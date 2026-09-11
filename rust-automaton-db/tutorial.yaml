@@ -35,7 +35,7 @@ lessons:
   - lessons/22-hardening-performance.md
 
 workspace_kind: existing-or-new-repository
-tutor_owned: [tutorial/STATE.md, tutorial/DESIGN.md, tutorial/lessons/**]
+tutor_owned: [tutorial/STATE.md, tutorial/DESIGN.md]
 learner_owned: [src/**, tests/**, Cargo.toml, Cargo.lock]
 ownership_policy: tutor-must-not-edit-learner-owned
 
