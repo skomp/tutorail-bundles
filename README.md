@@ -6,7 +6,8 @@ Each subfolder is one self-contained bundle.
 
 ```
 tutorail-bundles/
-└── rust-automaton-db/        # one bundle
+├── rust-automaton-db/        # one bundle
+└── webgl-typescript-scene/   # another
     ├── tutorial.yaml
     ├── COURSE.md
     ├── DESIGN.md
@@ -41,3 +42,4 @@ The mechanical rule:
 | id | Title | Subjects | Level |
 |---|---|---|---|
 | `rust-automaton-db` | Learn Rust by Building AutomatonDB | rust, databases, distributed-systems | intermediate-to-advanced |
+| `webgl-typescript-scene` | Learn WebGL 2 by Building a 3D Scene | webgl2, computer-graphics, typescript | intermediate |

@@ -1,0 +1,49 @@
+bundle_format: 1
+id: webgl-typescript-scene
+title: Learn WebGL 2 by Building a 3D Scene
+description: >
+  Learn WebGL 2 from the rendering pipeline upward by building an interactive,
+  lit and textured 3D scene in TypeScript, culminating in a loaded glTF model.
+subjects: [webgl2, computer-graphics, typescript, glsl, gltf]
+aliases: [webgl, graphics-programming, 3d-rendering, shaders]
+level: intermediate
+style: [project-driven, interactive, exercise-based]
+
+lessons:
+  - lessons/00-project-setup/LESSON.md
+  - lessons/01-canvas-and-context.md
+  - lessons/02-first-shader-program.md
+  - lessons/03-vertex-data.md
+  - lessons/04-uniforms-and-animation.md
+  - lessons/05-transforms-and-perspective.md
+  - lessons/06-depth-and-culling.md
+  - lessons/07-indexed-meshes-and-vaos.md
+  - lessons/08-textures.md
+  - lessons/09-normals-and-lighting.md
+  - lessons/10-camera-and-scene.md
+  - lessons/11-secondary-demo-scene/LESSON.md
+  - lessons/12-scene-transition/LESSON.md
+  - lessons/13-load-gltf-model/LESSON.md
+  - lessons/14-optional-minimal-gltf-loader/LESSON.md
+  - lessons/15-render-to-texture.md
+  - lessons/16-bloom.md
+  - lessons/17-depth-reconstruction-and-ssr.md
+  - lessons/18-finish-the-scene.md
+
+workspace_kind: new-repository
+tutor_owned: [tutorial/STATE.md, tutorial/DESIGN.md]
+learner_owned: [index.html, package.json, package-lock.json, tsconfig.json, src/**, dist/**, models/**]
+ownership_policy: tutor-must-not-edit-learner-owned
+
+validators:
+  typecheck: { kind: command, command: [npm, run, typecheck] }
+  build: { kind: command, command: [npm, run, build] }
+  browser-check: { kind: manual }
+  git-diff: { kind: git-diff }
+  has-index: { kind: file-exists, path: index.html }
+  has-entrypoint: { kind: file-exists, path: src/main.ts }
+  has-model: { kind: file-exists, path: models/Duck.glb }
+
+one_task_at_a_time: true
+solution_code: on-request-only
+advance_on: validated-evidence-only

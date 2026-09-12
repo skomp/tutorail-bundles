@@ -1,0 +1,18 @@
+{
+  "name": "webgl-typescript-scene",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "build": "esbuild src/main.ts --bundle --sourcemap --outfile=dist/main.js",
+    "serve": "esbuild src/main.ts --bundle --sourcemap --outfile=dist/main.js --servedir=. --watch"
+  },
+  "dependencies": {
+    "@gltf-transform/core": "^4.2.1",
+    "gl-matrix": "^3.4.4"
+  },
+  "devDependencies": {
+    "esbuild": "^0.25.9",
+    "typescript": "^5.9.2"
+  }
+}
