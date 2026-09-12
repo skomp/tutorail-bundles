@@ -10,6 +10,9 @@
 #
 # `scope` has no field in a bundle's tutorial.yaml. It is derived from the
 # length of that bundle's lessons list.
+#
+# `optional_lesson_count` is derived from that bundle's `optional_lessons`
+# mapping (a lesson path to offer metadata) and is written even when it is 0.
 
 catalog_version: 1
 tutorials:
@@ -23,6 +26,7 @@ tutorials:
     level: intermediate-to-advanced
     style: [project-driven, interactive, long-form, measurement-led]
     scope: "15 lessons; a few weeks"
+    optional_lesson_count: 3
     workspace_kind: new-repository
     source:
       type: local
@@ -37,6 +41,7 @@ tutorials:
     level: beginner-to-intermediate
     style: [project-driven, interactive, short-form, exploratory]
     scope: "4 lessons; a few days"
+    optional_lesson_count: 1
     workspace_kind: new-repository
     source:
       type: local
@@ -51,6 +56,7 @@ tutorials:
     level: intermediate
     style: [project-driven, interactive, short-form]
     scope: "3 lessons; a few hours"
+    optional_lesson_count: 1
     workspace_kind: new-repository
     source:
       type: local
@@ -65,6 +71,7 @@ tutorials:
     level: intermediate-to-advanced
     style: [project-driven, interactive, systems-oriented, long-form]
     scope: "23 lessons; months of work"
+    optional_lesson_count: 0
     workspace_kind: existing-or-new-repository
     source:
       type: local
@@ -79,6 +86,7 @@ tutorials:
     level: intermediate
     style: [project-driven, interactive, exercise-based]
     scope: "18 lessons; months of work"
+    optional_lesson_count: 1
     workspace_kind: new-repository
     source:
       type: local
