@@ -1,6 +1,7 @@
 ---
-id: 14-optional-minimal-gltf-loader
-title: Optional — decode the packaged GLB yourself
+id: minimal-gltf-loader
+title: Decode the packaged GLB yourself
+optional: true
 design_refs: [asset-loading-paths, mesh-boundary, packaged-model]
 validators: [typecheck, build, browser-check]
 ---

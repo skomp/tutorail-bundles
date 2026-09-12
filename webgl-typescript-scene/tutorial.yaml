@@ -24,11 +24,18 @@ lessons:
   - lessons/11-secondary-demo-scene/LESSON.md
   - lessons/12-scene-transition/LESSON.md
   - lessons/13-load-gltf-model/LESSON.md
-  - lessons/14-optional-minimal-gltf-loader/LESSON.md
   - lessons/15-render-to-texture.md
   - lessons/16-bloom.md
   - lessons/17-depth-reconstruction-and-ssr.md
   - lessons/18-finish-the-scene.md
+
+optional_lessons:
+  lessons/minimal-gltf-loader/LESSON.md:
+    offer_at: [lessons/13-load-gltf-model/LESSON.md]
+    offer_because: >
+      The parsing library hides what a GLB actually contains. This optional lesson
+      implements only the subset the packaged model needs, behind the same MeshData
+      boundary, so nothing later in the course changes either way.
 
 workspace_kind: new-repository
 tutor_owned: [tutorial/STATE.md, tutorial/DESIGN.md]

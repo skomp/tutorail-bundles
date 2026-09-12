@@ -78,7 +78,7 @@ tutorials:
     aliases: [webgl, graphics-programming, 3d-rendering, shaders]
     level: intermediate
     style: [project-driven, interactive, exercise-based]
-    scope: "19 lessons; months of work"
+    scope: "18 lessons; months of work"
     workspace_kind: new-repository
     source:
       type: local

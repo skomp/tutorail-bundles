@@ -46,11 +46,10 @@ for the implementation.
 12. Choose and build a second scene around a classic demo effect.
 13. Render both scenes independently and transition between them.
 14. Load the supplied glTF model through a parsing library.
-15. Optionally replace the library path with a deliberately limited glTF/GLB loader.
-16. Generalise render targets into an inspectable post-processing pipeline.
-17. Extract and blur bright regions for bloom.
-18. Reconstruct view-space positions from depth and build screen-space reflections.
-19. Compose and validate the final multi-scene demo.
+15. Generalise render targets into an inspectable post-processing pipeline.
+16. Extract and blur bright regions for bloom.
+17. Reconstruct view-space positions from depth and build screen-space reflections.
+18. Compose and validate the final multi-scene demo.
 
 ## Checkpoints
 
@@ -135,6 +134,8 @@ clearly.
 
 ## Optional path
 
-Lesson 14 is optional. A learner who skips it retains the library-backed model loader from
-lesson 13. A learner who takes it implements the narrow loader behind the same `MeshData`
-boundary, so the final lesson and all WebGL concepts remain unchanged.
+`minimal-gltf-loader` is an optional lesson, offered while you are in lesson 14. It is not
+part of the numbered sequence above, and declining it costs you nothing: you keep the
+library-backed model loader that lesson builds. Taking it implements the narrow loader
+behind the same `MeshData` boundary, so every later lesson and every WebGL concept is
+identical either way.

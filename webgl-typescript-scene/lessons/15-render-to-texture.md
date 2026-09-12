@@ -12,8 +12,8 @@ image-space effects have explicit inputs.
 
 ## Prerequisites
 
-Lesson `13-load-gltf-model` is complete and lesson `14-optional-minimal-gltf-loader` was completed
-or skipped.
+Lesson `13-load-gltf-model` is complete. The optional lesson `minimal-gltf-loader` was taken or
+declined; either way a working `MeshData` adapter exists.
 
 ## Learning objectives
 

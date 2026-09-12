@@ -21,7 +21,6 @@ instance design.
 - Extract one supported mesh primitive into the existing `MeshData` representation
 - Preserve position, normal, texture-coordinate and index semantics
 - Upload loaded data through the same GPU path as procedural data
-- Carry asset licence and attribution into the repository
 
 ## Theory
 
@@ -65,5 +64,5 @@ unsupported features. Record the model attribution in the project documentation.
 
 ## Optional deeper paths
 
-Lesson `14-optional-minimal-gltf-loader` can replace the parsing-library adapter. It is not
-required for WebGL coverage or the final scene.
+The optional lesson `minimal-gltf-loader` replaces the parsing-library adapter with one you
+write. The tutor offers it here; it is not required for WebGL coverage or the final scene.
