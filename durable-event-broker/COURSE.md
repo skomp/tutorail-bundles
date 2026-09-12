@@ -86,6 +86,19 @@ why asynchronous copying is not quorum durability or failover.
 
 The course remains complete when every optional offer is declined.
 
+**Complete is not the same as covered.** A learner who declines every offer finishes the
+course: every main-path lesson's completion conditions are reachable without any optional
+lesson, which is the obligation `bundle-format.md` section 13 places on an author. They do
+not, however, meet everything the coverage list below names. Three of its topics are taught
+only by an optional lesson:
+
+- property-based record-framing tests — **Property-based framing**
+- length-prefixed TCP protocols — **TCP transport**
+- operating-system page-cache behaviour — **Page-cache experiments**
+
+They are in the list because the course does teach them and a tutor may offer them. They
+are not on the main path because the course finishes without them.
+
 ## Topics this course must cover
 
 - opaque key/value records
