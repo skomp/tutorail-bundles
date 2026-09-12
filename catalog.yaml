@@ -13,6 +13,20 @@
 
 catalog_version: 1
 tutorials:
+  - id: durable-event-broker
+    title: Build a Durable Event Broker in Go
+    description: >
+      Build a persistent, partitioned event broker from first principles, then add
+      batching, retention, observability, and a deliberately limited follower.
+    subjects: [go, event-streaming, storage, distributed-systems]
+    aliases: [message-broker, append-only-log, kafka-internals, event-log]
+    level: intermediate-to-advanced
+    style: [project-driven, interactive, long-form, measurement-led]
+    scope: "15 lessons; a few weeks"
+    workspace_kind: new-repository
+    source:
+      type: local
+      path: durable-event-broker
   - id: rust-automaton-db
     title: Learn Rust by Building AutomatonDB
     description: >

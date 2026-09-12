@@ -1,0 +1,72 @@
+bundle_format: 1
+id: durable-event-broker
+title: Build a Durable Event Broker in Go
+description: >
+  Build a persistent, partitioned event broker from first principles, then add
+  batching, retention, observability, and a deliberately limited follower.
+subjects: [go, event-streaming, storage, distributed-systems]
+aliases: [message-broker, append-only-log, kafka-internals, event-log]
+level: intermediate-to-advanced
+style: [project-driven, interactive, long-form, measurement-led]
+
+lessons:
+  - lessons/00-running-broker.md
+  - lessons/01-offsets-and-replay.md
+  - lessons/02-record-framing.md
+  - lessons/03-recovery.md
+  - lessons/04-durability-contract.md
+  - lessons/05-partition-ownership.md
+  - lessons/06-group-commit.md
+  - lessons/07-segments.md
+  - lessons/08-sparse-indexes.md
+  - lessons/09-retention.md
+  - lessons/10-topics-and-partitions.md
+  - lessons/11-http-api.md
+  - lessons/12-long-polling-and-overload.md
+  - lessons/13-observability-and-load.md
+  - lessons/14-asynchronous-follower.md
+
+optional_lessons:
+  lessons/property-based-framing.md:
+    offer_at: [lessons/02-record-framing.md]
+    offer_because: >
+      Binary decoders often work for the examples their author imagined but fail
+      on truncated or arbitrary bytes. Property-based checks can explore that
+      input space before recovery depends on the decoder.
+    anticipates: [frame-decoder-breaks-on-arbitrary-input]
+    repair_in: lessons/02-record-framing.md
+  lessons/tcp-transport.md:
+    offer_at: [lessons/11-http-api.md]
+    offer_because: >
+      HTTP keeps the main path focused on broker semantics. This optional lesson
+      adds a length-prefixed TCP protocol if you also want to study framing,
+      partial reads, and connection lifecycle.
+  lessons/page-cache-experiments.md:
+    offer_at: [lessons/04-durability-contract.md]
+    offer_because: >
+      The durability experiment relies on the boundary between a process, the
+      operating-system page cache, and stable storage. This optional lesson makes
+      that boundary visible with focused measurements.
+
+failure_modes:
+  frame-decoder-breaks-on-arbitrary-input:
+    summary: >
+      The record decoder panics, allocates unsafely, or accepts an invalid frame
+      when it receives truncated or arbitrary bytes.
+    signals: [validator:go-test, diagnosis]
+
+workspace_kind: new-repository
+tutor_owned: [tutorial/STATE.md, tutorial/DESIGN.md]
+learner_owned: [go.mod, go.sum, "**/*.go", testdata/**, data/**]
+ownership_policy: tutor-must-not-edit-learner-owned
+
+validators:
+  go-build: { kind: command, command: [go, build, ./...] }
+  go-test: { kind: command, command: [go, test, ./...] }
+  go-test-race: { kind: command, command: [go, test, -race, ./...] }
+  go-vet: { kind: command, command: [go, vet, ./...] }
+  manual-behaviour: { kind: manual }
+
+one_task_at_a_time: true
+solution_code: on-request-only
+advance_on: validated-evidence-only

@@ -6,8 +6,9 @@ Each subfolder is one self-contained bundle.
 
 ```
 tutorail-bundles/
-├── rust-automaton-db/        # one bundle
-└── webgl-typescript-scene/   # another
+├── durable-event-broker/     # one bundle
+├── rust-automaton-db/        # another
+└── webgl-typescript-scene/   # and another
     ├── tutorial.yaml
     ├── COURSE.md
     ├── DESIGN.md
@@ -41,5 +42,6 @@ The mechanical rule:
 
 | id | Title | Subjects | Level |
 |---|---|---|---|
+| `durable-event-broker` | Build a Durable Event Broker in Go | go, event-streaming, storage, distributed-systems | intermediate-to-advanced |
 | `rust-automaton-db` | Learn Rust by Building AutomatonDB | rust, databases, distributed-systems | intermediate-to-advanced |
 | `webgl-typescript-scene` | Learn WebGL 2 by Building a 3D Scene | webgl2, computer-graphics, typescript | intermediate |
