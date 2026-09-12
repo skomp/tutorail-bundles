@@ -1,0 +1,53 @@
+bundle_format: 1
+id: portable-bytebeat-wav
+title: Make Music with Integer Arithmetic
+description: >
+  Build a tiny Bytebeat synthesiser that turns integer expressions into a valid
+  WAV file, using TypeScript, JavaScript, Python, Go, or Kotlin.
+subjects: [programming, audio, bytebeat, binary-formats]
+aliases: [generative-music, wav, digital-audio, chiptune]
+level: beginner-to-intermediate
+style: [project-driven, interactive, short-form, exploratory]
+
+lessons:
+  - lessons/00-language-and-waveform.md
+  - lessons/01-write-a-tone.md
+  - lessons/02-bytebeat-rhythm.md
+  - lessons/03-compose-and-export.md
+
+optional_lessons:
+  lessons/stereo-bytebeat.md:
+    offer_at: [lessons/03-compose-and-export.md]
+    offer_because: >
+      Two independently generated channels can turn the same tiny expressions
+      into a spatial composition. Take this optional lesson if you want to extend
+      the WAV writer and compose in stereo.
+
+workspace_kind: new-repository
+tutor_owned: [tutorial/STATE.md, tutorial/DESIGN.md]
+learner_owned:
+  - src/**
+  - test/**
+  - tests/**
+  - '*.py'
+  - '*.js'
+  - '*.ts'
+  - '*.go'
+  - '*.kt'
+  - '*.json'
+  - '*.toml'
+  - '*.mod'
+  - '*.sum'
+  - '*.gradle'
+  - '*.gradle.kts'
+  - README.md
+ownership_policy: tutor-must-not-edit-learner-owned
+
+validators:
+  project-runs: { kind: manual }
+  tests-pass: { kind: manual }
+  output-wav: { kind: file-exists, path: output.wav }
+
+one_task_at_a_time: true
+solution_code: on-request-only
+advance_on: validated-evidence-only

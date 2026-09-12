@@ -1,0 +1,51 @@
+bundle_format: 1
+id: portable-fixed-window-rate-limiter
+title: Build a Fixed-Window Rate Limiter
+description: >
+  Implement and test a small in-memory rate limiter in a programming language of
+  your choice, with an explicit contract and deterministic time.
+subjects: [programming, testing, api-design, rate-limiting]
+aliases: [fixed-window, throttling, backend]
+level: intermediate
+style: [project-driven, interactive, short-form]
+
+lessons:
+  - lessons/00-contract-and-language.md
+  - lessons/01-windowed-counting.md
+  - lessons/02-boundaries-and-evidence.md
+
+optional_lessons:
+  lessons/concurrent-callers.md:
+    offer_at: [lessons/02-boundaries-and-evidence.md]
+    offer_because: >
+      A correct single-threaded limiter can still admit too many requests when
+      callers race. Take this optional lesson if concurrent use matters in your
+      chosen language or you want to explore its synchronisation model.
+
+workspace_kind: new-repository
+tutor_owned: [tutorial/STATE.md, tutorial/DESIGN.md]
+learner_owned:
+  - src/**
+  - test/**
+  - tests/**
+  - '*.py'
+  - '*.js'
+  - '*.ts'
+  - '*.go'
+  - '*.kt'
+  - '*.json'
+  - '*.toml'
+  - '*.mod'
+  - '*.sum'
+  - '*.gradle'
+  - '*.gradle.kts'
+  - README.md
+ownership_policy: tutor-must-not-edit-learner-owned
+
+validators:
+  project-runs: { kind: manual }
+  tests-pass: { kind: manual }
+
+one_task_at_a_time: true
+solution_code: on-request-only
+advance_on: validated-evidence-only

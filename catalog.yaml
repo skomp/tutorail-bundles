@@ -27,6 +27,34 @@ tutorials:
     source:
       type: local
       path: durable-event-broker
+  - id: portable-bytebeat-wav
+    title: Make Music with Integer Arithmetic
+    description: >
+      Build a tiny Bytebeat synthesiser that turns integer expressions into a valid WAV
+      file, using TypeScript, JavaScript, Python, Go, or Kotlin.
+    subjects: [programming, audio, bytebeat, binary-formats]
+    aliases: [generative-music, wav, digital-audio, chiptune]
+    level: beginner-to-intermediate
+    style: [project-driven, interactive, short-form, exploratory]
+    scope: "4 lessons; a few days"
+    workspace_kind: new-repository
+    source:
+      type: local
+      path: portable-bytebeat-wav
+  - id: portable-fixed-window-rate-limiter
+    title: Build a Fixed-Window Rate Limiter
+    description: >
+      Implement and test a small in-memory rate limiter in a programming language of
+      your choice, with an explicit contract and deterministic time.
+    subjects: [programming, testing, api-design, rate-limiting]
+    aliases: [fixed-window, throttling, backend]
+    level: intermediate
+    style: [project-driven, interactive, short-form]
+    scope: "3 lessons; a few hours"
+    workspace_kind: new-repository
+    source:
+      type: local
+      path: portable-fixed-window-rate-limiter
   - id: rust-automaton-db
     title: Learn Rust by Building AutomatonDB
     description: >
