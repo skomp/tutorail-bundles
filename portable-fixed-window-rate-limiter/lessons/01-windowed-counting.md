@@ -25,9 +25,9 @@ project and its tests.
 ## Theory
 
 A fixed-window counter maps a timestamp to one non-overlapping interval. Integer
-division of elapsed time by the window duration is one common representation, but the
-course specifies semantics rather than a formula. Moving to a new interval resets the
-effective count for that key.
+division of elapsed time by the window duration `W` is one common representation, but
+the course specifies semantics rather than a formula. Moving to a new interval resets
+the effective count for that key.
 
 Wall-clock sleeps make tests slow and flaky. The limiter should depend on a time source
 whose production form reads real time and whose test form returns values selected by

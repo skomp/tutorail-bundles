@@ -40,7 +40,7 @@ learner_owned:
   - '*.gradle'
   - '*.gradle.kts'
   - README.md
-ownership_policy: tutor-must-not-edit-learner-owned
+ownership_policy: on-request
 
 validators:
   project-runs: { kind: manual }

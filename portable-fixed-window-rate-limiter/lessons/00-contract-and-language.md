@@ -28,12 +28,20 @@ different boundary rule than its caller expects. Start with observable behaviour
 client key goes in, an allow/reject decision comes out, and a configured budget says
 how many decisions may be positive within one window.
 
+The course names two of those values and uses the same names everywhere. `N` is the
+request limit: the number of requests the limiter allows for one client key in one
+window. `W` is the window duration: the length of the interval that budget applies to.
+Both symbols belong to the course, not to the learner's prior knowledge, so define them
+in these terms the first time either one comes up — before using `N` or `W` in a task,
+an example, or a test. Every later lesson relies on them.
+
 Do not teach the counting implementation yet. Help the learner express examples for
 the first allowed request, the last allowed request, and the first rejected request.
 
 ## Concepts to teach
 
 - behavioural contract
+- the symbols `N` (request limit) and `W` (window duration)
 - public API versus internal representation
 - language-idiomatic project and test structure
 
@@ -41,15 +49,20 @@ the first allowed request, the last allowed request, and the first rejected requ
 
 - Let the learner choose any general-purpose implementation language.
 - Use a local in-memory component, not an HTTP service.
-- Configure a positive request limit and positive window duration.
+- Configure a positive request limit `N` and a positive window duration `W`.
 - Make the decision callable repeatedly for different client keys.
 - Do not prescribe class-oriented or functional structure across languages.
 
 ## Suggested progression
 
 - Ask which language the learner wants and why; adapt all later guidance to it.
-- Create the smallest conventional runnable project and initialise version control if
-  the learner wants it.
+- Offer to set the project up yourself, and say what you would create before you
+  create it: the smallest conventional runnable project for that language, its test
+  target, and version control if the learner wants it. Wait for the learner to accept;
+  create nothing under their files until they have. On acceptance, create that skeleton
+  yourself and show it to them — the skeleton only, never any part of the limiter, which
+  stays theirs to write. If the learner would rather do it themselves, let them, and
+  continue once it runs.
 - Define the public contract in prose and then as an API signature or stub.
 - Add one focused test or executable example covering the budget within one window.
 
