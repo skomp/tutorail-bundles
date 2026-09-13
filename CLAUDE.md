@@ -41,8 +41,14 @@ If no session holds it, file anyway and say so in the report. The general form o
 is in the global `parallel-sessions` skill, section 4a.
 
 Known sessions at the time of writing: `tutorail-authoring-db` holds
-`skomp/tutorail-authoring`. It shares that checkout, so name which of your commits there
-are still local.
+`skomp/tutorail-authoring`, and `tutorail-8c` holds `skomp/tutorAIl` — the plugin, the
+bundle format contract, the validator, the catalogue and discovery. The authoring session
+shares that checkout, so name which of your commits there are still local.
+
+An issue with a half on each side gets **two issues that point at each other**, not one:
+`skomp/tutorail-bundles#4` and `skomp/tutorAIl#23` are the worked example. Say in the
+runner-side issue what the bundle supplies, and what the runner must do when the bundle
+supplies nothing.
 
 A ruling only the author can make — for example whether a project skeleton counts as toil
 (`tutorail-authoring#11`) — stays pending in writing until the author makes it. Do not
