@@ -49,3 +49,11 @@ The mechanical rule:
 | `portable-fixed-window-rate-limiter` | Build a Fixed-Window Rate Limiter | programming, testing, api-design, rate-limiting | intermediate |
 | `rust-automaton-db` | Learn Rust by Building AutomatonDB | rust, databases, distributed-systems | intermediate-to-advanced |
 | `webgl-typescript-scene` | Learn WebGL 2 by Building a 3D Scene | webgl2, computer-graphics, typescript | intermediate |
+
+## Licence
+
+MIT. See `LICENSE`.
+
+One licence covers the whole repository, and it covers a course entirely: the lesson
+prose, the exercises, the design documents and the code fragments inside them. A bundle
+carries no licence of its own and `tutorial.yaml` has no field for one.
