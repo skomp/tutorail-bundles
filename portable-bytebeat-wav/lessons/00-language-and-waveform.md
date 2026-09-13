@@ -54,7 +54,10 @@ Kotlin integers overflow or shift identically.
 
 ## Suggested progression
 
-- Select the language track and create its smallest conventional runnable project.
+- Have the learner select the language track; it fixes project layout, run and test
+  commands, and integer semantics for the rest of the course.
+- Offer to create the smallest conventional runnable project for that track, and create
+  it only once the learner accepts. If they would rather set it up themselves, let them.
 - Generate a short sequence from a deliberately simple function of `t`.
 - Reduce every value to 0–255 using an idiom correct for the language.
 - Add a small deterministic test or inspectable assertion for several known samples.
