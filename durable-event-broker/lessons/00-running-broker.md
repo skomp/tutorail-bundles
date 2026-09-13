@@ -50,9 +50,10 @@ rewrite history accidentally.
 
 ## Suggested progression
 
-Create the module and a minimal broker executable. Add a directly testable record and log
-implementation. Append several opaque records, fetch them, and verify insertion order and
-copying behaviour. Keep the executable on the same path by making it exercise the API.
+Write a minimal broker executable against the supplied module declaration. Add a directly
+testable record and log implementation. Append several opaque records, fetch them, and
+verify insertion order and copying behaviour. Keep the executable on the same path by
+making it exercise the API.
 
 ## Completion conditions
 
@@ -64,8 +65,8 @@ copying behaviour. Keep the executable on the same path by making it exercise th
 
 ## On completion, persist
 
-Record the chosen module path, package boundary, record representation, and byte-ownership
-rule in the learner instance's design and state.
+Record the package boundary, record representation, and byte-ownership rule in the learner
+instance's design and state. The module path is supplied and is not the learner's choice.
 
 ## Optional deeper paths
 

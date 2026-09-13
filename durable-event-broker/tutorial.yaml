@@ -70,3 +70,7 @@ validators:
 one_task_at_a_time: true
 solution_code: on-request-only
 advance_on: validated-evidence-only
+supplies:
+  - from: supplies/go.mod
+    to: go.mod
+    describe: "go.mod: the module declaration, so lesson 00 starts at the broker rather than at go mod init"
