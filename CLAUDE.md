@@ -50,6 +50,13 @@ An issue with a half on each side gets **two issues that point at each other**, 
 runner-side issue what the bundle supplies, and what the runner must do when the bundle
 supplies nothing.
 
+**A cross-repository discussion lives in the issue, not in the messages.** Told on
+2026-09-13, for `skomp/tutorAIl#25`: post the answer on the issue, then ping the session
+that owns it and ask for its update; it answers on the issue and pings back; repeat. The
+ping is a doorbell and the issue is the record, so a reader who was in neither session can
+follow the whole argument afterwards. Answer every ping — the turn is explicit, and a
+discussion where both sides wait is indistinguishable from one that is finished.
+
 A ruling only the author can make — for example whether a project skeleton counts as toil
 (`tutorail-authoring#11`) — stays pending in writing until the author makes it. Do not
 pre-empt it, and pass it to the session that owns the file it changes.
