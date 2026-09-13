@@ -23,6 +23,31 @@ The findings go in an issue here, one issue per bundle. **The full report goes i
 Audits propose and never change a bundle. Applying a proposal is the `tutorail-authoring`
 skill's job, after the author agrees.
 
+## This session owns this repository, and hands the rest over
+
+A session here handles **`skomp/tutorail-bundles`** — the bundles and their teaching
+content. Two other repositories carry work that surfaces here and cannot be fixed here:
+
+| Repository | What belongs to it |
+|---|---|
+| `skomp/tutorail-authoring` | the authoring toolkit and the `course-quality` rubric: `supplies.py`, `catalog.py`, `audit.py`, the validator, and every audit report under `docs/audits/` |
+| `skomp/tutorAIl` | the runner: how a lesson is presented, how an offer is made, anything drawn on the learner's terminal |
+
+**A failing validation, a tooling defect or a runner change gets filed in the repository
+that has to fix it**, never here and never only in chat. Then check `ListAgents` for a
+session holding that repository and message it: one message, each issue named with its
+repo (`tutorail-authoring#11`, never a bare `#11`), what it is, and what is still pending.
+If no session holds it, file anyway and say so in the report. The general form of this rule
+is in the global `parallel-sessions` skill, section 4a.
+
+Known sessions at the time of writing: `tutorail-authoring-db` holds
+`skomp/tutorail-authoring`. It shares that checkout, so name which of your commits there
+are still local.
+
+A ruling only the author can make — for example whether a project skeleton counts as toil
+(`tutorail-authoring#11`) — stays pending in writing until the author makes it. Do not
+pre-empt it, and pass it to the session that owns the file it changes.
+
 ## A total is not a grade
 
 A course's score is comparable **against its own lessons only**. The figure tracks how
