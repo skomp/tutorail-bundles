@@ -68,12 +68,15 @@ borrowing, but exact-key lookup naturally motivates moving to a map.
 - Do not provide complete solution code unless asked.
 - Begin with a simple representation and let the need for `BTreeMap` emerge naturally.
 - Do not introduce modules/workspaces merely for style.
+- The crate manifest is supplied. If the learner's repository already carries a
+  `Cargo.toml`, the supplied one is not placed and their own crate stands; check it
+  builds before the first task.
 - Keep every declaration connected to code the learner actually uses.
 - Prefer compiler errors that teach ownership over artificial ownership quizzes.
 
 ## Suggested progression
 
-1. Create `automaton-db` with Cargo and run the generated binary.
+1. Write the entry point for the supplied `automaton-db` crate and run the binary.
 2. Experiment with bindings, `String`, `&str`, function arguments, moves, and borrows.
 3. Introduce a small entry struct and a `Vec<Entry>`.
 4. Implement insertion and exact lookup by iterating the vector.

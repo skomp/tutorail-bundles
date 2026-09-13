@@ -50,3 +50,7 @@ validators:
 one_task_at_a_time: true
 solution_code: on-request-only
 advance_on: validated-evidence-only
+supplies:
+  - from: supplies/Cargo.toml
+    to: Cargo.toml
+    describe: "Cargo.toml: the crate manifest for automaton-db, so lesson 00 starts at Rust rather than at cargo new"
