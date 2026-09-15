@@ -3,6 +3,10 @@ id: 13-load-gltf-model
 title: Load a glTF model without changing the renderer
 design_refs: [asset-loading-paths, mesh-boundary, packaged-model, resource-ownership]
 validators: [has-model, typecheck, build, browser-check]
+supplies:
+  - from: lessons/13-load-gltf-model/model/
+    to: models
+    describe: Duck.glb and its licence, attribution and SCEA files, kept together as the asset the loader lesson renders
 ---
 
 ## Purpose
@@ -36,9 +40,8 @@ materials, textures, asynchronous loading, validation and adapter boundaries.
 
 ## Constraints
 
-Before starting, copy every file under `model/` to a repository-root `models/` directory:
-`Duck.glb`, `LICENSE.md`, `SCEA.txt` and `ATTRIBUTION.md`. Read `model/ATTRIBUTION.md` when
-introducing the asset and retain all four files together.
+Read `models/ATTRIBUTION.md` when introducing the asset, and retain all four supplied files
+together.
 
 Use `@gltf-transform/core` only for asset parsing and traversal, never for rendering. Support
 the packaged model first. Reject missing required attributes with useful errors. Do not expose
