@@ -22,14 +22,15 @@ Lesson `01-canvas-and-context` is complete.
 
 ## Theory
 
-Each vertex invocation emits a homogeneous clip-space position. Primitive assembly forms a
-triangle; rasterisation produces fragments; the fragment shader emits a colour. Division by
-`w` produces normalised device coordinates before viewport mapping.
+Each vertex invocation emits a homogeneous clip-space position `(x, y, z, w)`, whose fourth
+component `w` is the homogeneous scale factor. Primitive assembly forms a triangle; rasterisation
+produces fragments; the fragment shader emits a colour. Division by `w` produces normalised device
+coordinates before viewport mapping.
 
 ## Concepts to teach
 
-Shader stages, GLSL version and precision, clip space, NDC, compilation, linking, program use,
-primitive assembly and `drawArrays`.
+Shader stages, GLSL version and precision, clip space, the homogeneous `w` component, NDC,
+compilation, linking, program use, primitive assembly and `drawArrays`.
 
 ## Constraints
 
