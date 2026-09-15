@@ -1,7 +1,6 @@
 # Starter project
 
-Copy `package.json`, `package-lock.json`, `tsconfig.json`, `index.html` and `src/main.ts` to
-their corresponding paths at the root of a new repository.
+These files are placed in your repository when this lesson opens. You do not copy them.
 
 Run `npm install`, then:
 

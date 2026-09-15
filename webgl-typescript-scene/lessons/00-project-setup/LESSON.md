@@ -3,6 +3,10 @@ id: 00-project-setup
 title: A minimal graphics workspace
 design_refs: [platform-toolchain]
 validators: [has-index, has-entrypoint, typecheck, build, browser-check]
+supplies:
+  - from: lessons/00-project-setup/starter/
+    to: .
+    describe: "The starter project: package files, tsconfig, index.html and src/main.ts, so lesson 00 starts at the render loop"
 ---
 
 ## Purpose
@@ -31,9 +35,6 @@ Entrypoints, ES modules, bundling, source maps, static origins and browser devel
 
 ## Constraints
 
-Copy `starter/package.json`, `starter/package-lock.json`, `starter/tsconfig.json`,
-`starter/index.html` and `starter/src/main.ts` into their corresponding repository-root paths,
-preserving `src/`.
 Do not introduce a framework, DOM component library or rendering dependency. Read
 `starter/README.md` before giving the first task; it defines the supplied commands and layout.
 
