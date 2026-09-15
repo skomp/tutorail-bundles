@@ -13,7 +13,7 @@ functions to create an audible spatial relationship.
 
 ## Prerequisites
 
-Lesson `02-bytebeat-rhythm` is complete and the mono WAV writer produces a valid,
+Lesson `03-compose-and-export` is complete and the mono WAV writer produces a valid,
 audible file.
 
 ## Learning objectives

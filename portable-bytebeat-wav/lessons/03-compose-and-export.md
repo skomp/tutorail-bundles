@@ -56,8 +56,10 @@ matter.
 - Regenerate and listen from beginning to end.
 - Run tests and inspect the final WAV metadata and duration.
 - Ask the learner to explain the composition in terms of `t` and its subexpressions.
-- Before the first required task, make the authored stereo offer from the manifest.
-- After the main-path completion conditions are met, offer a generated live-playback
+- After the main-path completion conditions are met, make the authored stereo offer from
+  the manifest. The mono course is finished by then, so a later two-channel `output.wav`
+  does not disturb this lesson's completion conditions.
+- After the main-path completion conditions are met, also offer a generated live-playback
   side lesson. Explain that it is outside the 60–90 minute estimate. Generate it only
   after the learner accepts and after asking for language/runtime, operating system,
   package manager, and streamed synthesis versus automatic file playback.
