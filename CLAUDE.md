@@ -9,6 +9,18 @@ A catalogue repository. Each subfolder is one self-contained tutorAIl bundle; se
 carries the `created-by-claude` label, and issue bodies are written in ASD-STE100
 Simplified Technical English.
 
+## Where course specs go
+
+**Inside the bundle's own subfolder, as `<bundle>/SPEC.md`.** One spec per bundle, kept
+with the bundle so it travels with a fork of the course. This repository does **not** use a
+shared `specs/` directory at the root.
+
+This overrides the `tutorail-authoring` create-interview default, which writes the spec to
+`specs/<bundle-id>.md` outside the bundle. That default is deliberately not followed here —
+a future session should keep the spec at `<bundle>/SPEC.md` and not "correct" it back. The
+one consequence to keep in mind: because the spec ships inside the bundle, the validator has
+to tolerate `SPEC.md`, and learners receive it with the course. Decided 2026-09-19.
+
 ## Where course-quality audits go
 
 The findings go in an issue here, one issue per bundle. **The full report goes in
