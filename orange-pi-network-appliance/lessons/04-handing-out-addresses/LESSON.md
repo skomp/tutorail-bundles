@@ -27,7 +27,9 @@ internet"). Your SSH session and `board.env` (lesson `00-find-the-board`), and t
 serial lifeline from lesson `02-the-lifeline` — nothing here should cut your access, but a
 misconfigured resolver on the board is exactly the kind of thing that can, so keep the
 lifeline available. The ability to read links and addresses (`ip addr`, lesson
-`01-reading-the-network`). The `dnsmasq` package on the board; install it if it is absent
+`01-reading-the-network`), where you also discovered and recorded the board's upstream Ethernet
+interface as `WAN_IF` (its actual name varies — `eth0`, `end0`, `enp1s0`, …); it is exported in
+your board session, so later references here use `$WAN_IF`. The `dnsmasq` package on the board; install it if it is absent
 (`apt install dnsmasq`, or the installer the tutor recorded — the package manager is the one
 prerequisite that adapts, `#platform`). A second device with Wi-Fi to join the AP and, on it,
 a way to run a DNS query (`dig`, `nslookup`, or the phone simply loading a name).
@@ -40,7 +42,7 @@ a way to run a DNS query (`dig`, `nslookup`, or the phone simply loading a name)
   happening in a foreground `dnsmasq -d` log
 - Distinguish a DNS **resolver** from a DNS **forwarder**, and explain that dnsmasq here is a
   forwarder that relays client queries to the upstream resolver the board learned by DHCP on
-  `eth0` (`#address-plan`)
+  the upstream interface (`$WAN_IF`) (`#address-plan`)
 - Write a minimal dnsmasq configuration that serves DHCP and DNS on `wlan0` only, with the
   gateway and DNS options pointing at `192.168.4.1`
 - Read the lease file (`/var/lib/misc/dnsmasq.leases`) and explain every field of a live lease
@@ -86,9 +88,10 @@ The **DNS** side is separate, and the distinction to hold onto is **resolver ver
 A full resolver walks the DNS hierarchy itself, from the root servers down, to answer a query. A
 **forwarder** does no such walking — it simply passes the client's query to another resolver and
 relays the answer back. dnsmasq here is a **forwarder**. When a client asks it for `example.com`,
-dnsmasq forwards that query to the upstream resolver that the board learned when `eth0` got its
-address by DHCP from the upstream network (`#address-plan`: `eth0` is the DHCP-client upstream,
-and its learned resolver is what the appliance forwards to). The client asks the appliance; the
+dnsmasq forwards that query to the upstream resolver that the board learned when the upstream
+interface (`$WAN_IF`) got its address by DHCP from the upstream network (`#address-plan`: the
+upstream interface is the DHCP-client upstream, and its learned resolver is what the appliance
+forwards to). The client asks the appliance; the
 appliance asks upstream; the answer comes back the same path. This is why the DNS option you
 hand clients is `192.168.4.1` and not the upstream resolver directly — clients only ever talk to
 the appliance, and the appliance decides where the real query goes.
@@ -114,9 +117,10 @@ resolver; the three things a DHCP server hands out — an address from a **range
 time**, and **options**; specifically the gateway option (router, = `192.168.4.1`) and the DNS
 option (= `192.168.4.1`) and why both point at the appliance; the **DORA** four-message exchange
 and how to read it in a foreground `dnsmasq -d` log; DNS **resolver versus forwarder**, and that
-dnsmasq is a forwarder relaying to the upstream resolver the board learned by DHCP on `eth0`
-(`#address-plan`); the lease file `/var/lib/misc/dnsmasq.leases` and every field of a lease line;
-binding dnsmasq to `wlan0` only and never serving DHCP on `eth0`/upstream; the `:53` stub-resolver
+dnsmasq is a forwarder relaying to the upstream resolver the board learned by DHCP on the
+upstream interface (`$WAN_IF`) (`#address-plan`); the lease file `/var/lib/misc/dnsmasq.leases`
+and every field of a lease line; binding dnsmasq to `wlan0` only and never serving DHCP on the
+upstream interface (`$WAN_IF`); the `:53` stub-resolver
 conflict and how to clear it; and the deliberate limit that a client can get an address and
 resolve a name yet still not reach the internet, because forwarding (lesson 05) and NAT (lesson
 06) do not exist yet.
@@ -126,7 +130,7 @@ resolve a name yet still not reach the internet, because forwarding (lesson 05) 
 - You write the dnsmasq configuration yourself, every directive of it. The tutor states what the
   configuration must contain and checks the result; it does not write your configuration.
 - dnsmasq serves **only** `wlan0`. Bind it to the AP interface and do **not** serve DHCP on
-  `eth0` or any upstream interface — handing addresses to the network the board is a *client* of
+  the upstream interface (`$WAN_IF`) — handing addresses to the network the board is a *client* of
   is a serious misconfiguration. Use the directives that pin dnsmasq to `wlan0` (an
   `interface=`/`bind-interfaces` pairing, or `except-interface=`), not a bare listen-everywhere.
 - The DHCP **range** must lie inside `192.168.4.0/24` and must **not** include `192.168.4.1` —
@@ -175,7 +179,7 @@ IP matches what the client reports and what the log offered.
 
 Now test DNS from the client. Query a name explicitly against the appliance: `dig @192.168.4.1
 example.com` or `nslookup example.com 192.168.4.1`. You should get an answer — the client asked
-the appliance, the appliance forwarded to the upstream resolver it learned on `eth0`, and the
+the appliance, the appliance forwarded to the upstream resolver it learned on the upstream interface (`$WAN_IF`), and the
 address came back. Note carefully what still does *not* work: try to actually reach that address
 (`ping`, a browser) and it fails, because there is no forwarding and no NAT yet. Name resolves,
 packet goes nowhere. That gap is lessons 05 and 06, and it is the correct state to end on.
@@ -206,7 +210,7 @@ the repo that deploys and serves.
 ## Completion conditions
 
 - dnsmasq is running against your configuration, bound to `wlan0`, and **not** offering DHCP on
-  `eth0` or any upstream interface.
+  the upstream interface (`$WAN_IF`).
 - A Wi-Fi client that joins the AP **obtains an address inside `192.168.4.0/24`** (in your
   configured range, and never `192.168.4.1`), with default gateway `192.168.4.1` and DNS server
   `192.168.4.1`.
@@ -233,7 +237,8 @@ Record in the instance's `STATE.md` (and `DESIGN.md` where it is a durable decis
 - The **DHCP range** chosen (its start and end inside `192.168.4.0/24`) and the **lease time**,
   so later lessons and any debugging know exactly what the pool is.
 - That the gateway option and DNS option handed to clients are both `192.168.4.1`, and that
-  dnsmasq forwards DNS to the upstream resolver learned by DHCP on `eth0` (`#address-plan`).
+  dnsmasq forwards DNS to the upstream resolver learned by DHCP on the upstream interface
+  (`$WAN_IF`) (`#address-plan`).
 - How the `:53`/stub-resolver conflict was resolved on this board, so it is not rediscovered from
   scratch next time.
 - That **clients still have no internet** — they have an address and can resolve names, but
@@ -252,4 +257,4 @@ Record in the instance's `STATE.md` (and `DESIGN.md` where it is a durable decis
   from the network instead of the server.
 - Look at how dnsmasq learns its upstream servers — from `/etc/resolv.conf`, or pinned explicitly
   with `server=` / `--no-resolv` — and reason about what should happen to client DNS when the
-  `eth0` upstream changes, which is the problem lesson `10-upstream-detection` returns to.
+  upstream interface (`$WAN_IF`) changes, which is the problem lesson `10-upstream-detection` returns to.

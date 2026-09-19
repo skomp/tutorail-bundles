@@ -33,7 +33,8 @@ following must already be true:
 
 - **Lessons 03-06:** a working access point that NATs its clients. A phone or
   laptop associates to `wlan0`, gets a `192.168.4.0/24` lease, and reaches the
-  internet through `eth0`. If a client cannot browse the web, fix that first —
+  internet through the upstream interface (`$WAN_IF`). If a client cannot browse
+  the web, fix that first —
   a portal has nothing to intercept otherwise.
 - **Lesson 08:** the `inet filter` firewall with default-drop `input` and
   `forward` chains. You need it here because redirected traffic still has to
@@ -71,7 +72,8 @@ find their way back. A captive portal rewrites the *destination* instead, and it
 does so as early as possible — in the **`prerouting`** hook, before the kernel
 decides where the packet should go. That ordering is the point. If you rewrote
 the destination after routing, the kernel would already have chosen to send the
-packet out `eth0` toward the real internet. By changing the destination in
+packet out the upstream interface (`$WAN_IF`) toward the real internet. By
+changing the destination in
 `prerouting`, you change the routing decision itself: a packet the client
 addressed to a far-off web server is re-addressed to the box, and the kernel
 routes it to a local socket instead of forwarding it.

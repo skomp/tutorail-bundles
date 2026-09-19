@@ -29,6 +29,11 @@ open.
 
 ## Prerequisites
 
+- Lesson 01 complete: the upstream Ethernet interface's real name was discovered
+  there and recorded as `WAN_IF` in `board.env` (the AP interface as `AP_IF`,
+  usually `wlan0`). It is exported in your board session as `$WAN_IF`, and the
+  placeholder `<WAN_IF>` in this lesson stands for that recorded name (for example
+  `end0`), because the interface name varies by board and image.
 - Lessons 03 through 08 complete and working live: the AP (`03-bring-up-an-ap`),
   DHCP and DNS (`04-handing-out-addresses`), IP forwarding
   (`05-routing-between-two-links`), NAT (`06-nat-with-nftables`), the management
@@ -53,9 +58,10 @@ open.
   NetworkManager or `ifupdown`.
 - Describe the intermittent, start-order failure mode that mixing control planes
   produces, and why an *intermittent* failure is worse than a consistent one.
-- Write `systemd-networkd` `.network` files that realise the address plan: `eth0`
-  as a DHCP client, `wlan0` with the static AP address `192.168.4.1/24`, and
-  `bnep0` with the static management address `192.168.44.1/24`.
+- Write `systemd-networkd` `.network` files that realise the address plan: the
+  upstream interface (`$WAN_IF`) as a DHCP client, `wlan0` with the static AP
+  address `192.168.4.1/24`, and `bnep0` with the static management address
+  `192.168.44.1/24`.
 - Explain when a `.netdev` file is needed (virtual interfaces you create) and why
   this appliance's interfaces mostly do not need one.
 - Order the units with `After=`, `Wants=`, `Requires=` and `BindsTo=` so nothing
@@ -80,7 +86,8 @@ commands), and it integrates cleanly with the rest of systemd's ordering, which 
 exactly what you need for unattended boot.
 
 **Why mixing control planes is the worst kind of bug.** If two control planes both
-try to configure `eth0`, the result depends on which one wins the race at boot —
+try to configure the upstream interface (`$WAN_IF`), the result depends on which one
+wins the race at boot —
 and that race is not deterministic. One boot, `systemd-networkd` sets the DHCP
 lease first and everything works; the next boot, a leftover NetworkManager or
 `ifupdown` config brings the link up its own way, or tears down the address the
@@ -98,9 +105,10 @@ from `/etc/systemd/network/`. A `.network` file matches one or more interfaces (
 name, MAC, type) and declares their layer-3 configuration. The address plan maps
 onto three of them:
 
-- `eth0` — the upstream. A `.network` that matches `eth0` and sets `DHCP=yes`, so
-  the board is a DHCP *client* on whatever network you plug it into and learns its
-  address, gateway and DNS from upstream.
+- The upstream interface (`$WAN_IF`) — the upstream. A `.network` that matches it
+  (`[Match] Name=<WAN_IF>`, with `<WAN_IF>` the name you recorded, e.g. `end0`) and
+  sets `DHCP=yes`, so the board is a DHCP *client* on whatever network you plug it
+  into and learns its address, gateway and DNS from upstream.
 - `wlan0` — the AP side. A `.network` that matches `wlan0` and assigns the static
   `Address=192.168.4.1/24`. `systemd-networkd` owns the address; hostapd owns the
   radio and the BSS. They are complementary: one runs the access point, the other
@@ -112,8 +120,8 @@ onto three of them:
 
 **When you need a `.netdev`.** A `.network` *configures* an interface that exists;
 a `.netdev` *creates* a virtual one — a bridge, a VLAN, a WireGuard tunnel. This
-appliance's interfaces are all created elsewhere: `eth0` and `wlan0` by their
-kernel drivers, `bnep0` by BlueZ. So the core of your work here is `.network`
+appliance's interfaces are all created elsewhere: the upstream interface (`$WAN_IF`)
+and `wlan0` by their kernel drivers, `bnep0` by BlueZ. So the core of your work here is `.network`
 files, and you likely need no `.netdev` at all. Know the distinction so you reach
 for the right one if a later lesson adds a virtual interface.
 
@@ -169,8 +177,9 @@ to read the logs and fix it — so verify it survives too, not just the AP and N
   commits to exactly one (`systemd-networkd`), not NetworkManager or `ifupdown`.
 - The start-order race that mixing control planes causes, and why an intermittent,
   timing-dependent failure is the worst failure mode to ship.
-- `systemd-networkd` `.network` files realising the address plan: `eth0` DHCP
-  client, `wlan0` static `192.168.4.1/24`, `bnep0` static `192.168.44.1/24`.
+- `systemd-networkd` `.network` files realising the address plan: the upstream
+  interface (`$WAN_IF`) DHCP client, `wlan0` static `192.168.4.1/24`, `bnep0` static
+  `192.168.44.1/24`.
 - `.network` (configure an existing interface) versus `.netdev` (create a virtual
   one), and why this appliance needs mostly the former.
 - Unit ordering and dependency semantics: `After=`/`Before=` (ordering only),
@@ -192,9 +201,9 @@ to read the logs and fix it — so verify it survives too, not just the AP and N
   ad-hoc bring-up scripts from earlier lessons — must be found and removed or
   masked before completion. A `.network` file fighting a leftover live/manual
   configuration for the same interface is a defect to fix, not to leave.
-- The three interfaces must follow the address plan exactly: `eth0` DHCP client,
-  `wlan0` `192.168.4.1/24`, `bnep0` `192.168.44.1/24`. No hard-coded upstream
-  address on `eth0`.
+- The three interfaces must follow the address plan exactly: the upstream interface
+  (`$WAN_IF`) DHCP client, `wlan0` `192.168.4.1/24`, `bnep0` `192.168.44.1/24`. No
+  hard-coded upstream address on the upstream interface.
 - Every unit the appliance needs must be *enabled*, not just running:
   `systemd-networkd`, hostapd, dnsmasq, nftables, and the lifeline getty.
 - The persisted configuration is deployed through `etc/` and `make deploy`. Do not
@@ -216,9 +225,12 @@ to read the logs and fix it — so verify it survives too, not just the AP and N
    stanzas, and which earlier-lesson steps brought interfaces up by hand. Decide
    what must be removed or masked so only `systemd-networkd` remains.
 3. Author the `.network` files under `etc/` (mirroring `/etc/systemd/network/`):
-   `eth0` with `DHCP=yes`; `wlan0` with static `192.168.4.1/24`; `bnep0` with
-   static `192.168.44.1/24`. Have the learner tie each back to the address plan
-   and explain why `eth0` is a client while the other two are static.
+   the upstream interface (`[Match] Name=<WAN_IF>`) with `DHCP=yes`; `wlan0` with
+   static `192.168.4.1/24`; `bnep0` with static `192.168.44.1/24`. Name each file
+   for its role rather than baking a specific interface name in (for example
+   `10-wan.network`), and remember `<WAN_IF>` is the name you recorded (e.g.
+   `end0`). Have the learner tie each back to the address plan and explain why the
+   upstream interface is a client while the other two are static.
 4. Make hostapd, dnsmasq and nftables into managed, enabled units, folding in the
    configuration authored live in lessons 03, 04, 06 and 08. Have the learner add
    the ordering: dnsmasq after the AP address is configured, nftables loaded
@@ -249,11 +261,13 @@ to read the logs and fix it — so verify it survives too, not just the AP and N
   nftables are all *enabled* (not merely running), and `.network` files are present
   under `/etc/systemd/network/` on the board.
 - `systemd-networkd` is the only active control plane; no NetworkManager,
-  `ifupdown`, or ad-hoc script is also configuring `eth0`, `wlan0` or `bnep0`. The
+  `ifupdown`, or ad-hoc script is also configuring the upstream interface
+  (`$WAN_IF`), `wlan0` or `bnep0`. The
   learner can point at what they removed or masked.
-- The `.network` files realise the address plan: `eth0` is a DHCP client, `wlan0`
-  carries `192.168.4.1/24`, `bnep0` carries `192.168.44.1/24` — confirmable with
-  `networkctl status <iface>`.
+- The `.network` files realise the address plan: the upstream interface (`$WAN_IF`)
+  is a DHCP client, `wlan0` carries `192.168.4.1/24`, `bnep0` carries
+  `192.168.44.1/24` — confirmable with `networkctl status "$WAN_IF"` and the same
+  for the other interfaces.
 - The configuration was deployed through `etc/` with `make deploy`; the working
   state on the board is what the repo installs, not a hand-edit.
 - After an **actual reboot** with no intervention, the appliance returns fully:
@@ -271,7 +285,8 @@ to read the logs and fix it — so verify it survives too, not just the AP and N
 Record in the instance's `DESIGN.md`/`STATE.md`:
 
 - The appliance is fully persisted under `systemd-networkd` as the single control
-  plane: `eth0` DHCP client, `wlan0` static `192.168.4.1/24`, `bnep0` static
+  plane: the upstream interface (`$WAN_IF`) DHCP client, `wlan0` static
+  `192.168.4.1/24`, `bnep0` static
   `192.168.44.1/24`, all declared in `.network` files under `etc/`.
 - hostapd, dnsmasq and nftables run as enabled systemd units, with `ip_forward`
   persisted via a `sysctl.d` drop-in.

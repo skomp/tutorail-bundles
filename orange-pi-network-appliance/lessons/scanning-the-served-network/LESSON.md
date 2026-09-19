@@ -48,7 +48,7 @@ lesson 08. Before you start, make sure the following are true:
 
 **Scan only the network you operate.** That means your own served subnet,
 `192.168.4.0/24`, reached through `wlan0`. Do **not** point a scan at the
-upstream side (`eth0`), at whatever LAN the appliance is plugged into, or at any
+upstream interface (`$WAN_IF`), at whatever LAN the appliance is plugged into, or at any
 host or range you do not own. You operate the AP subnet; you do not operate the
 upstream. This is a defensive exercise on your own appliance — keep it there.
 
@@ -140,8 +140,8 @@ the second instructive failure. Point a port scan at the appliance's own
 - **You run every command.** The tutor does not run scans for you and does not
   hand you a finished invocation to paste blindly — you choose the tool, the
   range, and the interface, and you say why.
-- **Target only `192.168.4.0/24`, via `wlan0`.** Never scan the `eth0` upstream,
-  the LAN behind it, or any host you do not own. If a command's target is not
+- **Target only `192.168.4.0/24`, via `wlan0`.** Never scan the upstream
+  interface (`$WAN_IF`), the LAN behind it, or any host you do not own. If a command's target is not
   inside your served subnet, do not run it.
 - **No configuration changes.** This lesson observes; it does not alter `etc/`,
   the firewall, or any service. Nothing you do here needs `make deploy`.
@@ -207,8 +207,8 @@ collect scans but to be able to explain every line one produces.
   **filtered**, which side stayed silent, and what you may and may not conclude
   from each — and you have seen a `filtered` result produced by a dropping
   firewall (yours from lesson 08 counts).
-- Every scan you ran targeted `192.168.4.0/24` only; you did not scan the `eth0`
-  upstream or any host you do not own, and you can state why that limit holds.
+- Every scan you ran targeted `192.168.4.0/24` only; you did not scan the
+  upstream interface (`$WAN_IF`) or any host you do not own, and you can state why that limit holds.
 - `bash checks/opt-scan.sh` passes. It confirms a scan run from the appliance
   discovers a host on the AP subnet — so associate a client first, or the check
   has nothing to find.

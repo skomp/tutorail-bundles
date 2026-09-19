@@ -15,12 +15,13 @@ The appliance routes and NATs, but it still accepts and forwards far more than
 it should — this lesson replaces that accidental openness with a firewall whose
 every verdict you can predict before you test it.
 
-Up to now the box has been permissive by default. Anything that arrives at eth0
-addressed to the appliance is processed; any packet that can be forwarded is
-forwarded. That was the right thing while you were building the data path,
-because a permissive box never gets in the way of the feature you are testing.
-It is the wrong thing now. eth0 faces the untrusted upstream, and the box offers
-services — SSH, DNS, DHCP — that have no business answering the whole world.
+Up to now the box has been permissive by default. Anything that arrives at the
+upstream interface (`$WAN_IF`) addressed to the appliance is processed; any
+packet that can be forwarded is forwarded. That was the right thing while you
+were building the data path, because a permissive box never gets in the way of
+the feature you are testing. It is the wrong thing now. The upstream interface is
+untrusted, and the box offers services — SSH, DNS, DHCP — that have no business
+answering the whole world.
 
 A firewall with intent is not a list of blocks. It is a policy derived from what
 each interface *is*. You decide, once, what each role is allowed to do, and then
@@ -29,6 +30,11 @@ tutor does not write it for you.
 
 ## Prerequisites
 
+- Lesson 01: the discovered interface names, recorded in `board.env` — the
+  upstream (WAN) interface as `WAN_IF` and the AP interface as `AP_IF` (usually
+  `wlan0`). This lesson assumes `export WAN_IF=<name>` is in your board session,
+  so `$WAN_IF` expands to your board's actual upstream (e.g. `end0`) in every
+  live `nft` command below.
 - Lesson 00: SSH access to the board.
 - Lesson 02: the Bluetooth **serial** console. This is the recovery path for
   this lesson and it must work before you touch the firewall. It is
@@ -37,7 +43,8 @@ tutor does not write it for you.
   state you met there is what makes a default-drop firewall usable.
 - Lesson 07: the `bnep0` management network. That interface is the trusted
   administrative path and the policy treats it as such.
-- A working data path: a wlan0 client can reach the internet through eth0.
+- A working data path: a wlan0 client can reach the internet through the upstream
+  interface (`$WAN_IF`).
 
 ## Learning objectives
 
@@ -45,8 +52,8 @@ tutor does not write it for you.
   decide for any packet which of the two questions applies to it.
 - Author an `nftables` filter table with `input` and `forward` chains whose
   policy is `drop`, plus explicit accepts.
-- Encode the interface roles (untrusted eth0, client wlan0, trusted bnep0, local
-  lo) into per-interface `iifname`/`oifname` rules.
+- Encode the interface roles (untrusted upstream `$WAN_IF`, client wlan0, trusted
+  bnep0, local lo) into per-interface `iifname`/`oifname` rules.
 - Use a `ct state established,related accept` rule to let replies and existing
   connections through, and explain why the policy is unusable without it.
 - Predict the verdict for a given packet before running it, and confirm the
@@ -58,7 +65,8 @@ tutor does not write it for you.
 **Two questions, two hooks.** A router firewall answers two separate questions,
 and netfilter gives you a separate hook for each. Traffic *addressed to the
 appliance itself* — an SSH session to the box, a DNS query a client sends to the
-box's resolver, a stray probe to eth0 — passes through the **`input`** hook.
+box's resolver, a stray probe to the upstream interface (`$WAN_IF`) — passes
+through the **`input`** hook.
 Traffic *passing through the box* between two interfaces — a client packet on its
 way out to the internet — passes through the **`forward`** hook. A packet hits
 exactly one of these. Nothing a client sends *to the internet* is ever seen by
@@ -105,8 +113,8 @@ broke everything" story is a missing established/related rule.
 packet arrived on; `oifname` matches the interface it is leaving by. These are
 how the interface roles become rules. `iifname "bnep0" accept` in the `input`
 chain says "the management network is trusted to talk to the box".
-`iifname "wlan0" oifname "eth0" accept` in the `forward` chain says "clients may
-reach the upstream". Because the default is drop, you never have to write the
+`iifname "wlan0" oifname "$WAN_IF" accept` in the `forward` chain says "clients
+may reach the upstream". Because the default is drop, you never have to write the
 inverse — "wlan0 may not reach bnep0" is true simply because you never wrote a
 rule allowing it.
 
@@ -137,9 +145,9 @@ coexist, each on its own hooks, and you keep NAT where it is.
 - The `ct state established,related accept` rule and its tie-back to conntrack in
   lesson 06 — what breaks without it (existing SSH, all replies).
 - `iifname`/`oifname` per-interface matching as the encoding of interface roles.
-- The interface roles themselves as the source of the whole policy: eth0
-  untrusted/upstream, wlan0 client (NATed out, allowed to send the box only what
-  a client needs), bnep0 trusted/management, lo local.
+- The interface roles themselves as the source of the whole policy: the upstream
+  interface (`$WAN_IF`) untrusted, wlan0 client (NATed out, allowed to send the
+  box only what a client needs), bnep0 trusted/management, lo local.
 - Why loopback must be accepted explicitly (local services talk to themselves
   over lo; drop it and things quietly break).
 - The serial console as the recovery invariant that makes default-drop safe.
@@ -190,24 +198,25 @@ moving on. Do not author the file first and load it blind.
    add a blanket wlan0 accept.
 
 6. **Build the `forward` accepts.** `ct state established,related accept` first,
-   then `iifname "wlan0" oifname "eth0" accept` for clients reaching the
+   then `iifname "wlan0" oifname "$WAN_IF" accept` for clients reaching the
    internet. Nothing else — wlan0->bnep0 and every other cross-interface flow has
    no reason to exist and will fall through.
 
 7. **Predict, then flip to drop.** Before you change the policy, write down the
    verdict you expect for each of these, and *why*:
    - a wlan0 client opening a web connection to the internet (forward: accept —
-     new wlan0->eth0);
+     new wlan0->`$WAN_IF`);
    - a wlan0 client trying to reach a bnep0 admin address (forward: drop — no
      rule);
    - the bnep0 admin host SSHing to the box (input: accept — trusted iifname);
-   - a new connection from eth0 to the box (input: drop — no rule, falls to
-     policy).
+   - a new connection from the upstream interface (`$WAN_IF`) to the box (input:
+     drop — no rule, falls to policy).
    Then set both chains to `policy drop`.
 
 8. **Test each prediction live.** From a wlan0 client, confirm internet works and
    the admin address does not answer. From the bnep0 host, confirm SSH to the box
-   works. From the eth0 side, confirm a new connection to the box is refused.
+   works. From the upstream side (`$WAN_IF`), confirm a new connection to the box
+   is refused.
    Where a verdict surprises you, read the per-rule counters to find which rule
    did or did not match — that is the debugging loop.
 
@@ -218,7 +227,10 @@ moving on. Do not author the file first and load it blind.
 
 10. **Author and deploy.** Only once the live ruleset behaves exactly as
     predicted, write the complete `etc/nftables.conf` to match it, and run
-    `make deploy`. Then re-run your predictions against the deployed box to
+    `make deploy`. That file is loaded by `nftables`, not by a shell, so `$WAN_IF`
+    will **not** expand there — write your actual recorded upstream name in place
+    of the `<WAN_IF>` placeholder (e.g. `end0`) directly into the `iifname`/
+    `oifname` rules. Then re-run your predictions against the deployed box to
     confirm the persisted file and the live ruleset agree.
 
 ## Completion conditions
@@ -229,12 +241,12 @@ moving on. Do not author the file first and load it blind.
   `input` accepts loopback.
 - The role-based accepts hold and nothing broader is present: `input` accepts all
   of bnep0 and, from wlan0, only DHCP and DNS to the box; `forward` accepts only
-  new wlan0->eth0.
-- No new connection from eth0 to the box is accepted; wlan0->bnep0 forwarding is
-  dropped.
+  new wlan0->`$WAN_IF`.
+- No new connection from the upstream interface (`$WAN_IF`) to the box is
+  accepted; wlan0->bnep0 forwarding is dropped.
 - You can state, before testing, the correct verdict and its reason for each of:
   client->internet (accept), client->admin (drop), admin->box (accept), new
-  eth0->box (drop) — and the live tests match.
+  `$WAN_IF`->box (drop) — and the live tests match.
 - The lesson-06 `nat` table is still present and NAT still works.
 - The policy is persisted in `etc/nftables.conf` and applied with `make deploy`,
   and the deployed ruleset matches what you tested live.
@@ -246,7 +258,8 @@ moving on. Do not author the file first and load it blind.
 Record in the instance's DESIGN.md:
 
 - The firewall policy stated in terms of the interface roles, not as a rule dump:
-  eth0 untrusted (no new input, no blanket forward); wlan0 client (NATed out via
+  the upstream interface (`$WAN_IF`) untrusted (no new input, no blanket forward);
+  wlan0 client (NATed out via
   forward, allowed to send the box only DHCP and DNS); bnep0 trusted management
   (full input to the box); lo local (accepted). Both chains default-drop with
   established/related accepted first.

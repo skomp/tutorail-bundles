@@ -6,13 +6,14 @@ validators: [upstream-follows]
 supplies:
   - from: lessons/10-upstream-detection/checks/10-upstream.sh
     to: checks/10-upstream.sh
-    describe: "Check for this lesson: eth0 is a networkd DHCP client and carrier changes are reacted to"
+    describe: "Check for this lesson: the upstream (WAN_IF) is a networkd DHCP client and carrier changes are reacted to"
 ---
 
 ## Purpose
 
-Make the appliance follow its Ethernet automatically — unplug `eth0` and replug
-it into a different network, and the upstream re-establishes itself while Wi-Fi
+Make the appliance follow its Ethernet automatically — unplug the upstream
+interface (`$WAN_IF`) and replug it into a different network, and the upstream
+re-establishes itself while Wi-Fi
 clients keep reaching the internet, with no login and no manual step.
 
 After lesson 09 the appliance is complete and survives a reboot, but the upstream
@@ -33,16 +34,22 @@ working routed box to keep working.
   `networkd` owns the links; this lesson reacts to `networkd`'s view of them and
   must not undo that persistence.
 - Lesson 06 (`06-nat-with-nftables`) complete: client traffic from
-  `192.168.4.0/24` is source-NATed out `eth0` with `masquerade`. You will lean on
-  the fact that `masquerade` follows `eth0`'s current address, and you will handle
-  the one thing it does not clean up on its own.
+  `192.168.4.0/24` is source-NATed out the upstream interface (`$WAN_IF`) with
+  `masquerade`. You will lean on the fact that `masquerade` follows the upstream's
+  current address, and you will handle the one thing it does not clean up on its
+  own.
 - Lesson 05 (`05-routing-between-two-links`) complete: forwarding is on and the
-  default route toward the internet is learned from `eth0`'s DHCP lease.
+  default route toward the internet is learned from the upstream's DHCP lease.
 - Lesson 02 (`02-the-lifeline`) available: you have the Bluetooth serial way onto
   the box that does not depend on its networking. You will deliberately unplug the
   upstream in this lesson; keep the lifeline within reach.
-- `eth0` is a `systemd-networkd`-managed DHCP client with a working upstream, and
-  a Wi-Fi client currently reaches the internet through the box.
+- Lesson 01 (`01-reading-the-network`) established the upstream interface's name and
+  recorded it as `WAN_IF` in `board.env`; your board session has it exported
+  (`export WAN_IF=<name>`, e.g. `end0`), alongside `AP_IF` for the Wi-Fi
+  interface. This lesson refers to the upstream as `$WAN_IF` throughout.
+- The upstream interface (`$WAN_IF`) is a `systemd-networkd`-managed DHCP client
+  with a working upstream, and a Wi-Fi client currently reaches the internet
+  through the box.
 
 ## Learning objectives
 
@@ -52,11 +59,11 @@ working routed box to keep working.
 - Explain what a hotplug / link event is: the kernel noticing carrier appearing
   or disappearing and telling userspace, versus polling for it.
 - Observe those events live with `ip monitor link`, `ip -4 monitor address`, and
-  `networkctl` / `networkctl status eth0`, and read the state transitions during
+  `networkctl` / `networkctl status "$WAN_IF"`, and read the state transitions during
   an unplug and a replug.
 - Explain why a change of upstream needs action even though `networkd` re-runs
   DHCP: the default route follows the new lease, `masquerade` follows the new
-  `eth0` address on its own, but connection-tracking entries created against the
+  upstream address on its own, but connection-tracking entries created against the
   *old* upstream survive and can leave clients briefly broken until flushed.
 - Choose and describe an event-driven reactor built on `networkd` — either a
   `networkd-dispatcher` hook keyed on the `routable` and `off` states, or a small
@@ -71,14 +78,16 @@ working routed box to keep working.
 
 **Carrier, operstate, and why "the cable is in" is a kernel-level fact.** Every
 network link has a *carrier*: the physical-layer signal that says a live peer is
-on the other end of the wire. When you unplug `eth0`, the NIC loses carrier and
+on the other end of the wire. When you unplug the upstream interface (`$WAN_IF`),
+the NIC loses carrier and
 the kernel marks the link `NO-CARRIER`; plug it back and carrier returns. The
 kernel also keeps an *operational state* for the link, `operstate`, which you can
-read at `/sys/class/net/eth0/operstate` and see in `ip link` — it moves through
+read at `/sys/class/net/"$WAN_IF"/operstate` and see in `ip link` — it moves through
 values like `down`, `no-carrier`, `dormant`, and `up`. This is distinct from the
 *administrative* state (whether anything has brought the interface up at all): a
 link can be administratively up but have no carrier because nothing is plugged in.
-Upstream detection is, at bottom, reacting to carrier transitions on `eth0`.
+Upstream detection is, at bottom, reacting to carrier transitions on the upstream
+interface (`$WAN_IF`).
 
 **Link events: the kernel tells you, you do not poll.** Rather than checking
 `operstate` in a loop, you can subscribe to the kernel's netlink notifications: it
@@ -88,22 +97,23 @@ address-add and address-remove events; `networkctl` shows `networkd`'s
 interpretation of the same underlying state. Watching these while you physically
 unplug and replug the cable is the whole point of the live phase: you see
 `NO-CARRIER` appear on unplug, then on replug carrier return, DHCP re-run, a new
-address arrive, and `networkd` move `eth0` back to `routable`.
+address arrive, and `networkd` move the upstream (`$WAN_IF`) back to `routable`.
 
 **Why `networkd` owns this, and what it does for you automatically.** Per the
 control-plane design, `systemd-networkd` owns the links; you build the reactor on
-top of it rather than reaching for NetworkManager. When carrier returns on `eth0`,
+top of it rather than reaching for NetworkManager. When carrier returns on the
+upstream (`$WAN_IF`),
 `networkd` re-runs the DHCP client on its own, obtains a fresh lease, and installs
 the new address and the new default route that came with it. So the *default
 route* follows the new upstream without your help. And because lesson 06 used
 `masquerade` rather than a static SNAT, the NAT rule rewrites to *whatever address
-`eth0` has right now* — so NAT also follows the new address without a rule change.
+the upstream (`$WAN_IF`) has right now* — so NAT also follows the new address without a rule change.
 Two of the three moving parts realign themselves.
 
 **The part that does not fix itself: stale conntrack.** The third part is
 connection tracking. When the old upstream was live, the kernel recorded a
 conntrack entry for each client flow, remembering the translation it applied
-against the *old* `eth0` address. When the upstream flips to a new network with a
+against the *old* upstream address. When the upstream flips to a new network with a
 new address, those old entries are now wrong: replies for them will never come
 back, and until each stale entry expires on its own, a client's existing
 connections can hang. The fix is to *flush* the relevant conntrack entries when
@@ -113,18 +123,22 @@ entries tied to the old address if you want to be surgical. Deciding to flush, a
 doing it at the right moment, is the substantive work of the reactor.
 
 **Building the reactor: two shapes, same job.** You need something that runs the
-moment `eth0`'s upstream is (re-)established and does the re-alignment step
+moment the upstream (`$WAN_IF`) is (re-)established and does the re-alignment step
 (principally the conntrack flush, plus any re-assertion your setup needs). Two
 idiomatic shapes sit on top of `networkd`:
 
 - *`networkd-dispatcher`.* This daemon watches `networkd` and runs your executable
   scripts from state-named directories — a hook in `routable.d/` runs when a link
-  becomes routable, a hook in `off.d/` runs when it goes down. You drop a small
-  script keyed on `eth0` reaching `routable`, and it does the flush. This is the
-  most direct fit and is `networkd`-native.
+  becomes routable, a hook in `off.d/` runs when it goes down. The dispatcher
+  passes the changed interface to the hook (as `$IFACE`/`$1`); you drop a small
+  script that fires when that interface is your upstream — compare it to the
+  recorded `WAN_IF` rather than hardcoding a name — reaching `routable`, and it
+  does the flush. This is the most direct fit and is `networkd`-native.
 - *A small `systemd` unit triggered by the link event.* Alternatively, wire a
-  oneshot unit that runs the re-alignment, triggered when `eth0` comes up — for
-  example `BindsTo=`/`After=` the `sys-subsystem-net-devices-eth0.device` unit, or
+  oneshot unit that runs the re-alignment, triggered when the upstream (`$WAN_IF`)
+  comes up — for
+  example `BindsTo=`/`After=` the `sys-subsystem-net-devices-<WAN_IF>.device` unit
+  (with `<WAN_IF>` the actual recorded name, e.g. `end0`), or
   driven from a networkd hook. Same outcome, more moving parts, useful if you want
   the action expressed as a first-class unit with its own logs and status.
 
@@ -150,7 +164,7 @@ interfaces up or down by hand) and fights the persistence you built in lesson 09
 - Link (hotplug) events as kernel netlink notifications, and event-driven reaction
   versus polling `operstate` in a loop.
 - Observing events live: `ip monitor link`, `ip -4 monitor address`, and
-  `networkctl` / `networkctl status eth0`, and reading the transitions during an
+  `networkctl` / `networkctl status "$WAN_IF"`, and reading the transitions during an
   unplug/replug.
 - `systemd-networkd` re-running DHCP on carrier return: the new address and the
   new default route arrive on their own — control-plane ownership in action, and
@@ -175,7 +189,7 @@ interfaces up or down by hand) and fights the persistence you built in lesson 09
 - Must not break the reboot persistence from lesson 09. The reactor is added
   *alongside* the persisted configuration; after this lesson the box must still
   come back correctly on a cold boot.
-- The reactor must not itself bring `eth0` up or down or otherwise fight
+- The reactor must not itself bring the upstream (`$WAN_IF`) up or down or otherwise fight
   `networkd`; it reacts to link state, it does not drive it.
 - Trigger on the upstream becoming routable (and going off), not on a bare
   address-change event or a premature carrier-up.
@@ -189,14 +203,14 @@ interfaces up or down by hand) and fights the persistence you built in lesson 09
 1. Frame the gap in one line: the appliance survives a reboot, but its upstream is
    still frozen to whatever was plugged in at boot. This lesson makes it follow
    the cable.
-2. Read the current state before touching anything: `networkctl status eth0`,
-   `ip link show eth0` (note `operstate`), `cat /sys/class/net/eth0/operstate`,
-   the current `eth0` address and default route (`ip -4 addr show eth0`,
+2. Read the current state before touching anything: `networkctl status "$WAN_IF"`,
+   `ip link show "$WAN_IF"` (note `operstate`), `cat /sys/class/net/"$WAN_IF"/operstate`,
+   the current upstream address and default route (`ip -4 addr show "$WAN_IF"`,
    `ip route show default`). Confirm a Wi-Fi client currently reaches the
    internet.
 3. Live, watch the events. In one session run `ip monitor link` (and, in another,
    `ip -4 monitor address` and/or `networkctl` / `journalctl -fu
-   systemd-networkd`). Physically unplug `eth0` and read the `NO-CARRIER` /
+   systemd-networkd`). Physically unplug the upstream (`$WAN_IF`) and read the `NO-CARRIER` /
    `off` transition; replug it and read carrier return, DHCP re-running, a new
    address arriving, and `networkd` reaching `routable`. Have the learner narrate
    which line is which.
@@ -210,10 +224,10 @@ interfaces up or down by hand) and fights the persistence you built in lesson 09
    address-change is not. Reach the choice of mechanism: a `networkd-dispatcher`
    hook, or a link-triggered `systemd` unit.
 6. Author the reactor live (or in a scratch location first): a small script/unit
-   that, when `eth0` becomes routable, flushes the stale conntrack entries
+   that, when the upstream (`$WAN_IF`) becomes routable, flushes the stale conntrack entries
    (`conntrack -F`, or a targeted flush) and re-asserts anything the setup needs.
-   Keep it idempotent and scoped to `eth0`.
-7. Prove it live: with the reactor active, unplug and replug `eth0` (or move it to
+   Keep it idempotent and scoped to the upstream (`$WAN_IF`).
+7. Prove it live: with the reactor active, unplug and replug the upstream (`$WAN_IF`) (or move it to
    a different LAN with a different subnet) and confirm the upstream
    re-establishes and a Wi-Fi client keeps reaching the internet across the flip,
    including existing-connection recovery, not just new connections.
@@ -226,36 +240,36 @@ interfaces up or down by hand) and fights the persistence you built in lesson 09
 
 ## Completion conditions
 
-- With the reactor in place, a real unplug-and-replug of `eth0` (or a move to a
+- With the reactor in place, a real unplug-and-replug of the upstream (`$WAN_IF`) (or a move to a
   different LAN, ideally on a different subnet) results in the upstream
-  re-establishing automatically: `eth0` obtains a fresh lease, the default route
+  re-establishing automatically: the upstream obtains a fresh lease, the default route
   follows it, and a Wi-Fi client keeps reaching the internet across the flip —
   including connections that were open before the flip, once stale conntrack is
   flushed.
-- `eth0` remains a `systemd-networkd`-managed DHCP client; `networkd` still owns
+- The upstream (`$WAN_IF`) remains a `systemd-networkd`-managed DHCP client; `networkd` still owns
   the link and no NetworkManager was introduced.
 - A carrier-reacting mechanism is present and enabled — either `networkd-dispatcher`
-  with a hook keyed on `eth0` reaching `routable` (and going `off`), or a
+  with a hook keyed on the upstream (`$WAN_IF`) reaching `routable` (and going `off`), or a
   link-triggered `systemd` unit — and it is triggered by the upstream becoming
   routable, not by a bare address-change or a premature carrier-up.
 - The reactor flushes stale conntrack entries on upstream change (e.g.
   `conntrack -F` or a targeted flush), and the learner can explain why the default
   route and `masquerade` realign on their own but conntrack does not.
-- The reactor does not bring `eth0` up or down itself and does not undo lesson
+- The reactor does not bring the upstream (`$WAN_IF`) up or down itself and does not undo lesson
   09's persistence; the box still comes back correctly on a cold boot.
 - The reactor is persisted into `etc/` and deployed with `make deploy`, and the
   upstream still follows a replug after the deploy.
-- `bash checks/10-upstream.sh` passes. It confirms `eth0` is a `networkd` DHCP
+- `bash checks/10-upstream.sh` passes. It confirms the upstream (`$WAN_IF`) is a `networkd` DHCP
   client and that a carrier-reacting mechanism — `networkd-dispatcher` or a custom
   upstream unit — is present. The check cannot pull a cable for you, so after it
-  passes, prove it for real by physically unplugging and replugging `eth0` and
+  passes, prove it for real by physically unplugging and replugging the upstream (`$WAN_IF`) and
   watching a client stay online.
 
 ## On completion, persist
 
 Record in the instance's `DESIGN.md`/`STATE.md`:
 
-- Upstream detection is in place: `eth0`'s upstream now follows the cable
+- Upstream detection is in place: the upstream (`$WAN_IF`) now follows the cable
   automatically, keyed on `networkd`'s `routable`/`off` states.
 - The mechanism chosen — `networkd-dispatcher` hook, or a link-triggered `systemd`
   unit — and where its script/unit lives in `etc/`.
@@ -272,7 +286,8 @@ Record in the instance's `DESIGN.md`/`STATE.md`:
 - Make the flush surgical: instead of `conntrack -F` (which drops every tracked
   flow), target only entries bound to the old upstream address, and reason about
   the trade-off between a clean sweep and disrupting unrelated flows.
-- Handle the `off` transition explicitly: have the reactor react when `eth0` goes
+- Handle the `off` transition explicitly: have the reactor react when the upstream
+  (`$WAN_IF`) goes
   down (log it, or take a defined action) rather than only on `routable`, and
   consider what the appliance should present to clients while there is no
   upstream at all.

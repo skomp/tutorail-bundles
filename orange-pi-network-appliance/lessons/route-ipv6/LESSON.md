@@ -30,9 +30,16 @@ IPv4 model lands first.
 
 This lesson stands alone but assumes a finished IPv4 appliance. Before you start:
 
+- Lesson 01 established your upstream interface name (it varies by board and image
+  — `eth0`, `end0`, `enp1s0`, …) and recorded it as `WAN_IF` in `board.env`, with
+  the AP interface recorded as `AP_IF` (usually `wlan0`). Your board session has
+  `WAN_IF` exported (`export WAN_IF=<name>`), so the interactive commands below use
+  `"$WAN_IF"` for the upstream, and config files you author use the actual recorded
+  name in place of the `<WAN_IF>` placeholder.
 - Lesson 06 (`06-nat-with-nftables`) complete: Wi-Fi clients on
-  `192.168.4.0/24` reach the internet, NATed out `eth0`. That working IPv4 box is
-  the thing you are extending, and its NAT model is the foil for everything here.
+  `192.168.4.0/24` reach the internet, NATed out the upstream interface
+  (`$WAN_IF`). That working IPv4 box is the thing you are extending, and its NAT
+  model is the foil for everything here.
 - Lesson 02 (`02-the-lifeline`) available: a way onto the box that does not depend
   on its networking. IPv6 forwarding and RA changes can disturb client
   connectivity; keep the Bluetooth lifeline within reach.
@@ -42,7 +49,8 @@ This lesson stands alone but assumes a finished IPv4 appliance. Before you start
 - **An upstream that actually provides IPv6.** This is the hard prerequisite, and
   it is not yours to control. Ideally the upstream offers *prefix delegation*
   (DHCPv6-PD), which hands you a block you can sub-divide. If the upstream gives
-  you only a single address on `eth0` and no delegated prefix, you can bring IPv6
+  you only a single address on the upstream interface (`$WAN_IF`) and no delegated
+  prefix, you can bring IPv6
   up *on the box* but you cannot cleanly route a globally routable prefix to
   clients — read the theory, do what your upstream allows, and stop where it
   stops. If the upstream has no IPv6 at all, you can complete the reading and the
@@ -88,8 +96,8 @@ problem you do not have. The IPv6 way is to give clients real addresses and
 *route* their packets. If you catch yourself writing a masquerade rule in this
 lesson, that is the mistake this lesson is built to prevent.
 
-**How you get address space: prefix delegation.** On IPv4 your `eth0` got one
-address from the upstream by DHCP. On IPv6 the upstream can do better: with
+**How you get address space: prefix delegation.** On IPv4 your upstream interface
+(`$WAN_IF`) got one address from the upstream by DHCP. On IPv6 the upstream can do better: with
 *DHCPv6 Prefix Delegation* (DHCPv6-PD) it delegates a whole *prefix* — a block of
 addresses, for example a `/56` or `/60` — for you to use and sub-divide. Think of
 it as being handed a range you own, not a single address. `systemd-networkd`
@@ -134,7 +142,8 @@ itself via `IPv6SendRA=`; whichever you choose, exactly one thing should own RAs
 **Route, do not translate.** Put it together and the shape is: the upstream
 delegates a prefix; you assign one `/64` of it to `wlan0`; you advertise that
 `/64` so clients SLAAC global addresses; you enable IPv6 forwarding; the box
-*routes* client packets out `eth0` with their real source addresses intact, and
+*routes* client packets out the upstream interface (`$WAN_IF`) with their real
+source addresses intact, and
 replies come straight back to those globally routable addresses. No masquerade, no
 conntrack-driven un-translation, no reverse anything. The upstream already routes
 the delegated prefix back toward your box because it delegated it to you — that is
@@ -152,7 +161,8 @@ Installing packages is your job, not the tutor's.
 - Why NAT66 / masquerade is the wrong instinct on IPv6, and what it breaks
   (end-to-end addressing) versus what it was ever for on IPv4 (scarcity).
 - DHCPv6 Prefix Delegation (DHCPv6-PD): the upstream delegates a *prefix* you
-  sub-divide, contrasted with the single `eth0` address IPv4 got by DHCP.
+  sub-divide, contrasted with the single upstream-interface (`$WAN_IF`) address
+  IPv4 got by DHCP.
 - Router Advertisements (RA) and SLAAC: clients learn the prefix and build their
   own global address from your advertisements, contrasted with the IPv4 DHCP
   lease table from lesson 04.
@@ -191,15 +201,18 @@ Installing packages is your job, not the tutor's.
 ## Suggested progression
 
 1. **Find out what the upstream gives you** before building anything. From the
-   box, check whether `eth0` has a global IPv6 address and whether a prefix was
-   delegated (`ip -6 addr show eth0`, `ip -6 route`, and networkd's lease/PD state
-   via `networkctl status eth0`). Decide honestly: full PD, single address only,
+   box, check whether the upstream interface (`$WAN_IF`) has a global IPv6 address
+   and whether a prefix was delegated (`ip -6 addr show "$WAN_IF"`, `ip -6 route`,
+   and networkd's lease/PD state via `networkctl status "$WAN_IF"`). Decide
+   honestly: full PD, single address only,
    or no IPv6. This decides how far the lesson can go.
 2. Restate the contrast in one line: on IPv4 (lesson 06) you masqueraded a private
    range; on IPv6 you will route a delegated global prefix. Name the reflex to
    resist — no NAT66.
 3. **Request/observe the delegated prefix** and assign a `/64` from it to `wlan0`
-   in `systemd-networkd` (request PD on the `eth0` `.network`, hand a sub-prefix
+   in `systemd-networkd` (request PD on the upstream `<WAN_IF>` `.network` — use
+   your actual recorded interface name in the filename and its `[Match]` — hand a
+   sub-prefix
    to the `wlan0` `.network`). Confirm `wlan0` gains a global `/64` address from
    the delegated block (`ip -6 addr show wlan0`).
 4. **Enable IPv6 forwarding** live (`sysctl -w net.ipv6.conf.all.forwarding=1`)
@@ -215,7 +228,7 @@ Installing packages is your job, not the tutor's.
    the client's default IPv6 route points at the box.
 7. **Show it is routed, not NATed**: on the box, confirm no IPv6 masquerade rule
    exists (`nft list ruleset` shows no NAT66) and that the client's traffic leaves
-   with its own global source address (a quick `tcpdump -i eth0 ip6` while the
+   with its own global source address (a quick `tcpdump -i "$WAN_IF" ip6` while the
    client pings shows the client's real address as source, not the box's).
 8. **Persist**: move the forwarding sysctl, the networkd PD/prefix assignment, and
    the RA configuration into `etc/`, then `make deploy`. Re-verify after deploy
@@ -231,8 +244,8 @@ Installing packages is your job, not the tutor's.
   `/64`, not merely link-local or a ULA), and reaches an IPv6 host through the box
   (for example `ping -6` or `curl -6` to an IPv6 destination succeeds).
 - IPv6 is **routed, not masqueraded**: IPv6 forwarding is enabled on the box, and
-  there is **no** IPv6 masquerade/NAT66 rule. The client's packets leave `eth0`
-  carrying the client's own global source address.
+  there is **no** IPv6 masquerade/NAT66 rule. The client's packets leave the
+  upstream interface (`$WAN_IF`) carrying the client's own global source address.
 - RAs are advertised on `wlan0` by exactly one source (radvd, dnsmasq, or
   networkd), announcing the downstream `/64` with SLAAC, and the client's default
   IPv6 route points at the box.
