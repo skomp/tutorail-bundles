@@ -31,6 +31,22 @@ tutorials:
     source:
       type: local
       path: durable-event-broker
+  - id: orange-pi-network-appliance
+    title: Build a Linux Network Appliance on the Orange Pi Zero 3
+    description: >
+      Build a headless Orange Pi Zero 3 that routes and NATs a Wi-Fi access point from
+      its Ethernet upstream, stays reachable over Bluetooth, and teaches the Linux
+      networking mechanisms behind each step.
+    subjects: [linux-networking, routing, nat, wifi, bluetooth, systemd, embedded-linux]
+    aliases: [network appliance, linux router, wifi access point, orange pi, nat, headless router, travel router]
+    level: intermediate
+    style: [project-driven, interactive, long-form]
+    scope: "11 lessons; a few weeks"
+    optional_lesson_count: 5
+    workspace_kind: new-repository
+    source:
+      type: local
+      path: orange-pi-network-appliance
   - id: portable-bytebeat-wav
     title: Make Music with Integer Arithmetic
     description: >

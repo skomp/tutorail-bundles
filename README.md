@@ -45,6 +45,7 @@ The mechanical rule:
 | id | Title | Subjects | Level |
 |---|---|---|---|
 | `durable-event-broker` | Build a Durable Event Broker in Go | go, event-streaming, storage, distributed-systems | intermediate-to-advanced |
+| `orange-pi-network-appliance` | Build a Linux Network Appliance on the Orange Pi Zero 3 | linux-networking, routing, nat, wifi, bluetooth, systemd, embedded-linux | intermediate |
 | `portable-bytebeat-wav` | Make Music with Integer Arithmetic | programming, audio, bytebeat, binary-formats | beginner-to-intermediate |
 | `portable-fixed-window-rate-limiter` | Build a Fixed-Window Rate Limiter | programming, testing, api-design, rate-limiting | intermediate |
 | `rust-automaton-db` | Learn Rust by Building AutomatonDB | rust, databases, distributed-systems | intermediate-to-advanced |

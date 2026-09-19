@@ -1,0 +1,156 @@
+bundle_format: 1
+id: orange-pi-network-appliance
+title: Build a Linux Network Appliance on the Orange Pi Zero 3
+description: >
+  Build a headless Orange Pi Zero 3 that routes and NATs a Wi-Fi access point
+  from its Ethernet upstream, stays reachable over Bluetooth, and teaches the
+  Linux networking mechanisms behind each step.
+teaching_method: >
+  You do every mechanism live on the board first and watch it break, then
+  persist it into systemd units and deploy it from a config repo you build up.
+  You type every command; the tutor reads your board's real state back and never
+  advances on an assertion.
+subjects: [linux-networking, routing, nat, wifi, bluetooth, systemd, embedded-linux]
+aliases: [network appliance, linux router, wifi access point, orange pi, nat, headless router, travel router]
+level: intermediate
+style: [project-driven, interactive, long-form]
+
+lessons:
+  - lessons/00-find-the-board/LESSON.md
+  - lessons/01-reading-the-network.md
+  - lessons/02-the-lifeline/LESSON.md
+  - lessons/03-bring-up-an-ap/LESSON.md
+  - lessons/04-handing-out-addresses/LESSON.md
+  - lessons/05-routing-between-two-links/LESSON.md
+  - lessons/06-nat-with-nftables/LESSON.md
+  - lessons/07-the-management-network/LESSON.md
+  - lessons/08-a-firewall-with-intent/LESSON.md
+  - lessons/09-making-it-survive-a-reboot/LESSON.md
+  - lessons/10-upstream-detection/LESSON.md
+
+workspace_kind: new-repository
+tutor_owned: [tutorial/STATE.md, tutorial/DESIGN.md]
+learner_owned:
+  - etc/**
+  - board.env
+  - checks/**
+  - Makefile
+  - README.md
+  - FLASH.md
+  - boot-overlay/**
+ownership_policy: tutor-must-not-edit-learner-owned
+
+validators:
+  board-reachable:  { kind: command, command: [bash, checks/00-reach.sh] }
+  lifeline-up:      { kind: command, command: [bash, checks/02-lifeline.sh] }
+  ap-beaconing:     { kind: command, command: [bash, checks/03-ap.sh] }
+  lease-issued:     { kind: command, command: [bash, checks/04-lease.sh] }
+  forwarding-on:    { kind: command, command: [bash, checks/05-forward.sh] }
+  nat-live:         { kind: command, command: [bash, checks/06-nat.sh] }
+  mgmt-reachable:   { kind: command, command: [bash, checks/07-mgmt.sh] }
+  firewall-policy:  { kind: command, command: [bash, checks/08-firewall.sh] }
+  reboot-survives:  { kind: command, command: [bash, checks/09-persist.sh] }
+  upstream-follows: { kind: command, command: [bash, checks/10-upstream.sh] }
+  capture-works:    { kind: command, command: [bash, checks/opt-capture.sh] }
+  scan-runs:        { kind: command, command: [bash, checks/opt-scan.sh] }
+  portal-redirects: { kind: command, command: [bash, checks/opt-portal.sh] }
+  deauth-observed:  { kind: command, command: [bash, checks/opt-deauth.sh] }
+  v6-routes:        { kind: command, command: [bash, checks/opt-ipv6.sh] }
+
+covers:
+  ip-routing:
+    summary: >
+      A host chooses an outgoing interface and next hop from its routing table,
+      and forwards between interfaces only when told to.
+    aliases: [routing-table, fib, ip-forwarding]
+  nat-masquerade:
+    summary: >
+      Source addresses on a private network are translated to the appliance's
+      upstream address, and return traffic is matched by connection tracking.
+    aliases: [nat, masquerade, conntrack]
+  dhcp-service:
+    summary: >
+      A server hands out addresses, a gateway and DNS to clients on a network,
+      and a client accepts a lease from it.
+    aliases: [dhcp, dhcp-server, leases]
+  wifi-access-point:
+    summary: >
+      A Linux host runs hostapd to beacon an SSID on a channel in its regulatory
+      domain, and stations associate to it.
+    aliases: [access-point, hostapd, 802.11-ap]
+  nftables-firewall:
+    summary: >
+      Packets are filtered by tables, chains and hooks, with input and forward
+      treated as separate questions under a default-drop policy.
+    aliases: [nftables, netfilter, firewall]
+  systemd-networkd:
+    summary: >
+      Interfaces, addresses and routes are declared to systemd-networkd and its
+      companion daemons so the appliance comes up unattended.
+    aliases: [networkd, persistent-networking]
+  bluetooth-management-link:
+    summary: >
+      An out-of-band Bluetooth link, an RFCOMM console and then PAN, reaches the
+      appliance independently of its IP configuration.
+    aliases: [rfcomm, bluetooth-pan, bnep]
+  carrier-detection:
+    summary: >
+      The kernel reports whether a link has carrier, and the appliance reacts to
+      the event to choose its upstream.
+    aliases: [link-carrier, hotplug, upstream-detection]
+
+assumes:
+  linux-shell:
+    level: working
+    summary: >
+      Use a Linux shell over SSH, edit files, and read journalctl and systemd
+      unit status without instruction.
+  systemd-basics:
+    level: conceptual
+    summary: >
+      Explain what a systemd service unit is and read its running state, though
+      not necessarily author one yet.
+
+one_task_at_a_time: true
+solution_code: on-request-only
+advance_on: validated-evidence-only
+optional_lessons:
+  lessons/watching-your-own-traffic/LESSON.md:
+    offer_at:
+      - lessons/06-nat-with-nftables/LESSON.md
+    offer_because: Now that clients route through the box, you can watch the packets you are forwarding and see both sides of the NAT translation. Take this if you want to see the traffic, not just trust it.
+  lessons/scanning-the-served-network/LESSON.md:
+    offer_at:
+      - lessons/08-a-firewall-with-intent/LESSON.md
+    offer_because: You are now routing for a network of clients. This optional lesson shows how to discover what is actually on that network, and how active and passive discovery differ.
+  lessons/a-captive-portal/LESSON.md:
+    offer_at:
+      - lessons/08-a-firewall-with-intent/LESSON.md
+    offer_because: With the firewall in place you can redirect client HTTP to a splash page before letting them out, and see first-hand why HTTPS resists interception. Take this if captive portals interest you.
+  lessons/deauth-and-defenses/LESSON.md:
+    offer_at:
+      - lessons/09-making-it-survive-a-reboot/LESSON.md
+    offer_because: A Wi-Fi access point can be knocked off the air by deauthentication frames. This optional lesson shows the attack and the one defence, protected management frames, that actually helps.
+  lessons/route-ipv6/LESSON.md:
+    offer_at:
+      - lessons/06-nat-with-nftables/LESSON.md
+    offer_because: The main path is IPv4 only. If you want to give clients real IPv6, this optional lesson shows why you route a delegated prefix instead of NATing it.
+supplies:
+  - from: supplies/FLASH.md
+    to: FLASH.md
+    describe: "FLASH.md: how the board was flashed and first-booted, for reference"
+  - from: supplies/boot-overlay/
+    to: boot-overlay
+    describe: "First-boot overlay to copy onto the SD card: enables SSH and sets the Wi-Fi country early"
+  - from: supplies/board.env.template
+    to: board.env
+    describe: "board.env: how the checks and the deploy Makefile reach your board (fill in the values from lesson 00)"
+  - from: supplies/Makefile
+    to: Makefile
+    describe: "Makefile: 'make deploy' copies etc/ to the board and reloads the affected units"
+  - from: supplies/README.md
+    to: README.md
+    describe: README for this appliance-config repository and how to deploy it
+  - from: supplies/checks-lib.sh
+    to: checks/_lib.sh
+    describe: "Shared helper the check scripts source: reads board.env and provides the SSH helper"
