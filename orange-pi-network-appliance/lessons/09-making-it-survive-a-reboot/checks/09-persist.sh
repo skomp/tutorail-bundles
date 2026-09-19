@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # reboot-survives: the appliance units are enabled and networkd config is in place.
 . "$(dirname "$0")/_lib.sh"
+require_board
 for u in systemd-networkd hostapd dnsmasq nftables; do
   bssh "systemctl is-enabled --quiet $u" || fail "$u is not enabled — it will not come back after a reboot"
 done

@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # firewall-policy: input and forward are default-drop, with established/related accepted.
 . "$(dirname "$0")/_lib.sh"
+require_board
 rs="$(bssh 'sudo nft list ruleset 2>/dev/null' || true)"
 [ -n "$rs" ] || fail "the nftables ruleset is empty"
 grep -Eq 'hook input .*policy drop'   <<<"$rs" || fail "the input chain is not default-drop"

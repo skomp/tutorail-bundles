@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # lifeline-up: a serial getty is bound to an rfcomm device and Bluetooth is powered.
 . "$(dirname "$0")/_lib.sh"
+require_board
 unit="$(bssh 'systemctl list-units --type=service --state=running --no-legend 2>/dev/null | grep -Eo "(serial-getty@rfcomm[0-9]+|rfcomm[^ ]*)\.service" | head -1' || true)"
 [ -n "$unit" ] || fail "no running serial getty bound to an rfcomm device — the Bluetooth console is not up"
 bssh 'bluetoothctl show 2>/dev/null | grep -q "Powered: yes"' || fail "the Bluetooth controller is not powered"

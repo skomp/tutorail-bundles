@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # v6-routes: IPv6 is forwarded (not masqueraded) and router advertisements are configured.
 . "$(dirname "$0")/_lib.sh"
+require_board
 v="$(bssh 'cat /proc/sys/net/ipv6/conf/all/forwarding' 2>/dev/null || echo 0)"
 [ "$v" = "1" ] || fail "IPv6 forwarding is off"
 if bssh 'sudo nft list ruleset 2>/dev/null | grep -A3 ip6 | grep -q masquerade'; then

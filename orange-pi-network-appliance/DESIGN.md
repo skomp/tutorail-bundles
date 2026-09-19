@@ -81,6 +81,12 @@ command from then on. Nothing else adapts, because the tools the course drives
 (`systemctl`, `networkctl`, `nft`, `iw`, `hostapd`, `bluetoothctl`) are the same
 whichever installer placed them.
 
+Admin access to the board is **key-based SSH**, established in lesson 00. Every check
+script connects non-interactively (`ssh -o BatchMode=yes`), so a password prompt, a key
+passphrase prompt or an unaccepted host key all make a check fail rather than pause — which
+is why key setup and a single consistent `BOARD_HOST` value are part of lesson 00 and not an
+unstated assumption.
+
 **What breaks if a lesson contradicts this:** a lesson that assumes NetworkManager,
 netplan, ifupdown or iptables is teaching a different stack from every other
 lesson, and the check scripts — which read `networkctl` and `nft` — will not see

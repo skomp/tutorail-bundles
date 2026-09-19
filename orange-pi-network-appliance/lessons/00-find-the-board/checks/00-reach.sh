@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
-# board-reachable: the board answers a shell over SSH using board.env.
+# board-reachable: a non-interactive (key-based) SSH session opens to the board.
 . "$(dirname "$0")/_lib.sh"
-out="$(bssh 'echo ok' 2>/dev/null || true)"
-[ "$out" = "ok" ] || fail "no SSH shell on ${BOARD_USER}@${BOARD_HOST} — is the host/user in board.env right?"
-pass "${BOARD_USER}@${BOARD_HOST} answered over SSH"
+require_board
+pass "${BOARD_USER}@${BOARD_HOST} is reachable over key-based SSH"
