@@ -33,6 +33,33 @@ Bluetooth serial console (lesson 02) comes before anything that touches routing
 or the firewall. It is your lifeline, and it works when the IP stack is broken.
 That is what makes the later lessons safe to get wrong.
 
+## What this course assumes you have
+
+The course is pinned to one platform, on purpose. Half of it is about how Linux
+*specifically* expresses networking — systemd-networkd units, nftables rulesets —
+so it teaches one stack well rather than several badly.
+
+- **Hardware:** an Orange Pi Zero 3.
+- **Operating system:** a current Debian-based Armbian image (Bookworm or later)
+  with **systemd**. The image is flashed and first-booted before lesson 00 — see
+  `FLASH.md`.
+- **Networking stack:** **systemd-networkd** as the control plane, **nftables**
+  for filtering and NAT, **dnsmasq** for DHCP and DNS, **hostapd** for the access
+  point, **bluez** for Bluetooth. These are the subject; they are not swappable.
+- **A shell** on your own machine with `ssh`, `rsync` and `make`, to reach and
+  deploy to the board.
+
+**The one thing that adapts: the package manager.** The course assumes **apt** and
+writes install steps as `apt install …`. If your image uses a different Debian
+derivative, tell the tutor at the start and it will substitute your package
+manager in the install steps — nothing else changes, because the tools the course
+drives are the same. Installing packages needs the network, so it stays your work:
+the course cannot ship the packages, and a lesson that asks you to install one is
+asking for real work, not toil.
+
+Everything past the package manager is fixed. A different init system, control
+plane or firewall is a different course.
+
 ## The chapters, in order
 
 - **00 — Find the board.** Locate a headless board on a network you do not

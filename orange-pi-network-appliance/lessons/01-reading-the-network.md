@@ -1,8 +1,8 @@
 ---
 id: 01-reading-the-network
 title: Reading the network
-design_refs: []
-validators: []
+design_refs: [address-plan, interface-roles]
+validators: [board-reachable]
 ---
 
 ## Purpose

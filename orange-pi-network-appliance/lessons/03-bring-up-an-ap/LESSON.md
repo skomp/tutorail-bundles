@@ -1,8 +1,8 @@
 ---
 id: 03-bring-up-an-ap
 title: Bring up an access point
-design_refs: []
-validators: []
+design_refs: [interface-roles, address-plan, platform]
+validators: [ap-beaconing]
 ---
 
 ## Purpose

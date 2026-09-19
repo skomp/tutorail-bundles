@@ -1,8 +1,8 @@
 ---
 id: 08-a-firewall-with-intent
 title: A firewall with intent
-design_refs: []
-validators: []
+design_refs: [interface-roles, recovery-invariant, platform]
+validators: [firewall-policy]
 ---
 
 ## Purpose

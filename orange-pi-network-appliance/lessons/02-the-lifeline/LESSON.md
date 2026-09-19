@@ -1,8 +1,8 @@
 ---
 id: 02-the-lifeline
 title: The lifeline
-design_refs: []
-validators: []
+design_refs: [recovery-invariant, platform]
+validators: [lifeline-up]
 ---
 
 ## Purpose

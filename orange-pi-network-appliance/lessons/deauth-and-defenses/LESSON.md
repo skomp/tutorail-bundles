@@ -1,8 +1,8 @@
 ---
 id: deauth-and-defenses
 title: Deauthentication and defences
-design_refs: []
-validators: []
+design_refs: [interface-roles, platform]
+validators: [deauth-observed]
 optional: true
 ---
 

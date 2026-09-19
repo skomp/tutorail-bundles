@@ -1,8 +1,8 @@
 ---
 id: watching-your-own-traffic
 title: Watching your own traffic
-design_refs: []
-validators: []
+design_refs: [interface-roles, platform]
+validators: [capture-works]
 optional: true
 ---
 

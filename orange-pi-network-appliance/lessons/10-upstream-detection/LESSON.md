@@ -1,8 +1,8 @@
 ---
 id: 10-upstream-detection
 title: Upstream detection
-design_refs: []
-validators: []
+design_refs: [control-plane, interface-roles, platform]
+validators: [upstream-follows]
 ---
 
 ## Purpose

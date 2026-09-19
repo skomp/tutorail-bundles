@@ -1,8 +1,8 @@
 ---
 id: scanning-the-served-network
 title: Scanning the served network
-design_refs: []
-validators: []
+design_refs: [address-plan, interface-roles, platform]
+validators: [scan-runs]
 optional: true
 ---
 

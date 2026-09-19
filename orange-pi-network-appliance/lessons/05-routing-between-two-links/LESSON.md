@@ -1,8 +1,8 @@
 ---
 id: 05-routing-between-two-links
 title: Routing between two links
-design_refs: []
-validators: []
+design_refs: [interface-roles]
+validators: [forwarding-on]
 ---
 
 ## Purpose

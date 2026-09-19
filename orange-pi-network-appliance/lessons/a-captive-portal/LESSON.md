@@ -1,8 +1,8 @@
 ---
 id: a-captive-portal
 title: A captive portal
-design_refs: []
-validators: []
+design_refs: [interface-roles, platform]
+validators: [portal-redirects]
 optional: true
 ---
 

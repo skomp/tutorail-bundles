@@ -1,8 +1,8 @@
 ---
 id: 04-handing-out-addresses
 title: Handing out addresses
-design_refs: []
-validators: []
+design_refs: [address-plan, platform]
+validators: [lease-issued]
 ---
 
 ## Purpose

@@ -1,8 +1,8 @@
 ---
 id: 06-nat-with-nftables
 title: NAT with nftables
-design_refs: []
-validators: []
+design_refs: [address-plan, interface-roles, platform]
+validators: [nat-live]
 ---
 
 ## Purpose

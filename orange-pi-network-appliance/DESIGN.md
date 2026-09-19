@@ -66,6 +66,28 @@ Mixing NetworkManager or ifupdown in produces start-order races that persist
 intermittently — the appliance comes up correctly most of the time, which is the
 worst way for it to fail. *Resolved.*
 
+## Platform and package manager {#platform}
+
+The appliance runs a Debian-based Armbian image (Bookworm or later) on an Orange
+Pi Zero 3, with systemd. The networking stack is fixed: systemd-networkd,
+nftables, dnsmasq, hostapd, bluez (see also `#control-plane`). Lessons that
+install software assume these packages and no others.
+
+**The package manager is the single adaptable prerequisite.** The default is apt,
+and install steps are written `apt install <pkg>`. If the learner is on another
+Debian derivative, the tutor asks once, records the choice in the instance's
+`STATE.md` under "Decisions made in discussion", and substitutes the install
+command from then on. Nothing else adapts, because the tools the course drives
+(`systemctl`, `networkctl`, `nft`, `iw`, `hostapd`, `bluetoothctl`) are the same
+whichever installer placed them.
+
+**What breaks if a lesson contradicts this:** a lesson that assumes NetworkManager,
+netplan, ifupdown or iptables is teaching a different stack from every other
+lesson, and the check scripts — which read `networkctl` and `nft` — will not see
+what it produced. Installing a package is the learner's work (it needs the
+network); a lesson is right to ask for it, and wrong to assume a stack other than
+this one. *Resolved, except the package-manager value, which the learner sets.*
+
 ## DNS policy {#dns-policy}
 
 **Deliberately unresolved.** On the main path, dnsmasq simply forwards client

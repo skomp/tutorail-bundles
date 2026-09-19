@@ -1,8 +1,8 @@
 ---
 id: 07-the-management-network
 title: The management network
-design_refs: []
-validators: []
+design_refs: [interface-roles, address-plan, recovery-invariant, platform]
+validators: [mgmt-reachable]
 ---
 
 ## Purpose

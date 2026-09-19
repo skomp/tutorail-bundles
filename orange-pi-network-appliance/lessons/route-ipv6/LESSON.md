@@ -1,8 +1,8 @@
 ---
 id: route-ipv6
 title: Routing IPv6
-design_refs: []
-validators: []
+design_refs: [address-plan, platform]
+validators: [v6-routes]
 optional: true
 ---
 

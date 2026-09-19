@@ -164,6 +164,18 @@ in a defined order. Not NetworkManager, not ifupdown. **Breaks if contradicted:*
 persistence and auto-switch lessons (09–10) assume one control plane; mixing them produces
 races that persist intermittently. *Resolved.*
 
+### `#platform`
+The platform stack is pinned: Debian-based Armbian (Bookworm+) on the Orange Pi
+Zero 3, systemd, systemd-networkd, nftables, dnsmasq, hostapd, bluez. The **one**
+adaptable prerequisite is the package manager: apt by default, and the tutor
+substitutes another Debian-derivative's installer once, recording the choice in
+the instance. **Breaks if contradicted:** a lesson assuming NetworkManager,
+netplan, ifupdown or iptables teaches a different stack from the rest and the
+check scripts (which read `networkctl`/`nft`) miss its output. Installing packages
+is the learner's work — it needs the network — so a lesson may ask for it.
+*Resolved (added 2026-09-19 after the author asked how prerequisites are stated);
+package-manager value set by the learner.*
+
 ### `#dns-policy` (open)
 Beyond "dnsmasq forwards to the upstream resolver", DNS policy — caching, blocklists,
 split-horizon — is **deliberately unresolved** and a candidate for a later offered lesson.

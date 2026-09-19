@@ -1,8 +1,8 @@
 ---
 id: 00-find-the-board
 title: Find the board
-design_refs: []
-validators: []
+design_refs: [address-plan]
+validators: [board-reachable]
 ---
 
 ## Purpose

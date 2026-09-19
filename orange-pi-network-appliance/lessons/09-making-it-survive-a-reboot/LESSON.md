@@ -1,8 +1,8 @@
 ---
 id: 09-making-it-survive-a-reboot
 title: Making it survive a reboot
-design_refs: []
-validators: []
+design_refs: [control-plane, recovery-invariant, platform]
+validators: [reboot-survives]
 ---
 
 ## Purpose
