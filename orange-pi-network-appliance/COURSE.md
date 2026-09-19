@@ -91,6 +91,28 @@ plane or firewall is a different course.
 - **M3 — It survives a reboot and behaves like an appliance.** (08–10)
 - **M4 — It can see and shape the network it serves.** (the optional lessons)
 
+## How long it takes
+
+Rough hands-on time for a learner who is comfortable in Linux but new to networking,
+working on real hardware. Spread it over several sittings — the milestones above are the
+natural stopping points.
+
+| Segment | Time |
+|---|---|
+| Setup — flash and first boot (`FLASH.md`, before lesson 00) | 0.5–0.75 h |
+| M1 — can't be locked out (00–02) | 1.5–2.75 h |
+| M2 — clients reach the internet (03–07) | 3.5–5.75 h |
+| M3 — behaves like an appliance (08–10) | 2.75–4.25 h |
+| **Main path (including setup)** | **≈ 8.5–14 h**, typically 10–12 h |
+| All five optional lessons | +3–5 h |
+| **Everything** | **≈ 12–18 h** |
+
+The high end is driven by the two Bluetooth lessons (02, 07) and the access-point bring-up
+(03), where real-hardware fiddliness — pairing, radio and driver quirks on the Zero 3, the
+Wi-Fi regulatory domain — takes the time. The estimate assumes the tutor's
+one-task-at-a-time, verify-on-the-board pacing, which trades a little speed for
+understanding each step.
+
 ## Optional lessons
 
 These are offered by the tutor at the right moment and are never required. The
