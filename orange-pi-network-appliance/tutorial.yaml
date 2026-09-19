@@ -15,7 +15,18 @@ aliases: [network appliance, linux router, wifi access point, orange pi, nat, he
 level: intermediate
 style: [project-driven, interactive, long-form]
 
-lessons: []
+lessons:
+  - lessons/00-find-the-board/LESSON.md
+  - lessons/01-reading-the-network.md
+  - lessons/02-the-lifeline/LESSON.md
+  - lessons/03-bring-up-an-ap/LESSON.md
+  - lessons/04-handing-out-addresses/LESSON.md
+  - lessons/05-routing-between-two-links/LESSON.md
+  - lessons/06-nat-with-nftables/LESSON.md
+  - lessons/07-the-management-network/LESSON.md
+  - lessons/08-a-firewall-with-intent/LESSON.md
+  - lessons/09-making-it-survive-a-reboot/LESSON.md
+  - lessons/10-upstream-detection/LESSON.md
 
 workspace_kind: new-repository
 tutor_owned: [tutorial/STATE.md, tutorial/DESIGN.md]
@@ -103,3 +114,24 @@ assumes:
 one_task_at_a_time: true
 solution_code: on-request-only
 advance_on: validated-evidence-only
+optional_lessons:
+  lessons/watching-your-own-traffic/LESSON.md:
+    offer_at:
+      - lessons/06-nat-with-nftables/LESSON.md
+    offer_because: Now that clients route through the box, you can watch the packets you are forwarding and see both sides of the NAT translation. Take this if you want to see the traffic, not just trust it.
+  lessons/scanning-the-served-network/LESSON.md:
+    offer_at:
+      - lessons/08-a-firewall-with-intent/LESSON.md
+    offer_because: You are now routing for a network of clients. This optional lesson shows how to discover what is actually on that network, and how active and passive discovery differ.
+  lessons/a-captive-portal/LESSON.md:
+    offer_at:
+      - lessons/08-a-firewall-with-intent/LESSON.md
+    offer_because: With the firewall in place you can redirect client HTTP to a splash page before letting them out, and see first-hand why HTTPS resists interception. Take this if captive portals interest you.
+  lessons/deauth-and-defenses/LESSON.md:
+    offer_at:
+      - lessons/09-making-it-survive-a-reboot/LESSON.md
+    offer_because: A Wi-Fi access point can be knocked off the air by deauthentication frames. This optional lesson shows the attack and the one defence, protected management frames, that actually helps.
+  lessons/route-ipv6/LESSON.md:
+    offer_at:
+      - lessons/06-nat-with-nftables/LESSON.md
+    offer_because: The main path is IPv4 only. If you want to give clients real IPv6, this optional lesson shows why you route a delegated prefix instead of NATing it.
