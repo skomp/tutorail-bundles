@@ -36,12 +36,12 @@ instructive failure column is the reason each row is a lesson and not a handover
 | 02 | `the-lifeline` | an out-of-band way back in that does not depend on IP | Bluetooth SPP/RFCOMM; getty over a serial line | forgetting the SPP profile is off by default; assuming the lifeline needs an address | learner drops Ethernet and still gets a shell over Bluetooth | `#recovery-invariant` | `lifeline-up` |
 | 03 | `bring-up-an-ap` | hostapd in the foreground, a station associates (no IP yet) | 802.11 AP basics: SSID, channel, regulatory domain, association | wrong/blank reg domain so hostapd refuses to start; expecting internet before there is an address | a phone shows "connected, no internet" and the association is in the log | `#interface-roles`, `#address-plan` | `ap-beaconing` |
 | 04 | `handing-out-addresses` | dnsmasq as DHCP + DNS for the AP subnet, live | DHCP server side; DNS resolving vs forwarding | a DHCP range that overlaps the interface address; serving DNS that forwards nowhere | a client gets a lease and resolves a name; learner reads both | `#address-plan` | `lease-issued` |
-| 05 | `routing-between-two-links` | why a packet from `wlan0` does not reach `eth0` yet | `ip_forward`; forward vs input; the host as a router | leaving forwarding off; expecting a reply without NAT and not seeing why | learner shows one packet forwarded and one dropped for want of NAT | `#interface-roles` | `forwarding-on` |
+| 05 | `routing-between-two-links` | why a packet from the AP does not reach the upstream yet | `ip_forward`; forward vs input; the host as a router | leaving forwarding off; expecting a reply without NAT and not seeing why | learner shows one packet forwarded and one dropped for want of NAT | `#interface-roles` | `forwarding-on` |
 | 06 | `nat-with-nftables` | masquerade and the conntrack idea; clients reach the internet | NAT and connection tracking; nftables NAT hooks | masquerade on the wrong chain/hook; forgetting the return path is conntrack's job | a client pings `1.1.1.1` through the box; learner explains the translation | `#address-plan`, `#interface-roles` | `nat-live` |
 | 07 | `the-management-network` | Bluetooth PAN → `bnep0`, a third L3 interface, deliberately not NATed | Bluetooth PAN/NAP; a management interface vs a client interface | NATing the mgmt link like a client; letting a Wi-Fi client reach admin | learner reaches admin over `bnep0` that a Wi-Fi client provably cannot | `#interface-roles`, `#address-plan`, `#recovery-invariant` | `mgmt-reachable` |
 | 08 | `a-firewall-with-intent` | nftables policy: forward vs input, per-interface trust, default drop | netfilter tables/chains/hooks; the forward-vs-input distinction | a default-drop that locks out the IP admin path (but not the lifeline — by design) | stated policy enforced; learner predicts each verdict before testing | `#interface-roles`, `#recovery-invariant` | `firewall-policy` |
 | 09 | `making-it-survive-a-reboot` | persist the lot into systemd-networkd + hostapd/dnsmasq/nftables units | systemd-networkd; unit ordering & dependencies | a `.network` that fights a leftover live config; unit start-order races | reboot and the AP, NAT and lifeline all come back unattended | `#control-plane`, `#recovery-invariant` | `reboot-survives` |
-| 10 | `upstream-detection` | detect Ethernet carrier and switch upstream automatically | link-carrier detection & hotplug; event-driven reconfiguration | acting on the wrong event; not re-NATing after the upstream changes | unplug/replug `eth0`, upstream follows, clients keep working | `#control-plane`, `#interface-roles` | `upstream-follows` |
+| 10 | `upstream-detection` | detect Ethernet carrier and switch upstream automatically | link-carrier detection & hotplug; event-driven reconfiguration | acting on the wrong event; not re-NATing after the upstream changes | unplug/replug the upstream link, upstream follows, clients keep working | `#control-plane`, `#interface-roles` | `upstream-follows` |
 
 ### Optional track (offered, not sequenced)
 
@@ -141,16 +141,22 @@ are folded into lessons 03 and 02 where they actually bite.
 
 ### `#address-plan`
 AP on `192.168.4.0/24` (`wlan0` = `.1`), Bluetooth PAN/management on `192.168.44.0/24`
-(`bnep0` = `.1`), and `eth0` is a DHCP client of whatever upstream LAN it is plugged into.
-IPv4 only on the main path. **Breaks if contradicted:** an AP subnet that collides with the
-upstream LAN makes NAT in lesson 06 fail in a way that looks like anything but an addressing
-bug. *Resolved.* IPv6 is **deliberately deferred** to the optional `route-ipv6` lesson.
+(`bnep0` = `.1`), and the upstream Ethernet interface is a DHCP client of whatever upstream LAN
+it is plugged into. IPv4 only on the main path. **Interface names are discovered, not assumed:**
+the upstream name varies by board/image (`eth0`, `end0`, `enp1s0`, …), so the learner reads it
+from the default route in lesson 01 and records it as `WAN_IF` in `board.env` (AP interface as
+`AP_IF`, default `wlan0`); lessons and checks refer to `$WAN_IF`, never a literal. **Breaks if
+contradicted:** an AP subnet that collides with the upstream LAN makes NAT in lesson 06 fail in
+a way that looks like anything but an addressing bug; and a lesson that hardcodes an interface
+name breaks on any board whose name differs. *Resolved.* IPv6 is **deliberately deferred** to
+the optional `route-ipv6` lesson. *(Interface-name discovery added 2026-09-19 after a real
+board reported `end0`, not `eth0`.)*
 
 ### `#interface-roles`
-`eth0` untrusted/upstream; `wlan0` client (NAT yes, box-input limited to DHCP/DNS); `bnep0`
-management/trusted (no NAT, box-input allowed); `lo` local. **Breaks if contradicted:** the
-firewall in lesson 08 and the mgmt network in lesson 07 have no coherent policy without
-this — it is their spine. *Resolved.*
+The upstream interface (`$WAN_IF`) untrusted/upstream; the AP interface (`$AP_IF`, usually
+`wlan0`) client (NAT yes, box-input limited to DHCP/DNS); `bnep0` management/trusted (no NAT,
+box-input allowed); `lo` local. **Breaks if contradicted:** the firewall in lesson 08 and the
+mgmt network in lesson 07 have no coherent policy without this — it is their spine. *Resolved.*
 
 ### `#recovery-invariant`
 The lifeline — the RFCOMM serial console — must **never** depend on IP configuration.
@@ -175,6 +181,13 @@ check scripts (which read `networkctl`/`nft`) miss its output. Installing packag
 is the learner's work — it needs the network — so a lesson may ask for it.
 *Resolved (added 2026-09-19 after the author asked how prerequisites are stated);
 package-manager value set by the learner.*
+
+Admin access is **key-based SSH**, established in lesson 00: the check scripts connect
+non-interactively (`ssh -o BatchMode=yes`), so a password prompt, a passphrase prompt or an
+unaccepted host key make a check fail rather than pause. Lesson 00 therefore installs the
+learner's public key (`ssh-copy-id`) and has them settle on one consistent `BOARD_HOST`, and
+`require_board()` in `checks/_lib.sh` surfaces SSH's real error instead of misblaming
+`board.env`. *Resolved (added 2026-09-19 after a live run hit it — see `#14`).*
 
 ### `#dns-policy` (open)
 Beyond "dnsmasq forwards to the upstream resolver", DNS policy — caching, blocklists,

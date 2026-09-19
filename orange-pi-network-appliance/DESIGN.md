@@ -8,12 +8,19 @@ tutor appends to it as the learner makes decisions during the course.
 
 The appliance uses three interfaces with fixed roles on fixed subnets:
 
-- `eth0` — the **upstream**. It is a DHCP *client* of whatever LAN it is plugged
-  into, so its address is not known in advance and must not be assumed.
-- `wlan0` — the **access point**, `192.168.4.1/24`. Clients on
-  `192.168.4.0/24` receive addresses by DHCP.
+- **the upstream Ethernet interface** — a DHCP *client* of whatever LAN it is
+  plugged into, so its address is not known in advance and must not be assumed. Its
+  **name is not assumed either**: it varies by board and image (`eth0`, `end0`,
+  `enp1s0`, …). The learner discovers it in lesson 01 by reading the default route,
+  records it as `WAN_IF` in `board.env`, and exports `WAN_IF` in the board shell;
+  lessons and check scripts refer to `$WAN_IF`, never a literal name.
+- **the access-point interface**, `192.168.4.1/24` — usually `wlan0` (recorded as
+  `AP_IF`). Clients on `192.168.4.0/24` receive addresses by DHCP.
 - `bnep0` — the **Bluetooth management network**, `192.168.44.1/24`. Admin hosts
   on `192.168.44.0/24` reach the appliance here.
+
+Interface **names** are discovered and recorded, never assumed; the subnets and
+roles below are fixed.
 
 The main path is IPv4 only. IPv6 is **deliberately deferred** to the optional
 `route-ipv6` lesson; nothing on the main path routes or NATs IPv6.
@@ -28,9 +35,11 @@ ordinary home LAN does not use. *Resolved.*
 
 Each interface has one trust level, and the firewall is built entirely around it:
 
-- `eth0` — **untrusted / upstream**. The internet is on the other side of it.
-- `wlan0` — **client**. Traffic is NATed out through `eth0`; input *to the
-  appliance itself* from `wlan0` is limited to what a client needs (DHCP, DNS).
+- the **upstream interface** (`$WAN_IF`) — **untrusted / upstream**. The internet
+  is on the other side of it.
+- the **AP interface** (`$AP_IF`, usually `wlan0`) — **client**. Traffic is NATed
+  out through `$WAN_IF`; input *to the appliance itself* from the AP is limited to
+  what a client needs (DHCP, DNS).
 - `bnep0` — **management / trusted**. Not NATed. Input to the appliance is
   allowed here, because this is where administration happens.
 - `lo` — local.
@@ -97,7 +106,8 @@ this one. *Resolved, except the package-manager value, which the learner sets.*
 ## DNS policy {#dns-policy}
 
 **Deliberately unresolved.** On the main path, dnsmasq simply forwards client
-queries to the upstream resolver the appliance learned by DHCP on `eth0`.
+queries to the upstream resolver the appliance learned by DHCP on the upstream
+interface (`$WAN_IF`).
 Anything beyond that — caching policy, blocklists, split-horizon answers for the
 management network — is left open and is a candidate for a later offered lesson.
 A learner who wants to go further here is not contradicting the design; they are

@@ -15,6 +15,10 @@ fi
 : "${BOARD_HOST:?set BOARD_HOST in board.env}"
 : "${BOARD_USER:?set BOARD_USER in board.env}"
 
+# Interface names. AP_IF defaults to wlan0; WAN_IF (the upstream) is discovered in lesson 01
+# and set in board.env, so checks that need it guard it with ${WAN_IF:?...}.
+AP_IF="${AP_IF:-wlan0}"
+
 # Run a command on the board over SSH, non-interactively (key-based; see require_board).
 bssh() { ssh -o BatchMode=yes -o ConnectTimeout=8 "${BOARD_USER}@${BOARD_HOST}" "$@"; }
 
