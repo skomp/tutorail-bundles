@@ -135,3 +135,22 @@ optional_lessons:
     offer_at:
       - lessons/06-nat-with-nftables/LESSON.md
     offer_because: The main path is IPv4 only. If you want to give clients real IPv6, this optional lesson shows why you route a delegated prefix instead of NATing it.
+supplies:
+  - from: supplies/FLASH.md
+    to: FLASH.md
+    describe: "FLASH.md: how the board was flashed and first-booted, for reference"
+  - from: supplies/boot-overlay/
+    to: boot-overlay
+    describe: "First-boot overlay to copy onto the SD card: enables SSH and sets the Wi-Fi country early"
+  - from: supplies/board.env.template
+    to: board.env
+    describe: "board.env: how the checks and the deploy Makefile reach your board (fill in the values from lesson 00)"
+  - from: supplies/Makefile
+    to: Makefile
+    describe: "Makefile: 'make deploy' copies etc/ to the board and reloads the affected units"
+  - from: supplies/README.md
+    to: README.md
+    describe: README for this appliance-config repository and how to deploy it
+  - from: supplies/checks-lib.sh
+    to: checks/_lib.sh
+    describe: "Shared helper the check scripts source: reads board.env and provides the SSH helper"

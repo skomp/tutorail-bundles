@@ -7,42 +7,135 @@ validators: [board-reachable]
 
 ## Purpose
 
-TODO: why this lesson exists and what pressure motivates it. The first line of
-this section is what index.py shows, so make it one sentence.
+Learn to read the board's live network state as concrete, inspectable tables before you
+change any of it.
 
 ## Prerequisites
 
-TODO: what must already be true. Reference earlier lesson ids.
+Lesson `00-find-the-board` is complete: the board is powered and on the wired network, you
+can open an SSH session to it, and `board.env` holds a working `BOARD_HOST` and
+`BOARD_USER`. Everything in this lesson is run on the board, in that SSH session.
 
 ## Learning objectives
 
-- TODO
+- Read the interface list and tell an interface, an address and a link state apart
+- Read the routing table and predict which interface and next hop the kernel picks for a
+  given destination
+- Read the neighbour table and say what it records and what it does not
+- Point at the exact interface, address and route that carry your own SSH session
+- Identify the default route and the DHCP-assigned upstream address on `eth0`
 
 ## Theory
 
-TODO: the concepts the learner needs. Teach them; do not assume them.
+The board's networking is not a mystery the `ip` command performs; it is a set of tables the
+kernel already holds. The `ip` command is a client. It speaks to the kernel over an interface
+called netlink, asks a question ("what interfaces exist?", "what routes are installed?"), and
+prints the answer. Nothing you run in this lesson sends a single packet onto the wire. You are
+reading state, not making it. Keeping that distinction clear is the whole point of the lesson:
+when something is broken later, you will want to know whether the tables are wrong or the wire
+is, and these are the tables.
+
+There are three tables to read.
+
+The **interface list** is what you see with `ip addr` (or `ip link` for just the links). An
+*interface* is the kernel's handle on one way of sending and receiving packets: `lo` is the
+loopback that never leaves the board, `eth0` is the wired Ethernet port, and there will be more
+later. An *address* is an IP address bound to an interface, written with its prefix length, for
+example `192.168.1.50/24`. One interface can carry several addresses, or none. A *link state*
+is separate from any address: `ip link` shows flags like `UP` (the interface is administratively
+enabled) and a `state` such as `UP` or `DOWN` that reflects *carrier* — whether the driver sees
+a live connection, for Ethernet a cable plugged into something live at the other end. An interface
+can be administratively `UP` yet have no carrier, and it can have carrier yet no address. Read
+those three facts — does it exist, does it have carrier, does it have an address — as three
+separate questions.
+
+The **routing table** is what `ip route` prints, and it is how the kernel decides where a packet
+goes. Given a destination address, the kernel finds the most specific matching route — the one
+with the longest prefix that contains the destination — and that route names the outgoing
+interface and, when the destination is not directly attached, the *next hop* (a `via` address) to
+hand the packet to. A route with no `via`, marked something like `192.168.1.0/24 dev eth0`, is a
+*directly-connected* route: those destinations are on the same link, reachable without a
+gateway. The **default route**, written `default via <gateway> dev <iface>`, is the least
+specific route of all; it matches every destination that nothing more specific matched, and it is
+how the board reaches the wider internet. Routes also often carry a `src` field: that is the
+source address the kernel will stamp on packets it originates out of that route, chosen from the
+outgoing interface's addresses. `src` is about packets the board itself sends; it is not a filter
+on what may arrive.
+
+The **neighbour table** is what `ip neigh` shows, and it answers a different question again. To
+put a packet onto a shared link like Ethernet, the kernel needs the *link-layer* (MAC) address of
+the next machine on that link — the next hop from the route, or the destination itself if it is
+directly connected. It learns those MAC addresses with ARP (for IPv4) and caches them here, each
+entry an IP paired with a MAC and a state such as `REACHABLE`, `STALE` or `FAILED`. The neighbour
+table is a cache of who is physically next to you on a link. It does not decide where packets go;
+the routing table does that, and only then does the neighbour table supply the MAC for the hop the
+route already chose. Confusing the two is the classic beginner error, so keep them apart: route
+first (which interface, which next hop), neighbour second (what is that next hop's MAC).
+
+Now make it concrete with the session you are sitting in. Your SSH connection arrived on some
+interface and the board's replies leave by some route. You can read both off these tables rather
+than guessing.
 
 ## Concepts to teach
 
-TODO: named concepts the tutor must actually cover, not skip past.
+Interface, address (with prefix length), link state versus carrier, administrative up versus
+operational up. Routing table / FIB, longest-prefix match, directly-connected route, default
+route, next hop (`via`), `src` address. Neighbour / ARP table, MAC address, neighbour state.
+`ip` as a netlink client that reads kernel state rather than being the network itself. The
+address plan in this course (see `#address-plan`): `eth0` is the untrusted upstream and takes
+its address by DHCP, so its exact address is not known in advance and must be read, not assumed.
 
 ## Constraints
 
-TODO: what the learner's solution must and must not do.
+This is a read-only lesson. Inspect; do not configure, bring interfaces up or down, add or
+delete routes, or flush the neighbour table. Nothing is persisted to `etc/` because nothing is
+configured — there is no config to author yet. Every command runs on the board over your SSH
+session.
 
 ## Suggested progression
 
-TODO: a rough sequence of tasks. Not a script of conversational turns.
+Run `ip addr` and read off every interface, its carrier/link state, and any addresses. Then
+`ip link` alone to see the state flags without the address noise. Find `eth0`'s address and note
+that the board received it by DHCP from the LAN — write the actual value down; you will refer to
+it. Run `ip route` and locate the default route, the directly-connected route for `eth0`'s
+subnet, and the `src` address. Predict, before running anything else, which interface a packet to
+a public address (say `1.1.1.1`) would leave by, and which it would take to another host on
+`eth0`'s subnet; confirm your prediction with `ip route get 1.1.1.1` and `ip route get <a
+neighbour on the subnet>`. Now tie it to your own session: your SSH client's address is the
+destination for the board's replies — run `ip route get <your client's address>` to see the
+interface and route that carry your session, and check that it matches where you connected from.
+Finally run `ip neigh` and identify the entry for your next hop (the default gateway, or your SSH
+client if it is on the same link), noting its MAC and state. Re-confirm the board is still
+reachable with `bash checks/00-reach.sh`; since this lesson changes nothing, this only re-checks
+that SSH still works.
 
 ## Completion conditions
 
-TODO: checkable conditions. Be specific enough that "looks plausible" is not
-enough.
+From the live tables, and without guessing, the learner can:
+
+- Name the interface and route (`ip route get <client-address>`) that carry their own SSH
+  session, and explain why that interface is the one, in terms of the matching route rather than
+  merely "it has an address".
+- State `eth0`'s current IPv4 address and prefix, and say it came from DHCP and is not fixed.
+- Point at the default route (`default via … dev …`) and distinguish it from a
+  directly-connected route.
+- Explain what the neighbour table records (IP-to-MAC for hosts on a shared link, with a state)
+  and why it is consulted only after the routing table has chosen a next hop.
+- Confirm `bash checks/00-reach.sh` still passes, understanding it merely re-confirms SSH because
+  this lesson changed no state.
 
 ## On completion, persist
 
-TODO: what to record in the instance's DESIGN.md or STATE.md.
+Nothing is written to `etc/`. Record in the instance's `STATE.md` that the learner can read the
+interface, routing and neighbour tables, that they have identified `eth0`'s DHCP-assigned upstream
+address and prefix (note the value, marking that it may change on the next lease) and the board's
+default route, and that they can name the interface and route carrying their SSH session.
 
 ## Optional deeper paths
 
-TODO: material available if the learner asks. Not required.
+Add `-s` to `ip -s link` to see per-interface packet and error counters. Read the other routing
+tables with `ip route show table all`, and see how the kernel chooses among tables with
+`ip rule`. Watch the neighbour table change: `ip neigh` before and after reaching a new host on
+the subnet, and observe entries age from `REACHABLE` to `STALE`. Compare `ip route get` for a
+directly-connected destination (no `via`) against a remote one (via the gateway) and read the
+difference in the output.
