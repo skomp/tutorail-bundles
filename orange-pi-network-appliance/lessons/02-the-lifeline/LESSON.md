@@ -33,8 +33,9 @@ serial-terminal application on it. The `bluez` stack and its command-line tools
 - Explain what a serial getty is, and how binding one to an rfcomm device yields a login
   shell over Bluetooth
 - Pair a controller with the board over `bluetoothctl` and advertise the Serial Port Profile
-- Bind an rfcomm device on the board and run a getty on it, live, then connect to it and log
-  in from the controller
+- Bind an rfcomm device, discover why `serial-getty@rfcomm0` will not start against it, and
+  activate the getty with a udev rule — distinguishing a `/dev` node from a systemd device
+  unit — then connect and log in from the controller
 - Persist the console as a systemd unit so it survives a reboot
 - Justify why this recovery path keeps working when the routing table is wrong and the
   firewall is dropping everything
@@ -60,6 +61,34 @@ runs a login prompt on `/dev/ttyS0`. Point the same mechanism at an rfcomm devic
 getty on `/dev/rfcomm0` — and anything that opens that RFCOMM link over Bluetooth gets a
 login prompt and, after authenticating, a real shell on the board.
 
+But pointing a getty at `/dev/rfcomm0` is not as simple as starting `serial-getty@rfcomm0`,
+and meeting the failure is the point of the exercise. `serial-getty@.service` declares
+`BindsTo=dev-%i.device`: it starts only once systemd has a *device unit* for that tty, and
+stops when the device goes away. The trap is that a `/dev` node is **not** a systemd device
+unit. systemd creates a `dev-….device` unit only for a udev device tagged `systemd`, and the
+stock rules tag `ttyS*`, `ttyAMA*` and `ttyUSB*` — never `rfcomm*`. So `/dev/rfcomm0` can
+exist and be perfectly usable while `dev-rfcomm0.device` never activates, and
+`systemctl start serial-getty@rfcomm0` times out on that dependency.
+
+The fix is a **udev rule**, and since this course does not assume you have written one, here
+is what a rule is. *udev* is the daemon that reacts to the kernel's device events: whenever a
+device appears, changes or goes away, the kernel emits an event (`add`, `change`, `move`,
+`remove`) and udev runs its rules against it. A rule is one line of comma-separated *keys*.
+Keys written with `==` are **match** conditions — the rule fires only if every one of them
+matches the event's device; keys written with `=`, `+=` or `:=` are **assignments** that take
+effect when it does. Four keys carry this job: `SUBSYSTEM` and `KERNEL` match *which* device
+this is; `TAG+="systemd"` tells systemd to mind the device, which is the assignment that makes
+the `.device` unit exist at all; and `ENV{SYSTEMD_WANTS}="…"` names a unit for systemd to
+start when the device appears. Rules live in files under `/etc/udev/rules.d/`, read in
+filename order (a numeric prefix like `99-` decides when yours runs), and udev re-reads them
+after `udevadm control --reload`. Two tools let you write a rule by looking rather than
+guessing: `udevadm monitor` prints events live as you connect, and `udevadm info /dev/rfcomm0`
+(add `--attribute-walk` for the full set) prints the exact `SUBSYSTEM`, `KERNEL` and
+attributes you can match on. You will use both to build the rule yourself.
+
+With such a rule tagging the rfcomm device `systemd` and wanting the getty, `BindsTo=` finally
+works *for* you: the getty starts the moment the node appears and stops cleanly on hangup.
+
 Now the reason this is the *recovery* path and not just another way in. The chain is radio →
 SPP → RFCOMM character device → getty → `login` → shell. Not one link in that chain consults
 an IP address, a route, an interface, or the firewall. When lesson 06 gives you a wrong route
@@ -78,7 +107,12 @@ link carrying Ethernet frames (named here, built in lesson 07) so the two never 
 pairing, trust and bonding in `bluetoothctl` (discoverable, pairable, paired, trusted);
 the SDP service record and why SPP must be *advertised* before a controller can find it to
 connect; getty as the owner of a terminal device and `serial-getty@.service` as its
-systemd template; binding a getty to an rfcomm device to get a shell over Bluetooth; and the
+systemd template; why a `/dev` node is not a systemd `.device` unit and how `serial-getty@`'s
+`BindsTo=` depends on the latter; udev as the device-event daemon and the anatomy of a udev
+rule (match keys with `==`, assignments with `+=`, `TAG+="systemd"`, `ENV{SYSTEMD_WANTS}`),
+placed under `/etc/udev/rules.d/` and reloaded with `udevadm control --reload`, with
+`udevadm monitor` and `udevadm info` to write it by looking; binding a getty to an rfcomm
+device this way to get a shell over Bluetooth; and the
 independence of this whole chain from the IP stack, routes and the firewall.
 
 ## Constraints
@@ -114,18 +148,32 @@ and bind a device to listen for incoming SPP connections: `rfcomm bind` / `rfcom
 attach `/dev/rfcomm0`. Check that the device node appears and, where available, that
 `sdptool browse local` lists a serial port service.
 
-Run a getty on that device, live: `systemctl start serial-getty@rfcomm0`. From the controller,
-open the paired serial port in your terminal application and confirm you are met by the
-board's login prompt and, after logging in, a shell. If the connection opens but shows no
-prompt, the getty is not actually bound to that device — a link with no login is the second
-classic failure, and it looks like success until you notice nothing greets you.
+Now try to run a getty the obvious way, and watch it fail: `systemctl start
+serial-getty@rfcomm0` returns `Timed out waiting for device dev-rfcomm0.device` and fails with
+result `dependency`, even though `/dev/rfcomm0` is present and openable. Diagnose it against
+the theory above before fixing it — no `systemd` tag on the rfcomm device means no
+`dev-rfcomm0.device` unit, and the getty's `BindsTo=` has nothing to bind to.
 
-With it working live, persist it. Author the unit(s) into `etc/` so the board recreates this
-on boot: enable `serial-getty@rfcomm0`, and add whatever your setup needs to power the
-controller, re-advertise SPP and re-bind the rfcomm device before the getty starts (a small
-`rfcomm-bind` service, or the equivalent in your unit). Order it so it does **not** wait on
-any network target — it must come up whether or not the IP stack does. Deploy with
-`make deploy` and reboot the board to prove the console returns on its own.
+Now write the udev rule that fixes it, and build it by looking rather than by pasting. Run
+`udevadm monitor` and open the link so you see the event: `add /devices/virtual/tty/rfcomm0
+(tty)`, followed a moment later by a `move` as the device is re-parented — so match on stable
+keys, not that transient path. Read the device's match keys with `udevadm info /dev/rfcomm0`.
+Then compose a rule in a `99-`-prefixed file under `/etc/udev/rules.d/`: match the rfcomm tty
+by its `SUBSYSTEM` and `KERNEL`, tag it with `TAG+="systemd"`, and start its getty with
+`ENV{SYSTEMD_WANTS}="serial-getty@%k.service"` (`%k` expands to the kernel name, `rfcomm0`).
+Reload with `udevadm control --reload`, reconnect from the controller, and confirm the getty
+now starts on its own as the node appears. Check the tag actually took with
+`udevadm info /dev/rfcomm0 | grep -i systemd`. Then open the paired serial port and confirm
+the login prompt and, after logging in, a shell.
+
+With it working live, persist it into `etc/`. Two pieces plus the udev rule you just wrote:
+the rule itself (under `etc/udev/rules.d/`), and a small service that makes the rfcomm node
+exist on boot in the first place — power the controller as needed, re-advertise SPP, and
+`rfcomm listen`/bind `/dev/rfcomm0` (an `rfcomm-bind` service, or the equivalent in your unit).
+You do **not** statically enable `serial-getty@rfcomm0`: the udev rule activates it whenever
+the node appears, which is exactly the behaviour you want. Order the bind service so it does
+**not** wait on any network target — the lifeline must come up whether or not the IP stack
+does. Deploy with `make deploy` and reboot the board to prove the console returns on its own.
 
 ## Completion conditions
 
@@ -138,15 +186,19 @@ running `serial-getty@rfcommN` or an rfcomm-bind service), and the Bluetooth con
 powered. Treat a green check as necessary but not sufficient: it confirms the unit is up, and
 the unplugged-Ethernet login confirms the unit does what it is for.
 
-The console survives a reboot: after `make deploy` and a power cycle, the getty is running and
-the controller can reconnect without you re-issuing anything by hand. You can state, in one
-sentence, why this path keeps working when a route is wrong or the firewall drops all input.
+The console survives a reboot: after `make deploy` and a power cycle, the udev rule and the
+bind service are in place, and reconnecting from the controller brings up the login prompt on
+its own — the getty is activated by the rule when the rfcomm node appears, with nothing
+re-issued by hand. You can state, in one sentence, why this path keeps working when a route is
+wrong or the firewall drops all input; and you can explain why `systemctl start
+serial-getty@rfcomm0` failed before the rule and works through it after.
 
 ## On completion, persist
 
 Record in the instance state (`STATE.md`) that the lifeline is up: the controller's MAC that
-is paired and trusted, the rfcomm device and getty unit in use, and that the console has been
-verified with Ethernet unplugged and confirmed to survive a reboot.
+is paired and trusted, the rfcomm device, the udev rule that activates the getty, the bind
+service in use, and that the console has been verified with Ethernet unplugged and confirmed
+to survive a reboot.
 
 Add a note to the instance `DESIGN.md` under the recovery-invariant decision: the recovery
 path is a Bluetooth *serial* console (SPP/RFCOMM, not PAN) and must stay IP-independent — no
