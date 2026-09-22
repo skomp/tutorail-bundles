@@ -185,8 +185,6 @@ ARP, SSH, the reply traffic — until you narrow it to one host and port.
    interface's address on `wlan0`) and see it never appear; run an unfiltered
    `tcpdump -i "$WAN_IF"` briefly to feel the noise, then re-apply the filter and
    watch the signal return.
-10. Run `bash checks/opt-capture.sh` to confirm the tooling captures traffic on
-    `wlan0`.
 
 ## Completion conditions
 
@@ -204,7 +202,7 @@ ARP, SSH, the reply traffic — until you narrow it to one host and port.
   the filter selected.
 - The learner connects the two captures back to `conntrack`/`masquerade` from
   lesson 06: these are the two ends of the flow conntrack tracks.
-- `bash checks/opt-capture.sh` passes. It confirms `tcpdump` captures traffic on
+- The `capture-works` validator passes. It confirms `tcpdump` captures traffic on
   `wlan0` on the box.
 - Nothing under `etc/` was changed and nothing was deployed.
 

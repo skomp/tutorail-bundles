@@ -255,7 +255,7 @@ Installing packages is your job, not the tutor's.
 - The forwarding sysctl, the networkd prefix-delegation/assignment, and the RA
   config are persisted into `etc/` and deployed with `make deploy`, and a client
   still gets a global address and reaches an IPv6 host after the deploy.
-- `bash checks/opt-ipv6.sh` passes. It confirms IPv6 forwarding is on, that no IPv6
+- The `v6-routes` validator passes. It confirms IPv6 forwarding is on, that no IPv6
   masquerade rule is present, and that RAs are configured on `wlan0`; and if
   `CLIENT_HOST` (and `CLIENT_USER`) are set in `board.env`, it also drives a real
   client to confirm it has a global IPv6 address and reaches an IPv6 host. Set

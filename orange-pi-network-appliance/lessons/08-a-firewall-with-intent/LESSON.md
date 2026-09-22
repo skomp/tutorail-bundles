@@ -250,7 +250,7 @@ moving on. Do not author the file first and load it blind.
 - The lesson-06 `nat` table is still present and NAT still works.
 - The policy is persisted in `etc/nftables.conf` and applied with `make deploy`,
   and the deployed ruleset matches what you tested live.
-- `bash checks/08-firewall.sh` passes. It confirms both `input` and `forward` are
+- The `firewall-policy` validator passes. It confirms both `input` and `forward` are
   default-drop with `established,related` accepted.
 
 ## On completion, persist

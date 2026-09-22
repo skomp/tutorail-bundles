@@ -185,9 +185,9 @@ in the repo that deploys and runs, and a `wlan0` that comes up on `192.168.4.1/2
   route.
 - `etc/hostapd/hostapd.conf` exists in the repo with the keys you proved live, and
   `make deploy` applies it.
-- `bash checks/03-ap.sh` passes — it SSHes to the board and confirms hostapd is running and
-  `wlan0` is in AP mode. Run it, and confirm the association separately by hand, because the
-  check verifies the radio, not that a real client joined.
+- The `ap-beaconing` validator passes — it SSHes to the board and confirms hostapd is running
+  and `wlan0` is in AP mode. Confirm the association separately by hand, because the check
+  verifies the radio, not that a real client joined.
 
 ## On completion, persist
 

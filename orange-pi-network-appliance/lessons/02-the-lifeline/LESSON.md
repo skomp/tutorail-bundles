@@ -133,8 +133,7 @@ With **Ethernet unplugged**, you open a serial terminal from your paired control
 login prompt on the board, log in, and run a command in the resulting shell. This by-hand
 test with the cable out is the real proof — it demonstrates the path needs no IP.
 
-Running `bash checks/02-lifeline.sh` reports success. The script (validator `lifeline-up`)
-SSHes to the board and confirms two things: a serial getty is bound to an rfcomm device (a
+The `lifeline-up` validator passes. It SSHes to the board and confirms two things: a serial getty is bound to an rfcomm device (a
 running `serial-getty@rfcommN` or an rfcomm-bind service), and the Bluetooth controller is
 powered. Treat a green check as necessary but not sufficient: it confirms the unit is up, and
 the unplugged-Ethernet login confirms the unit does what it is for.

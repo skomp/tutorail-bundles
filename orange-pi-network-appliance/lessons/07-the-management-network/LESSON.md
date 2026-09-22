@@ -201,10 +201,10 @@ to prove the management network returns.
   admin access there).
 - You can state, in one sentence, why PAN is convenience management and the lesson-02 serial
   console is the lifeline — and the serial console still works.
-- `bash checks/07-mgmt.sh` passes — it SSHes to the board and confirms `bnep0` has
-  `192.168.44.1` and that the management subnet is not NATed. Run it, and confirm the two
-  by-hand facts separately (SSH over PAN reaches admin; a Wi-Fi client cannot), because the
-  script checks the interface and the ruleset, not that the roles behave for a real client.
+- The `mgmt-reachable` validator passes — it SSHes to the board and confirms `bnep0` has
+  `192.168.44.1` and that the management subnet is not NATed. Confirm the two by-hand facts
+  separately (SSH over PAN reaches admin; a Wi-Fi client cannot), because the validator checks
+  the interface and the ruleset, not that the roles behave for a real client.
 - The management network survives a reboot: after `make deploy` and a power cycle, the NAP is
   served, `bnep0` comes up on `192.168.44.1/24`, and the laptop can reconnect without you
   re-issuing commands by hand.
