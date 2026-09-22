@@ -109,8 +109,8 @@ fix its permissions (`700` on `~/.ssh`, `600` on the file).
 
 You can open an SSH session to the board **without being asked for a password** — key
 authentication is installed — using the exact `BOARD_HOST` and `BOARD_USER` now in
-`board.env`. Running `bash checks/00-reach.sh` reports success: it opens a non-interactive
-(key-based) session, the same mechanism every later check uses. If it fails it now prints
+`board.env`. The `board-reachable` validator passes: it opens a non-interactive
+(key-based) session — the same mechanism every later check uses — and confirms the board answers. If it fails it now prints
 SSH's own error and names the cause — a password prompt means the key is not installed; a
 host-key error means you must accept the key for this exact `BOARD_HOST`; a connection error
 points back at `board.env`. You can also name which discovery method found the board (lease

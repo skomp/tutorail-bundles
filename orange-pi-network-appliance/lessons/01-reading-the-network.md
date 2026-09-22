@@ -121,9 +121,9 @@ Now record what you found, because every later lesson refers to the upstream by 
 check scripts and the deploy Makefile read — and leave `AP_IF=wlan0` unless your Wi-Fi adapter
 is named differently. Then, in this board session, `export WAN_IF=<name>` so the commands in
 later lessons that use `$WAN_IF` work as written (re-export it whenever you open a new session on
-the board, or add it to your shell profile). Re-confirm the board is still reachable with
-`bash checks/00-reach.sh`; since this lesson changes no board state, this only re-checks that
-SSH still works.
+the board, or add it to your shell profile). Nothing in this lesson changes the board, so the
+only thing to verify is that SSH still works — the `board-reachable` validator, unchanged from
+lesson 00.
 
 ## Completion conditions
 
@@ -141,8 +141,8 @@ From the live tables, and without guessing, the learner can:
   directly-connected route.
 - Explain what the neighbour table records (IP-to-MAC for hosts on a shared link, with a state)
   and why it is consulted only after the routing table has chosen a next hop.
-- Confirm `bash checks/00-reach.sh` still passes, understanding it merely re-confirms SSH because
-  this lesson changed no state.
+- The `board-reachable` validator still passes — it merely re-confirms SSH, because this lesson
+  changed no state.
 
 ## On completion, persist
 

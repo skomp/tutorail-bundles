@@ -224,9 +224,9 @@ the repo that deploys and serves.
   `192.168.4.1`.
 - `etc/dnsmasq.conf` (or `etc/dnsmasq.d/appliance.conf`) exists in the repo with the directives
   you proved live, and `make deploy` applies it.
-- `bash checks/04-lease.sh` passes — it SSHes to the board and confirms dnsmasq is running and a
-  lease has been issued on the AP subnet. **Associate a client to the AP first**, so there is a
-  lease for the check to find, then run it.
+- The `lease-issued` validator passes — it SSHes to the board and confirms dnsmasq is running
+  and a lease has been issued on the AP subnet. **Associate a client to the AP first**, so there
+  is a lease for the check to find.
 
 ## On completion, persist
 

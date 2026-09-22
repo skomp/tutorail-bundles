@@ -177,9 +177,6 @@ without rebooting the whole board — `sysctl --system` reloads the `sysctl.d` f
 confirm the value is still `1`. If you want the full proof, reboot the board and check that
 forwarding comes back up on its own.
 
-Finally, run `bash checks/05-forward.sh`, which SSHes to the board and confirms
-`net.ipv4.ip_forward` is `1`.
-
 ## Completion conditions
 
 - `net.ipv4.ip_forward` reads `1` live (`sysctl net.ipv4.ip_forward`), enabled by you with
@@ -195,7 +192,7 @@ Finally, run `bash checks/05-forward.sh`, which SSHes to the board and confirms
   `make deploy` applies it; the setting survives `sysctl --system` (and a reboot).
 - You added **no** NAT, no nftables rule, and changed no address or route to force the reply
   back. The client still has no internet — that is the expected end state.
-- `bash checks/05-forward.sh` passes — it confirms `net.ipv4.ip_forward` is `1` on the board.
+- The `forwarding-on` validator passes — it confirms `net.ipv4.ip_forward` is `1` on the board.
 
 ## On completion, persist
 

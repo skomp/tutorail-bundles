@@ -259,8 +259,8 @@ interfaces up or down by hand) and fights the persistence you built in lesson 09
   09's persistence; the box still comes back correctly on a cold boot.
 - The reactor is persisted into `etc/` and deployed with `make deploy`, and the
   upstream still follows a replug after the deploy.
-- `bash checks/10-upstream.sh` passes. It confirms the upstream (`$WAN_IF`) is a `networkd` DHCP
-  client and that a carrier-reacting mechanism — `networkd-dispatcher` or a custom
+- The `upstream-follows` validator passes. It confirms the upstream (`$WAN_IF`) is a `networkd`
+  DHCP client and that a carrier-reacting mechanism — `networkd-dispatcher` or a custom
   upstream unit — is present. The check cannot pull a cable for you, so after it
   passes, prove it for real by physically unplugging and replugging the upstream (`$WAN_IF`) and
   watching a client stay online.

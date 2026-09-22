@@ -176,12 +176,9 @@ deauth not at all, however strong its passphrase — PMF is a separate switch, a
 not it. Third, the compatibility trap: if you reach for `=2`, name the risk that an old client
 will be refused silently, and check for it rather than discovering it as a mystery outage later.
 
-Finally, run `bash checks/opt-deauth.sh`, which confirms hostapd has `ieee80211w` enabled in
-the deployed configuration.
-
 ## Completion conditions
 
-- `bash checks/opt-deauth.sh` passes — it confirms the deployed hostapd configuration has
+- The `deauth-observed` validator passes — it confirms the deployed hostapd configuration has
   `ieee80211w` enabled (PMF is on).
 - `etc/hostapd/hostapd.conf` in the repo contains the `ieee80211w` key you added (`1` or `2`),
   and the value on the board matches, applied through `make deploy` — not a live-only edit.

@@ -193,8 +193,6 @@ collect scans but to be able to explain every line one produces.
    filtered and what that means. If a result surprised you, find out why before
    you call the lesson done.
 
-8. **Run the check.** `bash checks/opt-scan.sh`.
-
 ## Completion conditions
 
 - You have enumerated the live hosts on `192.168.4.0/24` from the appliance,
@@ -209,7 +207,7 @@ collect scans but to be able to explain every line one produces.
   firewall (yours from lesson 08 counts).
 - Every scan you ran targeted `192.168.4.0/24` only; you did not scan the
   upstream interface (`$WAN_IF`) or any host you do not own, and you can state why that limit holds.
-- `bash checks/opt-scan.sh` passes. It confirms a scan run from the appliance
+- The `scan-runs` validator passes. It confirms a scan run from the appliance
   discovers a host on the AP subnet — so associate a client first, or the check
   has nothing to find.
 

@@ -69,6 +69,15 @@ The learner's "artifact" is often running kernel and daemon state, not a file, s
 checked by scripts that inspect **live** state on the board over SSH — a written ruleset
 that is never loaded must not pass.
 
+**Validators are the tutor's to run, never the learner's** (runner-protocol §14;
+`advance_on: validated-evidence-only`). So a lesson body names the *validator* — `board-reachable`,
+`nat-live` — and **never a runnable command string** like `bash checks/00-reach.sh`: a
+copy-pasteable command invites the tutor to hand the run to the learner, whose result is an
+assertion, not evidence, and a validator name resolves only through the `validators` map, which
+is the tutor's step. The lesson still says *what* is verified. By-hand learner tests — the
+unplugged-Ethernet login, associating a client, the reboot, the unplug/replug — stay imperative;
+only the validator invocation is withheld. *(Added 2026-09-22 after a live run — see `#16`.)*
+
 ```yaml
 workspace_kind: new-repository        # an appliance-config repo the learner builds up
 ownership_policy: tutor-must-not-edit-learner-owned

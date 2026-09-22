@@ -244,8 +244,8 @@ to read the logs and fix it — so verify it survives too, not just the AP and N
 7. Deploy the whole configuration with `make deploy` and reconcile the running
    system without rebooting yet: `networkctl status` for the addresses,
    `systemctl status` for the units, a client still reaching the internet.
-8. Run `bash checks/09-persist.sh` to confirm the units are enabled and the
-   `.network` files are present — the pre-flight before the real test.
+8. Before the real test, the `reboot-survives` validator confirms the units are enabled and
+   the `.network` files are present — the pre-flight.
 9. Instructive failures to surface if they have not appeared: a `.network` file
    fighting a leftover manual address on the same interface; dnsmasq ordered
    before the AP address and failing to bind; the nftables ruleset absent for a
@@ -257,7 +257,7 @@ to read the logs and fix it — so verify it survives too, not just the AP and N
 
 ## Completion conditions
 
-- `bash checks/09-persist.sh` passes: `systemd-networkd`, hostapd, dnsmasq and
+- The `reboot-survives` validator passes: `systemd-networkd`, hostapd, dnsmasq and
   nftables are all *enabled* (not merely running), and `.network` files are present
   under `/etc/systemd/network/` on the board.
 - `systemd-networkd` is the only active control plane; no NetworkManager,
@@ -271,8 +271,8 @@ to read the logs and fix it — so verify it survives too, not just the AP and N
 - The configuration was deployed through `etc/` with `make deploy`; the working
   state on the board is what the repo installs, not a hand-edit.
 - After an **actual reboot** with no intervention, the appliance returns fully:
-  re-running `bash checks/03-ap.sh`, `bash checks/04-lease.sh` and
-  `bash checks/06-nat.sh` all pass — the AP beacons, a client gets a
+  the `ap-beaconing`, `lease-issued` and `nat-live` validators all pass again — the AP beacons,
+  a client gets a
   `192.168.4.0/24` lease with the box as gateway/resolver, and a client reaches
   the internet through NAT.
 - After the same reboot, the serial lifeline is up on its own and you can log in

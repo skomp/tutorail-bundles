@@ -198,7 +198,7 @@ address. Match on the client source subnet, the outgoing interface
   rewritten to and why, and what conntrack does for the reply.
 - The rule is persisted into `etc/` and deployed with `make deploy`, and a client
   still reaches the internet after the deploy.
-- `bash checks/06-nat.sh` passes. It confirms the masquerade rule is loaded on the
+- The `nat-live` validator passes. It confirms the masquerade rule is loaded on the
   box; and if `CLIENT_HOST` (and `CLIENT_USER`) are set in `board.env`, it also
   drives a real client to prove it reaches `1.1.1.1` end to end. Set
   `CLIENT_HOST`/`CLIENT_USER` in `board.env` to get that full client-side test

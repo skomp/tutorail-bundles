@@ -244,7 +244,7 @@ Build the redirect live and watch each stage take effect before persisting.
   for everything you did not redirect.
 - The redirect (and optionally the responder unit) is persisted under `etc/` and
   applied with `make deploy`, and the deployed box behaves like your live tests.
-- `bash checks/opt-portal.sh` passes. It confirms the client's port 80 is
+- The `portal-redirects` validator passes. It confirms the client's port 80 is
   redirected and a splash responder is listening.
 
 ## On completion, persist
