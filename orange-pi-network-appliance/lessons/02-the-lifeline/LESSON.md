@@ -184,26 +184,44 @@ configuration. **If you do not see those symptoms, your kernel is fine — skip 
 step. The fix below turns off a safety measure, and there is no reason to apply it to a board
 that does not need it.**
 
-If you did see them: the cause is that `serial-getty@.service` sets `TTYVHangup=yes`, so systemd
-calls `vhangup()` on the tty before starting the login program, and on this driver that path
-(`rfcomm_tty_cleanup`) is where the underflow lives. Turn that one option off, and only for the
-rfcomm instance, with a drop-in at `/etc/systemd/system/serial-getty@rfcomm0.service.d/override.conf`:
+If you did see them: the immediate cause is that `serial-getty@.service` sets `TTYVHangup=yes`,
+so systemd calls `vhangup()` on the tty before starting the login program, and on this driver
+that path (`rfcomm_tty_cleanup`) is *one* way into the underflow. Turning that option off — only
+for the rfcomm instance — is a **partial mitigation, not a fix.** Write it as a drop-in at
+`/etc/systemd/system/serial-getty@rfcomm0.service.d/override.conf`:
 
     [Service]
     TTYVHangup=no
 
 Make it an **instance** override (`serial-getty@rfcomm0.service.d`), never the template
 (`serial-getty@.service.d`) — real serial consoles want `vhangup` and should keep it; only the
-rfcomm instance opts out. Choose it knowing the cost: without `vhangup`, a process left over
-from a previous session can survive into the next connection rather than being cleared — an
-acceptable trade for a recovery console on a board with this bug, but a real one.
-`systemctl daemon-reload`, reconnect, and confirm a stable login. Two things about recovering
-from a hit, because it is confusing on the way out: **once the bug has fired, reboot before you
-retry** — the leaked reference wedges the device (`rfcomm release` reports `Operation already in
-progress` with nothing holding the node, and the module will not unload), so retrying without a
-reboot only produces more inexplicable failures; and **after that reboot, re-advertise SPP and
-re-bind the listener**, because at this point in the lesson they are live-only and a reboot
-clears them.
+rfcomm instance opts out. `systemctl daemon-reload` and reconnect.
+
+What it buys, and what it does not: with the drop-in the getty stays up instead of dying in
+milliseconds, and you can connect and log in over Bluetooth — real progress. But `vhangup()` is
+only one entry into the buggy cleanup path. When `login` execs and the original descriptors
+close, the ordinary tty-release path runs and reaches the *same* underflow, so on an affected
+kernel the same warnings fire again a few seconds after login and the session drops. The drop-in
+moves the failure from connect time to login time; it does not remove it. So do not read the
+login prompt as success, and do not blame your own configuration when the session then drops —
+it is the same kernel bug on its other path. (There is also a cost even where it helps: without
+`vhangup`, a stale process from a previous session can survive into the next connection.)
+
+**If you cannot hold a logged-in shell on this kernel, do not get stuck here.** This lesson's
+completion condition — log in over the console with Ethernet unplugged and run a command — may
+not be reachable until the kernel is fixed, and that is the kernel's failure, not yours. Record
+where you got to (the console delivers a login; the session drops on the underflow) and the
+kernel version, and move on: the later lessons do not depend on the console staying up, and you
+can come back. The only known complete route is a kernel without the defect — if a fixed build
+exists for this board, upgrading to it is the real fix, but treat any specific version as
+unverified until you have watched a session stay up on it.
+
+Two things about recovering from a hit, because it is confusing on the way out: **once the bug
+has fired, reboot before you retry** — the leaked reference wedges the device (`rfcomm release`
+reports `Operation already in progress` with nothing holding the node, and the module will not
+unload), so retrying without a reboot only produces more inexplicable failures; and **after that
+reboot, re-advertise SPP and re-bind the listener**, because at this point in the lesson they are
+live-only and a reboot clears them.
 
 With it working live, persist it into `etc/`. Two pieces plus the udev rule you just wrote:
 the rule itself (under `etc/udev/rules.d/`), and a small service that makes the rfcomm node
@@ -219,6 +237,13 @@ does. Deploy with `make deploy` and reboot the board to prove the console return
 With **Ethernet unplugged**, you open a serial terminal from your paired controller and get a
 login prompt on the board, log in, and run a command in the resulting shell. This by-hand
 test with the cable out is the real proof — it demonstrates the path needs no IP.
+
+The exception is a kernel hit by the rfcomm bug above: there the console delivers a login but
+the session drops seconds later, and this condition is not reachable until the kernel is fixed.
+That is the kernel's failure, not your work. If you are on such a kernel, the lesson is complete
+when you have the getty activating on connect and a login prompt delivered, have recorded that
+the session cannot yet be held (with the kernel version), and understand what a fixed kernel
+would change — then carry on, since nothing later needs the console to stay up.
 
 The `lifeline-up` validator passes. It SSHes to the board and confirms two things: a serial getty is bound to an rfcomm device (a
 running `serial-getty@rfcommN` or an rfcomm-bind service), and the Bluetooth controller is
