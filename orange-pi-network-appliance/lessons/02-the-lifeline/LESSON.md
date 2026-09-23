@@ -166,6 +166,45 @@ now starts on its own as the node appears. Check the tag actually took with
 `udevadm info /dev/rfcomm0 | grep -i systemd`. Then open the paired serial port and confirm
 the login prompt and, after logging in, a shell.
 
+**First connections often need a second try.** It is common for the controller's first attempt
+to time out and a retry to succeed — in `udevadm monitor` you see an `hci0` add/remove with no
+`rfcomm0` appearing, then a retry that creates the node. That is the phone's radio warming up,
+not a fault in your setup. A recovery console gets used under stress, so build the habit: if the
+first attempt does not take, just try again.
+
+**If the getty starts and then dies within a second, you may have hit a kernel bug — check
+before you work around it.** On some builds the rfcomm tty driver has a refcount bug, and the
+getty is torn down almost immediately on the first connection. The decisive check is
+`dmesg -T | grep -iE 'refcount|rfcomm_tty'`: on an affected board it prints
+`refcount_t: underflow; use-after-free` with `rfcomm_tty_cleanup` in the trace, and
+`/proc/sys/kernel/tainted` has gone non-zero; corroborating it, `systemctl status
+serial-getty@rfcomm0` shows the unit stopped with `signal=TERM` a fraction of a second after it
+started. This is known on Armbian `6.18.52-current-sunxi64`; it is the kernel's fault, not your
+configuration. **If you do not see those symptoms, your kernel is fine — skip the rest of this
+step. The fix below turns off a safety measure, and there is no reason to apply it to a board
+that does not need it.**
+
+If you did see them: the cause is that `serial-getty@.service` sets `TTYVHangup=yes`, so systemd
+calls `vhangup()` on the tty before starting the login program, and on this driver that path
+(`rfcomm_tty_cleanup`) is where the underflow lives. Turn that one option off, and only for the
+rfcomm instance, with a drop-in at `/etc/systemd/system/serial-getty@rfcomm0.service.d/override.conf`:
+
+    [Service]
+    TTYVHangup=no
+
+Make it an **instance** override (`serial-getty@rfcomm0.service.d`), never the template
+(`serial-getty@.service.d`) — real serial consoles want `vhangup` and should keep it; only the
+rfcomm instance opts out. Choose it knowing the cost: without `vhangup`, a process left over
+from a previous session can survive into the next connection rather than being cleared — an
+acceptable trade for a recovery console on a board with this bug, but a real one.
+`systemctl daemon-reload`, reconnect, and confirm a stable login. Two things about recovering
+from a hit, because it is confusing on the way out: **once the bug has fired, reboot before you
+retry** — the leaked reference wedges the device (`rfcomm release` reports `Operation already in
+progress` with nothing holding the node, and the module will not unload), so retrying without a
+reboot only produces more inexplicable failures; and **after that reboot, re-advertise SPP and
+re-bind the listener**, because at this point in the lesson they are live-only and a reboot
+clears them.
+
 With it working live, persist it into `etc/`. Two pieces plus the udev rule you just wrote:
 the rule itself (under `etc/udev/rules.d/`), and a small service that makes the rfcomm node
 exist on boot in the first place — power the controller as needed, re-advertise SPP, and
