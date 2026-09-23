@@ -197,15 +197,19 @@ Make it an **instance** override (`serial-getty@rfcomm0.service.d`), never the t
 (`serial-getty@.service.d`) — real serial consoles want `vhangup` and should keep it; only the
 rfcomm instance opts out. `systemctl daemon-reload` and reconnect.
 
-What it buys, and what it does not: with the drop-in the getty stays up instead of dying in
-milliseconds, and you can connect and log in over Bluetooth — real progress. But `vhangup()` is
-only one entry into the buggy cleanup path. When `login` execs and the original descriptors
-close, the ordinary tty-release path runs and reaches the *same* underflow, so on an affected
-kernel the same warnings fire again a few seconds after login and the session drops. The drop-in
-moves the failure from connect time to login time; it does not remove it. So do not read the
-login prompt as success, and do not blame your own configuration when the session then drops —
-it is the same kernel bug on its other path. (There is also a cost even where it helps: without
-`vhangup`, a stale process from a previous session can survive into the next connection.)
+What it buys, and what it does not: with the drop-in the getty starts and holds an **idle login
+prompt** — `systemctl status` shows it up for minutes instead of the sub-second death without it
+— and the prompt reaches your controller. But on an affected kernel **entering a username kills
+the session.** That is the exact moment `agetty` hands the terminal to `login`, and the handover
+reaches the same underflow (the warnings fire with `rfcomm_tty_cleanup ← release_one_tty`, taint
+goes to 512, the device wedges). **A prompt is not a login — no shell is ever reached on this
+kernel.** The tell is sharp: `cat /dev/rfcomm0` (open and read, no session) stays stable for
+minutes, and an idle `agetty` prompt (tty opened, no exec) holds for ten minutes, but the exec
+of `login` fails every time. So the trigger is the terminal **handover** to another process, not
+opening the device and not the getty itself. Do not read the prompt as success, and do not blame
+your configuration when entering a username drops you — it is the kernel bug on the handover
+path. (There is also a cost even where the drop-in helps this far: without `vhangup`, a stale
+process from a previous session can survive into the next connection.)
 
 **If you cannot hold a logged-in shell on this kernel, do not get stuck here.** This lesson's
 completion condition — log in over the console with Ethernet unplugged and run a command — may
@@ -238,12 +242,13 @@ With **Ethernet unplugged**, you open a serial terminal from your paired control
 login prompt on the board, log in, and run a command in the resulting shell. This by-hand
 test with the cable out is the real proof — it demonstrates the path needs no IP.
 
-The exception is a kernel hit by the rfcomm bug above: there the console delivers a login but
-the session drops seconds later, and this condition is not reachable until the kernel is fixed.
-That is the kernel's failure, not your work. If you are on such a kernel, the lesson is complete
-when you have the getty activating on connect and a login prompt delivered, have recorded that
-the session cannot yet be held (with the kernel version), and understand what a fixed kernel
-would change — then carry on, since nothing later needs the console to stay up.
+The exception is a kernel hit by the rfcomm bug above: there the console delivers a login
+*prompt*, but entering a username drops the session at the `agetty`→`login` handover, so no shell
+is ever reached and this condition is **definitely unreachable** until the kernel is fixed — the
+kernel's failure, not your work. If you are on such a kernel, the lesson is complete when the
+getty activates on connect and delivers a prompt, you have recorded that a login cannot yet
+complete over this path (with the kernel version), and you understand what a fixed kernel would
+change — then carry on, since nothing later needs the console to stay up.
 
 The `lifeline-up` validator passes. It SSHes to the board and confirms two things: a serial getty is bound to an rfcomm device (a
 running `serial-getty@rfcommN` or an rfcomm-bind service), and the Bluetooth controller is
