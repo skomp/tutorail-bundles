@@ -21,8 +21,8 @@ tells you what the parts are.
 ## Prerequisites
 
 This is an optional lesson, offered around `08-templates-eat-the-macros`. It needs a
-function template of your own — the `read<T>()` that replaced the `read_u32` / `read_u16` /
-`read_u8` family — a project that builds a library, a binary and a test executable from
+function template of your own — the `read<T>()` that replaced the `read_u32` and `read_u8`
+pair — a project that builds a library, a binary and a test executable from
 `04-a-target-of-its-own`, and the ability to run the build and read its output. It uses no
 C++ feature the main path has not reached, and nothing on the main path depends on it.
 
@@ -87,9 +87,11 @@ The message is more informative than it looks. GCC and the GNU linker say
 `undefined reference to` followed by the mangled name; Clang on macOS says
 `Undefined symbols for architecture …`, then the symbol, then `referenced from:` and the
 object file. In both cases the symbol **contains the template arguments**, so it says exactly
-which instantiation was requested, and `c++filt` or `nm -C` over the object files will
-demangle it into something readable. Note the one thing it cannot tell you: there is no line
-number in the template, because no code was ever generated to have one.
+which instantiation was requested. Most current linkers print it already demangled, which is
+why it reads like a C++ signature rather than like `_ZN3png4readItEE…`; where you meet the
+raw form — `nm` over the object file shows it — `c++filt` or `nm -C` turns it back. Note
+the one thing it cannot tell you: there is no line number in the template, because no code
+was ever generated to have one.
 
 The deliberate version of the same mechanism is an **explicit instantiation definition**:
 telling the compiler in that `.cpp` to generate the specialisation for a named type whether

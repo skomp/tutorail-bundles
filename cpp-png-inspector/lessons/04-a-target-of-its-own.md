@@ -2,7 +2,7 @@
 id: 04-a-target-of-its-own
 title: A target of its own
 design_refs: [owning-and-borrowing]
-validators: [configure, build, tests]
+validators: [configure, build, tests, no-leak-on-error-path]
 ---
 
 ## Purpose
@@ -243,6 +243,15 @@ what you gave it and its bytes are what you put in, let it go out of scope, and 
 allocation counter balances. Return non-zero from `main` if any check failed. Register it
 with `add_test`.
 
+That test makes up its own bytes, which is why it needs no data file, and it is a perfectly
+good first test. The second one is not so lucky: write a test that reads `assets/basic.png`
+and give it the path rather than letting it guess, either by passing
+`${CMAKE_CURRENT_SOURCE_DIR}/assets/basic.png` to the test program as an argument from
+`add_test` or by setting `WORKING_DIRECTORY` and knowing what it is. Then prove it, because
+a path that happens to work from the project root proves nothing: run the suite again from
+somewhere else entirely — `ctest --test-dir <absolute path>/build` invoked from your home
+directory — and confirm it is still green.
+
 Run the suite — the `tests` check runs `ctest --test-dir build --output-on-failure` from the
 project root, which is the same thing as running `ctest` inside `build/`.
 
@@ -260,6 +269,9 @@ above about static libraries and replaced `operator new`.
 - `configure` passes.
 - `build` passes, and it builds both `pngdump` and the test executable.
 - `tests` passes: CTest runs at least one registered test and reports it green.
+- At least one test reads `assets/basic.png`, and it gets that path from the build rather
+  than from the directory it was run in: the suite is still green when CTest is invoked from
+  a working directory that is not the project root.
 - The suite is **demonstrably** real: with a deliberate break in the code under test, the
   learner has seen `tests` fail, and seen it pass again after restoring the code. A suite
   that has never been observed failing does not satisfy this lesson.

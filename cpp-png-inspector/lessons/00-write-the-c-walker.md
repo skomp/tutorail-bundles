@@ -10,8 +10,8 @@ validators: [configure, build, dumps-basic-png]
 Write the whole inspector in C — a program that reads a PNG into memory, walks its chunks
 and prints them — because every lesson after this one repairs something you wrote here.
 
-This is the longest lesson in the course and the only one that starts from nothing. It does
-three jobs at once: it re-establishes the `malloc`/`free` discipline you will be measured
+This is among the longest lessons in the course and the only one that starts from nothing. It
+does three jobs at once: it re-establishes the `malloc`/`free` discipline you will be measured
 against in `02-where-the-leaks-are`, it produces the program that lessons `01` through `12`
 take apart, and it teaches the smallest amount of CMake that will build anything at all.
 Nothing in it is C++. That is deliberate: you cannot be shown what a C++ feature repairs
@@ -30,6 +30,10 @@ Your workspace already contains four things the course supplies and you never ed
   it is one page and it is the only format reference you will need for twelve lessons.
 - `.gitignore` — which already ignores `build/`, for a reason that appears below.
 
+It also contains `CMakeLists.txt` — three commands, already written, because typing those
+three lines out is not what this lesson is for. Unlike the four above, that one is yours to
+change: `01-not-a-superset` and `04-a-target-of-its-own` both edit it.
+
 Everything else in the repository is yours to write.
 
 ## Learning objectives
@@ -40,8 +44,8 @@ Everything else in the repository is yours to write.
 - Walk a length-prefixed chunk sequence, advancing by the right number of bytes and refusing
   to read a byte the file does not contain
 - Produce output in a fixed shape that a script can diff, rather than output that reads well
-- Write a minimal `CMakeLists.txt` for a C executable, and configure and build it out of
-  source as two separate steps
+- Read the three-command `CMakeLists.txt` that builds a C executable, and configure and build
+  it out of source as two separate steps
 
 ## Theory
 
@@ -109,9 +113,9 @@ four are combined. That code depends on nothing about the machine running it. On
 you write it: an `unsigned char` promotes to `int` in an arithmetic expression, so shifting it
 left by twenty-four can push a bit into the sign bit of a 32-bit `int` — undefined behaviour,
 for lengths at or above `0x80000000`. Convert each byte to the unsigned 32-bit type *before*
-shifting it. Write yourself small helpers for a 32-bit and an 8-bit read; you will be deleting
-them in `08-templates-eat-the-macros`, and it will be more satisfying if there is a family of
-them to delete.
+shifting it. Write yourself small helpers for a 32-bit and an 8-bit read — PNG stores no
+number at any other width, so those two are the whole family — and you will be deleting both
+in `08-templates-eat-the-macros`, where one definition replaces them.
 
 **Walking the chunks.** From offset 8, a chunk is twelve bytes of framing — four of length,
 four of type, four of CRC — plus `length` bytes of data in the middle. So the next chunk
@@ -196,14 +200,16 @@ sees them, and the `CMakeCache.txt` left behind pins settings that will fight yo
 time you change something — including the language switch that is the whole of the next
 lesson.
 
-Your `CMakeLists.txt` needs three commands and is about eight lines long.
-`cmake_minimum_required` takes a `VERSION` and must come first, because it tells CMake which
-generation of its own behaviour to use. `project` names the project and takes a `LANGUAGES`
-list — today that list is `C`, and if you leave it out CMake assumes C and C++ and will look
-for a C++ compiler it does not need. `add_executable` takes the name of the target followed by
-the source files that make it. That target name is not cosmetic: the checks look for an
-executable called exactly `pngdump`, under `build/`, `build/Debug/` or `build/Release/`, so
-name the target `pngdump` and do not redirect the output anywhere else.
+Open the `CMakeLists.txt` the course put in your workspace. It is three commands long and
+there is nothing in it you cannot read today. `cmake_minimum_required` takes a `VERSION` and
+must come first, because it tells CMake which generation of its own behaviour to use.
+`project` names the project and takes a `LANGUAGES` list — today that list is `C`, and if it
+were left out CMake would assume C and C++ and look for a C++ compiler it does not need.
+`add_executable` takes the name of the target followed by the source files that make it, which
+is where `src/main.c` comes from: that path is the file you are about to write. The target
+name is not cosmetic either — the checks look for an executable called exactly `pngdump`,
+under `build/`, `build/Debug/` or `build/Release/`, so leave the target named `pngdump` and do
+not redirect the output anywhere else.
 
 ## Concepts to teach
 
@@ -256,10 +262,11 @@ concrete. Work out by hand, from the dump, what the three lines of output for th
 be before you write a line of code — you will then know whether your program is right without
 having to ask anyone.
 
-Build the skeleton first: `CMakeLists.txt`, a `src/` with a `main` that prints its argument
-and exits, then `cmake -S . -B build` and `cmake --build build`. Getting the two-step build
-working on a program that does nothing takes five minutes; getting it working while also
-debugging a parser does not. Confirm the binary is at `build/pngdump` and runs.
+Get the build working first: read the supplied `CMakeLists.txt`, write `src/main.c` as a
+`main` that prints its argument and exits, then run `cmake -S . -B build` and
+`cmake --build build`. Getting the two-step build working on a program that does nothing takes
+five minutes; getting it working while also debugging a parser does not. Confirm the binary is
+at `build/pngdump` and runs.
 
 Then read the file into memory: open in binary mode, find the size, allocate, read, check what
 you got, and print the size. Compare it with `wc -c assets/basic.png`. Free the buffer.
