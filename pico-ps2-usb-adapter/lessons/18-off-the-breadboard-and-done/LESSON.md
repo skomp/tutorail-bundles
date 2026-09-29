@@ -100,7 +100,8 @@ is still empty and easy to probe.
 **Plain perfboard** has isolated pads: no free connections, no cuts to forget, every
 net a wire you place deliberately. More work and fewer surprises, and its
 characteristic fault is a missing wire — a kinder failure, because an open circuit
-releases no smoke. The layout at `docs/perfboard-layout.md` is a stripboard layout, so
+releases no smoke. The layout at `docs/perfboard-layout.md` — shipped in this lesson's
+folder as `perfboard-layout.md` — is a stripboard layout, so
 if you take it as given, the cuts are the step to be careful about.
 
 ### The first open decision: module or discrete

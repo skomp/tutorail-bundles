@@ -204,7 +204,8 @@ do, and it is outside this course's scope by explicit decision.
 
 ### The rest of the translation table arrives now
 
-`include/ps2_set2_to_hid.h` is in your workspace. It is the complete scan code set 2 to HID
+`include/ps2_set2_to_hid.h` is in your workspace. The bundle ships it as
+`ps2_set2_to_hid.h` beside this lesson, and the runner places it when this lesson opens. It is the complete scan code set 2 to HID
 usage translation — every plain make code and every `0xE0`-extended one, with the HID usage ID
 and the usage name for each.
 

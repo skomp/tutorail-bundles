@@ -25,7 +25,9 @@ derivable — the framing bits, the parity sense, the clock edge that carries th
 clock period. One part of it is a convention that no trace can settle, and knowing *which*
 part, and why, is as valuable as the rest.
 
-The bundle ships a reference capture at `captures/model-m-keypress.sr`, already in your
+The bundle ships a reference capture at `captures/model-m-keypress.sr`, with
+`captures/README.md` beside it saying exactly how it was made — read that one first, because
+the trace is synthesized rather than taken off real hardware. Both are already in your
 workspace. It is there to compare against and to work from if your wiring is not ready. It is
 a synthesized reference, not a recording of a real keyboard. **Your own capture, off your own
 Model M, is the one that matters**, and it is the one the completion condition is about.

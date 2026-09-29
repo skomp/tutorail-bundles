@@ -45,7 +45,8 @@ that has sat there passively since lesson 01 does something because you told it 
 
 ### The command table is supplied
 
-`docs/ps2-commands.md` is in your workspace. It holds the PS/2 host-to-device command bytes and
+`docs/ps2-commands.md` is in your workspace. The bundle ships it as `ps2-commands.md`
+beside this lesson, and the runner places it for you. It holds the PS/2 host-to-device command bytes and
 the device's response codes: what `0xFF`, `0xED` and `0xF3` mean, what `0xFA`, `0xFE` and
 `0xAA` mean coming back, and which commands take a following argument byte.
 
