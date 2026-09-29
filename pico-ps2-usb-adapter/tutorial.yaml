@@ -229,3 +229,6 @@ supplies:
   - from: supplies/device.env.template
     to: device.env
     describe: "device.env: which serial port your debug console is on and which VID/PID your device will use - you fill these in during lesson 00"
+  - from: supplies/BOM.md
+    to: BOM.md
+    describe: The shopping list, with the exact part types this course assumes and why each one. Lead time is the thing you cannot compress, so read it first
