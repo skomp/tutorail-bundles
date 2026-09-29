@@ -3,6 +3,10 @@ id: 11-the-finished-tool
 title: The finished tool
 design_refs: []
 validators: []
+supplies:
+  - from: lessons/11-the-finished-tool/crc32.hpp
+    to: src/crc32.hpp
+    describe: "A CRC32 implementation, supplied: writing one teaches bit manipulation, not C++. Getting the byte range you hand it right is still yours"
 ---
 
 ## Purpose
