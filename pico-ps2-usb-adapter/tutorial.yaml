@@ -32,6 +32,7 @@ lessons:
   - lessons/12-the-hid-report-descriptor.md
   - lessons/13-your-first-keystroke.md
   - lessons/14-events-to-state/LESSON.md
+  - lessons/15-the-lock-leds.md
 
 workspace_kind: new-repository
 tutor_owned: [tutorial/STATE.md, tutorial/DESIGN.md]
