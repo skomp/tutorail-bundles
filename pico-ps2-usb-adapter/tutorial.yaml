@@ -192,3 +192,7 @@ optional_lessons:
     offer_at:
       - lessons/02-open-drain-and-pull-ups.md
     offer_because: You have just calculated an RC rise time for your pull-up. If you have an oscilloscope, you can go and look at the edge it actually produces, at two different pull-up values, and see why this is a trade-off rather than a lookup. It needs a scope; a logic analyser cannot show you this.
+  lessons/watch-the-enumeration.md:
+    offer_at:
+      - lessons/11-descriptors-you-write-yourself.md
+    offer_because: "You have just inferred the enumeration conversation from its results. You can watch it happen instead, as packets on the wire, and walk the request sequence your own device answered. This needs a Linux or Windows host: USB packet capture does not work on macOS."
