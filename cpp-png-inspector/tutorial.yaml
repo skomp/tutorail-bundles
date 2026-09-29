@@ -20,6 +20,7 @@ lessons:
   - lessons/01-not-a-superset.md
   - lessons/02-where-the-leaks-are.md
   - lessons/03-a-class-that-cleans-up.md
+  - lessons/04-a-target-of-its-own.md
 
 workspace_kind: new-repository
 tutor_owned: [tutorial/STATE.md, tutorial/DESIGN.md]
