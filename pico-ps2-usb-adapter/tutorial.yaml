@@ -235,3 +235,6 @@ supplies:
   - from: supplies/PINOUT.md
     to: docs/PINOUT.md
     describe: The pin assignment this course uses, and the mini-DIN-6 pinout drawn from both the plug side and the socket side so you cannot read it mirrored
+  - from: supplies/checks-console.py
+    to: checks/_console.py
+    describe: Shared helper the checks use to open your debug console and read its log lines
