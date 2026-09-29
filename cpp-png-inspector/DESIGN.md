@@ -27,8 +27,15 @@ Allocation is counted for the whole course by a counting wrapper the learner wri
 lesson 02: around `malloc` and `free` at first, and around `operator new` and
 `operator delete` from lesson 03 onward. It stays in the program to the end.
 
-It is the evidence for lessons 03, 05, 06, 10 and 12, and in lesson 10 it is what catches
-a missing virtual destructor — a leak with no visible symptom otherwise.
+It is the evidence for lessons 03, 05, 06, 10 and 12. In lesson 10 it is what catches a
+missing virtual destructor — a leak with no visible symptom otherwise — but only under a
+precondition that lesson has to arrange. Deleting a derived object through a non-virtual
+base destructor still makes exactly one deallocation call, so the counts balance and the
+counter sees nothing. The omission is observable only when the derived object owns a
+*further* heap allocation whose destructor never runs: that allocation is never released
+and the count goes positive. Lesson 10 therefore requires at least one handler to own heap
+state, and lesson 12 runs the same experiment again once `std::unique_ptr` holds the
+handlers.
 
 A sanitizer would be the professional answer and is deliberately not used.
 LeakSanitizer does not detect leaks on macOS, and valgrind does not run on Apple silicon,
@@ -106,8 +113,13 @@ lost.
 
 ## Hand-written, then replaced {#handwritten-then-replaced}
 
-The owning buffer, the result type and the owning raw pointer are written by hand and then
-deleted in lesson 12 in favour of `std::vector`, `std::optional` and `std::unique_ptr`.
+The owning buffer, the result type and the owning raw pointer are written by hand, and
+lesson 12 replaces each with what the standard library offers. Two of them go outright:
+`std::vector` for the buffer, `std::unique_ptr` for the pointer. The result type is the
+partial case, and deliberately so — C++17 has no `std::expected`, and `std::optional`
+carries no error payload, so it can replace only the returns that need to say "nothing
+here". A failure that must carry a byte offset keeps a hand-written shape, and which shape
+is a decision the learner argues rather than one this course dictates.
 
 This is the shape of the course, not an accident of ordering, and it has to survive contact
 with a learner who knows `std::vector` exists and asks why they are not using it. The answer
@@ -128,7 +140,20 @@ for the whole course, and stated to the learner in `COURSE.md`:
 - `allocations: <n> frees: <m> outstanding: <k>` — the allocation report, printed at exit.
 - `error: <message> at offset <n>` — one per problem found.
 
-Everything else is the learner's: spacing, headers, colour, how text metadata is laid out.
+The checks match these three literally, so the spacing inside them is part of the shape
+and not presentation. A chunk line is `^[0-9]+ [A-Za-z]{4} [0-9]+$` — a decimal offset,
+one space, four letters, one space, a decimal length, with nothing before it and nothing
+after it. Aligned columns, a leading space and a trailing space all fail to match;
+zero-padded numbers do match the pattern but then fail `checks/expected/*.chunks`, which
+the listing is compared against character for character. The allocation report is matched
+the same way, single spaces and nothing trailing, and must be printed exactly once in a
+run — the check reads one value and cannot read two. An error line is matched only on its
+`error:` prefix in column one; the rest is read as text, so the message and the offset are
+required by this contract rather than enforced by a pattern — with the one exception that
+the bad-CRC check looks for the word CRC in it. The patterns live in `checks/_lib.sh`.
+
+Everything else is the learner's: headers, colour, how text metadata is laid out, and any
+other formatting printed as extra lines beside these three.
 
 **Contradiction cost.** Every validator from `dumps-basic-png` to `no-leak-on-error-path`
 reads these lines. A lesson that changes a shape breaks the checks of the lessons around it,

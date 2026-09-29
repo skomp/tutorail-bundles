@@ -212,9 +212,12 @@ in the file on the heap behind a base pointer, which lesson 12 then cannot repla
 
 ### `#handwritten-then-replaced`
 
-The buffer, the result type and the owning pointer are written by hand and then deleted in
-lesson 12 in favour of `std::vector`, `std::optional` and `std::unique_ptr`. This is the
-course's shape, not an accident of ordering.
+The buffer, the result type and the owning pointer are written by hand, and lesson 12
+replaces each with what the standard library offers: the buffer by `std::vector` and the
+pointer by `std::unique_ptr`, outright; the result type only partly, because C++17 has no
+`std::expected` and `std::optional` carries no error payload, so a failure that must carry
+an offset keeps a hand-written shape the learner argues for. This is the course's shape,
+not an accident of ordering.
 
 **What breaks if a lesson contradicts it:** a lesson that reaches for `std::vector` before 12
 removes the only reason lessons 03 to 06 exist. Resolved.

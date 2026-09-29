@@ -44,7 +44,8 @@ questions, and after eleven lessons you will have met all of them.
 
 You need two things installed, and the course checks for both before the first lesson:
 
-- **CMake**, version 3.16 or newer.
+- **CMake**, version 3.20 or newer. The course's test check runs
+  `ctest --test-dir build`, and `--test-dir` arrived in 3.20.
 - **A C++ compiler that accepts C++17** — GCC 8 or newer, Clang 7 or newer, or MSVC 2019
   or newer. The same compiler will build the C in lesson 00.
 
@@ -70,8 +71,7 @@ manipulation, which is a fine thing to learn in some other course.
 ## The output your program must produce
 
 The check scripts read your program's standard output, so three lines have a fixed shape.
-Everything else the tool prints is yours — spacing, headers, colour, how you lay out text
-metadata.
+Everything else the tool prints is yours — headers, colour, how you lay out text metadata.
 
 ```
 <offset> <type> <length>                          one line per chunk, in file order
@@ -81,6 +81,21 @@ error: <message> at offset <n>                    one line per problem found
 
 `<offset>` is the byte offset of the chunk's length field. `<length>` is the value of
 that field — the payload length, not counting the twelve bytes of framing.
+
+The spacing of those three lines is part of the shape, because the checks match them
+literally. A chunk line is a decimal offset, one space, a four-letter type, one space, a
+decimal length, and nothing else: no space before the offset, no aligning the columns, no
+space after the length. The listing is then compared against an expected one character for
+character, so do not pad the numbers with zeros either. Lining the columns up is the one
+piece of formatting that will fail a check with no defect behind it. The allocation report
+is read the same way — single spaces exactly as written above, nothing trailing — and it
+must be printed exactly once in a run, so print it from a single place rather than from
+every exit path. An error line only has to begin with `error:` at the very start of the
+line; the wording after that is yours, though the checks read it for the word CRC on a bad
+checksum, and the offset is what makes the message useful.
+
+If you want an aligned table, colour or a header, print it as extra lines beside these
+three rather than instead of them.
 
 ## The map
 
