@@ -3,6 +3,10 @@ id: 03-see-the-protocol-before-you-decode-it
 title: See the protocol before you decode it
 design_refs: [wire-format]
 validators: [signal-captured]
+supplies:
+  - from: lessons/03-see-the-protocol-before-you-decode-it/captures/
+    to: captures
+    describe: A reference PS/2 trace to compare your own capture against, with a README saying how it was made - read that first, the trace is synthesized and not taken off real hardware
 ---
 
 ## Purpose
