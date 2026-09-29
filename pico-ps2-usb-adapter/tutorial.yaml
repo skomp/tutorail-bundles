@@ -253,3 +253,6 @@ supplies:
   - from: supplies/checks-usb-cli.py
     to: checks/usb.py
     describe: The checks that read evidence off the host's view of your device
+  - from: supplies/CMakeLists.txt
+    to: CMakeLists.txt
+    describe: A minimal CMake file that finds the SDK and builds one executable. Everything this course teaches about the build - the stdio route, the PIO header, TinyUSB, the backend switch - you add to it yourself.
