@@ -226,3 +226,6 @@ supplies:
   - from: supplies/pico_sdk_import.cmake
     to: pico_sdk_import.cmake
     describe: Boilerplate the Pico SDK requires verbatim; nothing in this course changes it
+  - from: supplies/device.env.template
+    to: device.env
+    describe: "device.env: which serial port your debug console is on and which VID/PID your device will use - you fill these in during lesson 00"
