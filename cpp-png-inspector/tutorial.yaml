@@ -162,3 +162,6 @@ supplies:
   - from: supplies/PNG-FORMAT.md
     to: PNG-FORMAT.md
     describe: One page holding everything about the PNG format this course needs, so you never have to open the specification
+  - from: supplies/gitignore
+    to: .gitignore
+    describe: Keeps the build/ directory out of git
