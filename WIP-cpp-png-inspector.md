@@ -28,11 +28,8 @@ Not done:
   `docs/audits/`, and its findings belong in an issue here, per this repository's CLAUDE.md.
 - A final `validate_bundle.py` run after the corrections.
 
-One thing was lost to the reboot: the fifth agent (chapter 5 and the two optional lessons)
-never delivered its final report, so any defects it found are not recorded. Its files are
-written and committed. Read `12-it-was-in-the-box.md`,
-`what-the-compiler-writes-for-you.md` and `reading-a-template-error.md` with more suspicion
-than the other twelve, because nobody has reported on them.
+All five agents reported. `validate_bundle.py` returns PASS, exit 0, at the last commit —
+confirmed by running it, not assumed.
 
 ## 2. Corrections to apply, all verified
 
@@ -108,6 +105,43 @@ lessons.
   reproduce on `basic.png`; a bounds-checked loop terminates anyway. It bites only on
   `truncated.png`. The lesson poses termination as a real choice between two stopping rules.
 
+### 2.7 `SPEC.md` lesson 12 asks for something C++17 cannot give
+
+"No hand-written result type remains" cannot hold alongside `#errors-are-values` and the
+`error: <message> at offset <n>` contract. `std::optional` carries no error payload and
+`std::expected` is C++23. The lesson turns this into its designed decision point:
+`std::optional` where absence needs no explanation, and for failures that must carry an
+offset, a choice the learner argues — a diagnostics container the caller owns, which the
+tool already wants because `rejects-truncated` requires chunks read before the truncation to
+still be listed, or a justified two-field result. The non-negotiables stay: no global, no
+`-1`, offsets survive. Soften the spec cell to match.
+
+### 2.8 Lesson 12's validator list cannot check its own closing claim
+
+Its completion says the allocation counter still balances, but `dump.sh` ignores the
+allocation report and `error-path.sh` is the only script that reads `outstanding:` — and
+`no-leak-on-error-path` is not in lesson 12's validator list. The condition is currently
+tutor-verified. Adding `no-leak-on-error-path` to that lesson makes the course's closing
+claim machine-checked, for one word of change. Worth doing.
+
+### 2.9 The optional lesson's type-trait mechanism is subtly wrong
+
+`SPEC.md` suggests `static_assert` on type traits for
+`what-the-compiler-writes-for-you`. `std::is_move_constructible_v<T>` is `true` for a
+copy-only type, because the copy constructor's `const T&` binds to an rvalue — so a naive
+assertion would *confirm* a wrong prediction about the learner's own buffer. The lesson
+makes that trap its sharpest point and uses a behavioural probe (construct from an rvalue
+with the counter watching) for the move questions, keeping traits where they genuinely
+answer. The spec's suggested mechanism should say so.
+
+### 2.10 `reading-a-template-error`'s compile-time case is implementation-dependent
+
+`read<double>` fails only if the template body shifts and ORs; a memcpy-and-reverse body
+compiles for `double` and silently returns nonsense. The lesson makes choosing the type part
+of the exercise and gives a fallback (a small class type with no default constructor) that
+no plausible body accepts. It also surfaces a secondary point worth keeping: an
+unconstrained `read<T>` accepts types it should not.
+
 ## 3. Checked and deliberately not acted on
 
 - **iostreams inflating the counter.** Chapter 2 suspected that replacing global
@@ -118,6 +152,11 @@ lessons.
 - **Lesson length.** 216 to 332 lines against a briefing figure of 120 to 250. The byte
   sizes sit inside the range of this repository's existing lessons. Do not trim teaching to
   hit a number.
+- **A reported missing supply that is not missing.** The fifth agent reported that
+  `tutorial.yaml` has no entry handing `crc32.hpp` to `src/crc32.hpp`. It is declared, and
+  correctly: the entry is LESSON-scoped, so it lives in the frontmatter of
+  `lessons/11-the-finished-tool/LESSON.md`, which is where the format requires a
+  lesson-scope `from` to be. Confirmed by reading the file. No action.
 - **`crc32.hpp` and `PNG-FORMAT.md` disclose the CRC range** before lesson 11's trap can
   spring. Keep it. A supplied file that hides its own contract is worse than a survivable
   trap, and the failure is in what the learner passes, not in what they can read.
