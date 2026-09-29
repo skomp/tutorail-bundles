@@ -238,3 +238,6 @@ supplies:
   - from: supplies/checks-console.py
     to: checks/_console.py
     describe: Shared helper the checks use to open your debug console and read its log lines
+  - from: supplies/checks-usb.py
+    to: checks/_usb.py
+    describe: Shared helper the checks use to find your device on the host and read its descriptors, on Linux, macOS and Windows alike
