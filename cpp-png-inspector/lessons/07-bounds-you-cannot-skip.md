@@ -2,7 +2,7 @@
 id: 07-bounds-you-cannot-skip
 title: Bounds you cannot skip
 design_refs: [owning-and-borrowing]
-validators: [build, tests, rejects-truncated]
+validators: [build, tests, dumps-basic-png, rejects-truncated]
 ---
 
 ## Purpose
@@ -100,10 +100,12 @@ Every parsing function takes the whole buffer, because that is the only handle y
 of them needs it: a function that reads a chunk header needs to see some bytes, not the right
 to free them, copy them, or outlive them.
 
-What it needs is a *view*: a pointer to the first byte and a count. That is the whole type. It
-has no destructor, because it releases nothing, and no copy constructor you have to write,
-because copying two scalars is exactly what the compiler's default copy does — the first type
-in this course where that default is right. Compare `05-the-rule-of-three`, where the default
+What it needs is a *view*: a pointer to the first byte and a count. That is the whole type,
+and what you call it is yours — the course writes `View` for whatever you name it, the way it
+writes `Buffer` for the type that owns the bytes. It has no destructor, because it releases
+nothing, and no copy constructor you have to write, because copying two scalars is exactly
+what the compiler's default copy does — the first type in this course where that default is
+right. Compare `05-the-rule-of-three`, where the default
 copy duplicated a pointer and the second destructor freed it again: the rule of three and the
 rule of five are rules about classes that *own* something, and a view owns nothing.
 
@@ -178,7 +180,7 @@ because C++17 has none.
 The check is strict about one thing. When your program reaches a chunk that runs off the end
 of the file it must report a problem and exit non-zero — and must still have listed
 `8 IHDR 13`, the chunk it read correctly before the trouble started. A parser that abandons
-everything on the first error is a worse tool than one that says the file is good to byte 95
+everything on the first error is a worse tool than one that says the file is good to byte 94
 and broken after. Detecting a failure and discarding your results are two decisions, and the
 second is not implied by the first. The error line keeps the contract's shape,
 `error: <message> at offset <n>`, where `<n>` is the offset of the chunk that claims more
@@ -245,9 +247,8 @@ view, see what happens, then delete it. It may print the right answer, which is 
 - `rejects-truncated` passes: on `assets/truncated.png` the program prints an `error:` line
   naming a byte offset, exits non-zero, does not die on a signal, and `8 IHDR 13` is still
   among the chunk lines.
-- `dumps-basic-png` still passes — run it even though this lesson does not list it, because a
-  bounds check that rejects valid files is the commonest way to pass the truncation check for
-  the wrong reason.
+- `dumps-basic-png` still passes — this lesson lists it because a bounds check that rejects
+  valid files is the commonest way to pass the truncation check for the wrong reason.
 - A test exercises an out-of-range read through the checked accessor and asserts the chosen
   behaviour; a test that only reads in range does not satisfy this.
 - At least one read-only function takes a `const` handle, and writing a byte through that
