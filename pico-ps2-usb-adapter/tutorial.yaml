@@ -232,3 +232,6 @@ supplies:
   - from: supplies/BOM.md
     to: BOM.md
     describe: The shopping list, with the exact part types this course assumes and why each one. Lead time is the thing you cannot compress, so read it first
+  - from: supplies/PINOUT.md
+    to: docs/PINOUT.md
+    describe: The pin assignment this course uses, and the mini-DIN-6 pinout drawn from both the plug side and the socket side so you cannot read it mirrored
