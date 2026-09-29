@@ -196,3 +196,7 @@ optional_lessons:
     offer_at:
       - lessons/11-descriptors-you-write-yourself.md
     offer_because: "You have just inferred the enumeration conversation from its results. You can watch it happen instead, as packets on the wire, and walk the request sequence your own device answered. This needs a Linux or Windows host: USB packet capture does not work on macOS."
+  lessons/a-safety-catch.md:
+    offer_at:
+      - lessons/12-the-hid-report-descriptor.md
+    offer_because: From the next lesson on, your firmware can type into whatever window has focus, and a bug that holds a key down is recoverable only by unplugging. If you would rather solve that in firmware than by choosing a machine you do not mind being typed into, this lesson adds a hardware enable gate that fails safe.
