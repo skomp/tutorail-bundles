@@ -11,11 +11,31 @@ is defined in `COURSE.md` or in the lesson body, not here.
 
 PS/2 **clock on GP2** and PS/2 **data on GP3** — adjacent, and in that order.
 
-The order is not cosmetic. A PIO state machine addresses pins from a base index, and
-`wait` and `in` on two adjacent pins are materially simpler than on two scattered ones:
-with clock at the base and data at base+1, one `in pins, 1` reads the data line while
-`wait 0 pin 0` has just synchronised on the clock. Scattering them costs a second pin
-mapping and an instruction the nine-instruction program can rarely spare.
+The order is not cosmetic. A PIO state machine addresses pins from a base index, and two
+adjacent pins can be reached from one mapping where two scattered ones cannot.
+
+Be precise about *how*, because the near-miss version of this argument is wrong and a
+lesson written from it would teach a bug. `in pins, N` shifts in N bits **starting at the
+IN base**, and `wait <level> pin <index>` has the state machine's input IO mapping applied
+first — the datasheet's wording is "PIN: Input pin selected by Index. This state machine's
+input IO mapping is applied first". So both are IN-base-relative, and with the base at GP2
+they both address the **clock**. Only `wait <level> gpio <n>` takes an absolute GPIO
+number, and `jmp pin` has its own separate setting in `EXECCTRL_JMP_PIN`.
+
+What adjacency actually buys is therefore a *choice* rather than a free read: either line
+is one base away, so a program may put the IN base on whichever of the two it needs to shift
+and reach the other absolutely. The place it is genuinely load-bearing is lesson 09, where a
+single two-pin `set pindirs` group based at GP2 expresses the whole line-state vocabulary of
+the host-to-device sequence — release both, pull clock low, pull data low, release clock —
+in one instruction per state. Scattering the pins costs that, and costs instructions a
+nine-instruction program can rarely spare.
+
+> **Correction, 2026-09-29.** This section previously claimed that "with clock at the base
+> and data at base+1, one `in pins, 1` reads the data line while `wait 0 pin 0` has just
+> synchronised on the clock". That is wrong in both halves: with the IN base at GP2, `in
+> pins, 1` reads the clock, and `wait 0 pin 0` also refers to GP2. The decision — clock on
+> GP2, data on GP3, adjacent and in that order — is unchanged and still correct; only its
+> justification was wrong. Lessons 07 and 08 teach the real semantics.
 
 The rest of the assignment:
 
@@ -30,6 +50,19 @@ The rest of the assignment:
 
 GP4 and GP5 are reserved rather than used, so that a learner who takes the offered lessons
 does not have to move a wire that three earlier lessons assumed.
+
+**An RP2040 pad resets with its internal pull-down enabled, and GP2 and GP3 must have it
+turned off explicitly.** The reset value of a `PADS_BANK0` GPIO register is `0x56`: input
+enable set, pull-down enable set, pull-up clear. So a pin the firmware has not configured is
+not floating — it is being pulled down, against the level-shifter module's pull-up, and the
+bus idles somewhere in the middle of the rail instead of high. The symptom is a lesson 02
+idle measurement that reads about half of 3.3 V and a receiver that sees nothing, and neither
+points at the cause.
+
+This is the one piece of RP2040-specific behaviour that reaches out of the datasheet and
+breaks the electrical design, which is why it is recorded here rather than left to a lesson.
+Lesson 02 has the learner confirm the reset value in the datasheet rather than taking it on
+trust, and lesson 03 carries the constraint forward.
 
 **What breaks if a lesson contradicts it.** The PIO programs in lessons 07 and 08 assume
 clock and data are adjacent and in that order. Lesson 16's capture correlation assumes a
@@ -129,6 +162,14 @@ resulting bug is intermittent, unreproducible on demand, and miserable to find.
 The modifier bitmap and the six-key array in the report are both **derived** from the state
 bitmap at the moment the report is built. Neither is accumulated as events arrive.
 
+**The `key:` console line carries the mapped HID usage name, never the physical key.** This
+matters only once a learner takes the offered `remap-and-macros` lesson, and it is recorded
+here because that is the moment it stops being obvious. The down/up pairing invariant that
+`key-events-decoded` enforces is about the identity that reaches the host, which is exactly
+the identity a remap changes; pairing physical names would leave a remap that emits a
+different usage on release looking perfectly healthy. A learner who wants the physical name
+in the log is free to print it on a free-form line, which no check reads.
+
 **What breaks if a lesson contradicts it.** Stuck keys under load, arriving several lessons
 after the decision that caused them. Resolved.
 
@@ -177,6 +218,15 @@ the last one is a safety property rather than a feature.
   forever into whatever has focus, and the learner's only recovery is to unplug the adapter.
 - **Support USB remote wakeup.** An ordinary keyboard wakes the host it is plugged into, and
   an adapter that does not is visibly not an ordinary keyboard.
+
+**One stated non-compliance, so that nobody later "fixes" it.** A bus-powered USB device is
+required to drop to the suspend current budget — single-digit milliamps — while the host is
+suspended. This adapter cannot, because it is powering a Model M, and a Model M does not have
+a low-power state to be put into. The adapter therefore keeps the keyboard alive through
+suspend and draws more than the specification allows. That is a deliberate trade: the
+alternative is cutting the keyboard's supply and losing the ability to wake the host with a
+keypress, which is the one thing a keyboard must be able to do. Lesson 17 records it as a
+known limit rather than glossing it, and no check asserts compliance.
 
 **What breaks if a lesson contradicts it.** A lesson that assumes the keyboard is present at
 boot produces firmware that wedges on a cold start — which is exactly how the finished object

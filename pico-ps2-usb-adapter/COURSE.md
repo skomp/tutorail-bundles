@@ -144,7 +144,7 @@ finishes either way.
 |---|---|---|
 | `see-the-edges-on-a-scope` | see the rise time you calculated, on a real bus. **Needs an oscilloscope.** | 02 |
 | `watch-the-enumeration` | see the enumeration conversation as packets rather than infer it. **Needs a Linux or Windows host — USB capture does not work on macOS.** | 11 |
-| `a-safety-catch` | stop buggy firmware typing into whatever has focus | 12 |
+| `a-safety-catch` | stop buggy firmware typing into whatever has focus | 13 |
 | `a-second-interface-for-debugging` | a channel through USB itself, and why it cannot live on the keyboard interface | 13 |
 | `measure-your-latency` | what the adapter actually costs the typist | 14 |
 | `nkro-without-a-driver` | report more than six keys, and understand what you give up | 14 |
