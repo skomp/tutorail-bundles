@@ -3,6 +3,10 @@ id: 09-talking-back-in-pio
 title: "Talking back: driving the bus in PIO"
 design_refs: [wire-format, voltage-domains]
 validators: [build-ok, keyboard-acks-command]
+supplies:
+  - from: lessons/09-talking-back-in-pio/ps2-commands.md
+    to: docs/ps2-commands.md
+    describe: The PS/2 host-to-device command and response codes, as a reference table - deriving these from captures would teach you nothing
 ---
 
 ## Purpose
