@@ -250,3 +250,6 @@ supplies:
   - from: supplies/checks-console-cli.py
     to: checks/console.py
     describe: The checks that read evidence off your debug console
+  - from: supplies/checks-usb-cli.py
+    to: checks/usb.py
+    describe: The checks that read evidence off the host's view of your device
