@@ -8,38 +8,49 @@ The bundle is structurally complete and validated, and all fifteen lesson bodies
 written. It is NOT finished: the corrections in section 2 are known and unapplied, and the
 course-quality audit has not been run.
 
-## 0. Branch collision — read this before anything else
+## 0. Where this work lives now
 
-Two sessions shared this checkout. A peer session created and checked out
-`spec-pico-ps2-usb-adapter` from my HEAD at `64bfc72`, part-way through my work. Branches
-are per-checkout, so from that moment **my commits went onto their branch.** Nothing was
-lost and nobody staged anyone else's files, but the history is interleaved:
+**This bundle is developed in a worktree**, per the rule in the repository `CLAUDE.md`.
 
 ```
-main
- └─ d6ed53b .. 64bfc72   mine   skeleton, 15 lesson adds, failure mode
-     └─ d3074a0          PEER'S pico-ps2-usb-adapter/SPEC.md (458 lines, one file)
-         └─ 7a93281 .. cd8baa1   mine   supplies, all lesson bodies, this handover
+worktree : .claude/worktrees/cpp-png-inspector
+branch   : worktree-cpp-png-inspector
+tip      : 28 commits ahead of main, all mine, nothing of anyone else's
 ```
 
-- `add-cpp-png-inspector` is stranded at **`64bfc72`** and does NOT contain the lesson
-  bodies, the supplies declarations or this file.
-- `cpp-png-inspector-tip` -> **`cd8baa1`** is a ref I added purely so my later commits stay
-  reachable from something I own. It rewrites nothing.
-- `spec-pico-ps2-usb-adapter` -> `cd8baa1` is the peer's branch and currently HEAD.
+That branch is authoritative. Work on the bundle there, not in the main checkout.
 
-**The tip of my work is `cd8baa1`.** Untangling it means separating one peer commit from
-nine of mine, which is a history rewrite in a shared checkout — Robert's call, not a thing
-to do unattended. The peer said it intends to cherry-pick only `d3074a0` onto a fresh
-branch off `main` and leave my commits alone; cherry-picking does not move refs, so that
-plan is safe for me.
+### How it got untangled
 
-**One hazard if anyone rebases instead.** `rebase.updateRefs` is `true` in the global git
-config, so a rebase over `d3074a0` force-moves every branch pointing into the rewritten
-range. `git for-each-ref --contains d3074a0` lists both `cpp-png-inspector-tip` and
-`spec-pico-ps2-usb-adapter` — which is to say the backup would be moved off the commits it
-exists to preserve. Pass `--no-update-refs`, or re-point the ref afterwards and verify it.
-Nothing here is pushed, so the safety ref is local only and is not yet a real backup.
+Two sessions had shared the main checkout. A peer created and checked out
+`spec-pico-ps2-usb-adapter` from my HEAD part-way through my work, and because branches are
+per-checkout, my later commits landed on their branch — one peer commit (`d3074a0`, a
+458-line `pico-ps2-usb-adapter/SPEC.md`) sandwiched between mine.
+
+The worktree branch was built additively and rewrote nothing shared: it starts at `64bfc72`
+(my last pre-peer commit) and replays `d3074a0..cpp-png-inspector-tip` on top, which brings
+my commits over and skips the peer's. Verified by diffing the two tips: the single change is
+the deletion of the peer's `SPEC.md`, nothing else. `validate_bundle.py` passes here, exit 0.
+
+### Stale refs left behind in the main checkout
+
+All three still exist, none were moved, and none is where the work is:
+
+| ref | at | what it is |
+|---|---|---|
+| `spec-pico-ps2-usb-adapter` | `d727074` | the peer's branch. Carries their commit AND a copy of my pre-worktree history. |
+| `cpp-png-inspector-tip` | `d727074` | the safety ref made while the work hung off the peer's branch. Superseded. |
+| `add-cpp-png-inspector` | `64bfc72` | the original feature branch, stranded before the lesson bodies were written. **Do not resume from this one.** |
+
+They are kept deliberately rather than deleted: the old commits stay reachable, so nothing
+about the untangling is irreversible. Robert decides when they go.
+
+**Nothing is pushed.** A worktree branches from `origin/<default-branch>` by default, so any
+further worktree made from this repository will not see any of this work. Say so, or push.
+
+**`rebase.updateRefs` is `true` in the global config**, so a rebase over `d3074a0` in the
+main checkout would force-move every branch pointing into that range. Replaying commits one
+at a time does not.
 
 ## 1. State
 
