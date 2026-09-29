@@ -135,3 +135,13 @@ optional_lessons:
     offer_at:
       - lessons/05-the-rule-of-three.md
     offer_because: You have just written a copy constructor and a copy assignment operator by hand. The compiler had been writing those for you, along with four more, and it stops writing some of them the moment you declare one yourself. Take this if you want to know exactly which six functions exist, and what makes each one appear or quietly vanish.
+
+failure_modes:
+  template-definition-in-a-cpp-file:
+    summary: >
+      A template defined in a .cpp file is instantiated only for the types that
+      file happens to use, so calling it from anywhere else fails at link time
+      with an undefined symbol rather than at the line with the mistake in it.
+    signals:
+      - validator:build
+      - diagnosis
