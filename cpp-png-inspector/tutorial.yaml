@@ -15,7 +15,8 @@ aliases: [c++, cpp17, modern c++, classes, templates, raii, move semantics, png,
 level: beginner-to-intermediate
 style: [project-driven, interactive, long-form]
 
-lessons: []
+lessons:
+  - lessons/00-write-the-c-walker.md
 
 workspace_kind: new-repository
 tutor_owned: [tutorial/STATE.md, tutorial/DESIGN.md]
