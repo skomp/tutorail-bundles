@@ -208,3 +208,7 @@ optional_lessons:
     offer_at:
       - lessons/14-events-to-state/LESSON.md
     offer_because: Your adapter works, and it sits between a typist and their computer. This lesson measures what it costs them, end to end, and compares your two receive backends with numbers rather than with intuition.
+  lessons/nkro-without-a-driver.md:
+    offer_at:
+      - lessons/14-events-to-state/LESSON.md
+    offer_because: Your report carries six keys, because that is what boot protocol gives you. You can report more, without a driver, and this lesson shows how — and what you give up if you do it by replacing the boot report instead of adding to it.
