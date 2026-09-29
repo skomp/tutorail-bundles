@@ -3,6 +3,10 @@ id: 18-off-the-breadboard-and-done
 title: Off the breadboard, and done
 design_refs: [voltage-domains, pin-assignment, hid-contract]
 validators: [finished-adapter]
+supplies:
+  - from: lessons/18-off-the-breadboard-and-done/perfboard-layout.md
+    to: docs/perfboard-layout.md
+    describe: A stripboard layout for the circuit you built on the breadboard, so this lesson is about soldering and not about drawing
 ---
 
 ## Purpose
