@@ -89,11 +89,28 @@ the owning buffer type and `std::vector` silently does not.
 
 ## 2. What remains
 
-- **The `course-quality` audit.** In flight at the time of writing. Its report belongs in
-  `skomp/tutorail-authoring` under `docs/audits/`, and its findings belong in an issue
-  here, per this repository's `CLAUDE.md`.
-- **The merge.** Nothing is pushed. See section 0.
-- **Delete this file** before merging.
+**Only the merge.** Nothing is pushed. See section 0. Delete this file before merging.
+
+The `course-quality` audit is done. Total 371 — 377 across fifteen lessons, less two
+unserved objectives at -3 each. No `required_for` gates, and the completability invariant
+holds and is planned for at `08:248`.
+
+- Report: `skomp/tutorail-authoring`, `docs/audits/2026-09-29-cpp-png-inspector.md`,
+  commit `88f3463`. **Local and unpushed in that checkout.**
+- Findings: `tutorail-bundles#26`.
+- Three rulings the rubric owes, filed where they will be fixed: `tutorail-authoring#27`.
+  No session held that repository at the time.
+
+Nothing in the audit has been applied — an audit proposes and never changes a bundle. The
+four findings worth doing first are in `tutorail-bundles#26`: lesson 00 asks for two byte
+helpers where lesson 08 needs three; `src/crc32.hpp` has two different owners; lesson 11
+asserts the allocation balance and no validator checks it; lesson 07 needs a validator it
+does not declare.
+
+**One finding is blocked on `tutorail-authoring#27`** and must not be repaired before the
+rubric rules: whether `what-the-compiler-writes-for-you` has to bind `rvalue`,
+`overload resolution` and `static_assert` in its own theory, given that the manifest offers
+it at lesson 05 and the main path binds those three in lessons 06 and 08.
 
 ## 3. Checked and deliberately not acted on
 
