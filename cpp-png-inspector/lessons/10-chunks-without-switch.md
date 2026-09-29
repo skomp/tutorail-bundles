@@ -257,9 +257,10 @@ Now run `build` and `no-leak-on-error-path`, then run the tool yourself over
 `assets/basic.png` and read what the counter says there. The second run is the one that
 shows this: `assets/truncated.png` ends 54 bytes into the first `IDAT`'s payload, so no
 complete chunk ever reaches that handler, it never allocated on that path, and its counts
-balance whether the destructor is virtual or not. If the number is not zero, do not reach for the answer: find out which
-allocation is outstanding, which destructor was supposed to release it, and why that
-destructor did not run when the handler was deleted through a base pointer.
+balance whether the destructor is virtual or not. If the number is not zero, do not reach
+for the answer: find out which allocation is outstanding, which destructor was supposed to
+release it, and why that destructor did not run when the handler was deleted through a
+base pointer.
 
 With that fixed, do the `override` experiment on purpose. Take one derived handler, change
 its parameter or its const-qualification so the signature no longer matches the base, and
@@ -281,7 +282,9 @@ type. Finish with `build`, `tests`, `dumps-basic-png` and `no-leak-on-error-path
 
 - `build`, `tests`, `dumps-basic-png` and `no-leak-on-error-path` all pass.
 - The chunk listing for `assets/basic.png` is unchanged from before this lesson, and the
-  allocation report shows `outstanding: 0` on the truncated file.
+  allocation report shows `outstanding: 0` on `assets/basic.png` — the run in which a
+  handler actually allocated, and so the only one in which a missing virtual destructor
+  would have shown. `no-leak-on-error-path` covers the truncated file separately.
 - No `switch` or `if`/`else if` chain on chunk type remains outside the table lookup, and
   the parsed chunk has no virtual functions.
 - A handler exists whose destructor releases a heap allocation, and the learner can say —
