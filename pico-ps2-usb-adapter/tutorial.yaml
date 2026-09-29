@@ -33,6 +33,7 @@ lessons:
   - lessons/13-your-first-keystroke.md
   - lessons/14-events-to-state/LESSON.md
   - lessons/15-the-lock-leds.md
+  - lessons/16-when-it-goes-wrong.md
 
 workspace_kind: new-repository
 tutor_owned: [tutorial/STATE.md, tutorial/DESIGN.md]
