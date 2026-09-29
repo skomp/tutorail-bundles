@@ -220,3 +220,6 @@ supplies:
   - from: supplies/README.md
     to: README.md
     describe: "README for this firmware repository: what the project is, the hardware it needs, and how to configure, build and flash it"
+  - from: supplies/gitignore
+    to: .gitignore
+    describe: Keeps the build directory, editor droppings and your machine-specific device.env out of your git history
