@@ -247,3 +247,6 @@ supplies:
   - from: supplies/checks-build.py
     to: checks/build.py
     describe: The check that configures and builds your firmware
+  - from: supplies/checks-console-cli.py
+    to: checks/console.py
+    describe: The checks that read evidence off your debug console
