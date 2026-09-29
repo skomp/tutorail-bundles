@@ -1,7 +1,7 @@
 ---
 id: what-the-compiler-writes-for-you
 title: What the compiler writes for you
-design_refs: [owning-and-borrowing]
+design_refs: [the-allocation-counter]
 validators: [build, tests]
 optional: true
 ---
@@ -92,11 +92,15 @@ and nothing told you. That is exactly what `06-moving-not-copying` is about, and
 mechanism underneath it.
 
 There is a second consequence worth seeing: an object with no move constructor is still
-movable *in form*. `std::move` produces an rvalue, overload resolution looks for a
-constructor that accepts one, finds only the copy constructor taking `const T&` — and a
-`const` lvalue reference binds happily to an rvalue. So the call compiles, silently
-performs a copy, and looks exactly like a move at the call site. This is the single most
-common way a C++ program is slower than its author believes.
+movable *in form*. Two words are used here and explained only as far as the paragraph
+needs; `06-moving-not-copying` gives both properly. An **rvalue** is an expression naming a
+temporary about to be destroyed, and **overload resolution** is the compiler's choice,
+among the functions sharing a name, of the one a particular call reaches.
+`std::move` produces an rvalue, overload resolution looks for a constructor that accepts
+one, finds only the copy constructor taking `const T&` — and a `const` lvalue reference
+binds happily to an rvalue. So the call compiles, silently performs a copy, and looks
+exactly like a move at the call site. This is the single most common way a C++ program is
+slower than its author believes.
 
 ### `= default` and `= delete`
 
@@ -126,21 +130,22 @@ usually written the same buffer three times.
 
 `<type_traits>` offers `std::is_default_constructible_v`, `std::is_copy_constructible_v`,
 `std::is_copy_assignable_v`, `std::is_move_constructible_v`, `std::is_move_assignable_v` and
-`std::is_destructible_v`. A `static_assert` over them is a test that runs at compile time and
-costs nothing, and for the deleted cases it is exactly right: a type whose copy constructor
-is deleted reports `is_copy_constructible_v` as `false`, and a prediction saying otherwise
-will not compile.
+`std::is_destructible_v`. `static_assert(condition, message)` fails the build, with the
+message, when a condition the compiler can evaluate for itself comes out false;
+`08-templates-eat-the-macros` puts it to a different use later. A `static_assert` over these
+traits is therefore a test that runs at compile time and costs nothing, and for the deleted
+cases it is exactly right: a type whose copy constructor is deleted reports
+`is_copy_constructible_v` as `false`, and a prediction saying otherwise will not compile.
 
 But `std::is_move_constructible_v<T>` asks whether a `T` can be *constructed from an rvalue
 `T`* — not whether a move constructor exists. For a copy-only type the copy constructor takes
 `const T&`, that binds to an rvalue, and the trait answers `true`. Your buffer, which has had
 no move constructor since `03-a-class-that-cleans-up`, reports `true` right now, and a
-prediction "confirmed"
-by that assertion has confirmed nothing. `std::is_nothrow_move_constructible_v` gets closer,
-because a move that allocates nothing is usually `noexcept` while a copy that allocates is
-not — but that is a convention, not a rule. The honest instrument is the one you already
-built: construct from an rvalue with the allocation counter watching. A move does not
-allocate. A copy does.
+prediction "confirmed" by that assertion has confirmed nothing.
+`std::is_nothrow_move_constructible_v` gets closer, because a move that allocates nothing is
+usually `noexcept` while a copy that allocates is not — but that is a convention, not a rule.
+The honest instrument is the one you already built (`#the-allocation-counter`): construct
+from an rvalue with the allocation counter watching. A move does not allocate. A copy does.
 
 ## Concepts to teach
 

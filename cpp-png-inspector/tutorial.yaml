@@ -165,3 +165,6 @@ supplies:
   - from: supplies/gitignore
     to: .gitignore
     describe: Keeps the build/ directory out of git
+  - from: supplies/skeleton/CMakeLists.txt
+    to: CMakeLists.txt
+    describe: The three-command CMakeLists.txt this course starts from. Configuring and building it as two separate steps, and knowing why the build directory is separate, is still yours

@@ -2,15 +2,15 @@
 id: 08-templates-eat-the-macros
 title: Templates eat the macros
 design_refs: [byte-order-in-one-place]
-validators: [build, tests, dumps-basic-png]
+validators: [build, tests, dumps-basic-png, no-leak-on-error-path]
 ---
 
 ## Purpose
 
-You have three or four byte-reading functions that differ only in a type and a count, and one
-definition should replace the lot of them.
+You have two byte-reading functions that differ only in a type and a count, one definition
+should replace both, and the same definition should serve every width you add after them.
 
-Look at `read_u32`, `read_u16` and `read_u8` — or the macros you wrote instead of them. Line
+Look at `read_u32` and `read_u8` — or the macros you wrote instead of them. Line
 them up and the bodies are the same shape: take a position, take that many bytes, put them
 together most significant first, hand back an integer. Only the type and the number of bytes
 change, and the number of bytes is a property of the type. In C the available answers were
@@ -35,6 +35,9 @@ the placement is the point.
   honour
 - Explain why a template's definition must be visible wherever it is instantiated, and
   recognise the link error you get when it is not
+- Read the compiler's error from an instantiation the body cannot serve: name the frame of
+  the chain that is your own code, say what `T` was deduced to be, and say why the first
+  line of the output is not the mistake
 - Convert file-order bytes to host-order integers in one place, without `reinterpret_cast`
   and without depending on the host's endianness
 
@@ -42,9 +45,9 @@ the placement is the point.
 
 ### What is wrong with the family you have
 
-Three functions that differ by a type are three places to fix a bug, and the bug they attract
-is the byte-order one: it is entirely possible to get `read_u32` right and `read_u16` subtly
-wrong, and nothing points at the discrepancy. If you wrote macros instead, the defects are
+Two functions that differ by a type are two places to fix a bug, and the bug they attract is
+the byte-order one: it is entirely possible to get `read_u32` right and the next width you
+add subtly wrong, and nothing points at the discrepancy. If you wrote macros instead, the defects are
 the familiar ones — the arguments are evaluated wherever they appear in the expansion, so a
 macro called with `p[i++]` does something nobody intended; there is no type checking, because
 there is no type; the errors name the expansion, not your call; and a macro obeys no scope
@@ -131,6 +134,19 @@ notices. An undefined symbol with a mangled name containing the type argument is
 signature of this mistake, and recognising it on sight is worth as much as anything else in
 this lesson.
 
+The name in that symbol will not be `read`. So that two overloads can be two distinct
+symbols, the compiler encodes the namespace, the parameter types and the template arguments
+into one identifier — that is *name mangling*, and `nm` over the object file shows the raw
+form while `nm -C`, or `c++filt` on a name you paste in, turns it back:
+
+```
+U __ZN3png4readItEET_NS_4ViewEm                                        <- nm
+U unsigned short png::read<unsigned short>(png::View, unsigned long)   <- nm -C
+```
+
+Most linkers now demangle for you in the message itself, so you may meet either spelling.
+Both carry the template argument, which is the part to look for.
+
 Hence the rule: **a template's definition goes where every user of it can see it**, which in
 practice means a header. That looks like it violates the one-definition rule, since every
 translation unit including the header now has the definition — and templates, like `inline`
@@ -178,14 +194,17 @@ be written explicitly at the call. `sizeof(T)` as a compile-time constant drivin
 body and its bounds check. `static_assert` as an error reported at the mistake. Why a
 template's definition must be visible at the point of instantiation; the undefined-symbol
 link error that results when it is not, and why it arrives from the linker rather than the
-compiler; the one-definition rule and the exemption templates and `inline` functions have;
+compiler; name mangling, the template arguments the symbol carries, and `c++filt` / `nm -C`
+for reading one; the compiler's own template error — the instantiation chain, the frame in
+the learner's code, the deduced `T`, and the first line as an end of the chain rather than
+the mistake; the one-definition rule and the exemption templates and `inline` functions have;
 explicit instantiation mentioned and set aside. Big-endian file order versus host order,
 conversion by shifting rather than by `reinterpret_cast`, and the rule that the conversion
 lives in one function (`#byte-order-in-one-place`).
 
 ## Constraints
 
-- `read_u32`, `read_u16`, `read_u8` and any macro that did their job are deleted, not left
+- `read_u32`, `read_u8` and any macro that did their job are deleted, not left
   beside the template as wrappers.
 - There is exactly one definition of `read`, it is a template, and it lives in a header that
   both the library and the tests include.
@@ -213,6 +232,18 @@ expect to be instantiated is really in a different translation unit from the def
 Having reached a conclusion about the placement, fix it and say in one sentence what the
 compiler could not do without the body.
 
+That failure was the linker's; the compiler has one of its own that looks nothing like it.
+With the build green, instantiate `read<T>` from a test with a type its body genuinely
+cannot serve. Which type that is depends on your body, and working it out is part of the
+exercise: a body built from shifts and a bitwise or rejects a floating-point type outright,
+while one that copies the bytes and reverses them will compile for `double` and hand back
+nonsense, and the type no plausible body accepts is a small class of your own with no
+default constructor. Answer from the message before you edit anything: which line the
+compiler is complaining about, which frame of the chain is code you wrote, and what `T` was
+deduced to be. The first line is one *end* of the chain, not the mistake. Then take the
+instantiation out again and add the `static_assert` from the theory section, so that the
+next `T` the body cannot serve is refused in your own words instead.
+
 Now convert the call sites, one at a time, deleting the old function as its last caller goes.
 Run `dumps-basic-png` after the first conversion rather than at the end: the length field of
 the first chunk is read by the very first call, so a byte-order mistake shows up immediately
@@ -226,7 +257,7 @@ source for the deleted names and for any shifting or reversing outside the templ
 ## Completion conditions
 
 - `build` and `tests` pass, and `dumps-basic-png` still passes.
-- No `read_u32`/`read_u16`/`read_u8` function or macro remains in the source, and no call site
+- No `read_u32`/`read_u8` function or macro remains in the source, and no call site
   adjusts byte order after calling `read<T>`.
 - `read<std::uint32_t>` reads a chunk length correctly, demonstrated by the listing for
   `assets/basic.png` being byte-for-byte what it was before.
@@ -237,6 +268,9 @@ source for the deleted names and for any shifting or reversing outside the templ
   one.
 - The learner can describe the link error a template defined in a `.cpp` produces, say why the
   compiler did not catch it, and say what makes a header the right place for the definition.
+- The learner instantiated `read<T>` with a type its body cannot serve and, from the message
+  alone, named the line the compiler objected to, the frame of the chain in their own code and
+  the deduced `T` — and can say why the first line of the output was not the mistake.
 - The learner can state where byte order is handled in the program and defend the answer being
   one place.
 
@@ -251,8 +285,10 @@ will need the explanation repeated when a class template arrives in `09-errors-w
 
 ## Optional deeper paths
 
-The tutor may offer `reading-a-template-error` here; it takes two deliberately broken
-instantiations and reads the messages down to the one line that matters.
+The tutor may offer `reading-a-template-error` here. This lesson has read one broken
+instantiation; that one takes both failures deliberately and at length, compares how GCC and
+Clang print the same chain in opposite orders, and adds the four ways to cut a wall of
+output down to one question.
 
 For the curious: look at the generated code for `read<std::uint32_t>` in a disassembler or on
 a compiler explorer and find the single byte-swapping instruction the shifting loop became.

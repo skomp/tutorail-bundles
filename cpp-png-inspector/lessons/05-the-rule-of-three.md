@@ -36,8 +36,9 @@ the code under it was broken.
 
 ### The functions you did not write
 
-Your buffer class has a copy constructor and a copy assignment operator. You did not write
-them; the compiler wrote them for you, as it does for every class that does not say
+Your buffer class has a copy constructor and a copy assignment operator — the course writes
+`Buffer` for whatever you named the owning type in `03-a-class-that-cleans-up`. You did not
+write them; the compiler wrote them for you, as it does for every class that does not say
 otherwise. What it wrote copies each member in turn.
 
 For a class holding an `int` and a `double` that is exactly right. For a class holding a

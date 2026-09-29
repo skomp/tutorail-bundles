@@ -25,8 +25,8 @@ wrote that defect yourself, in lesson 00, and took it out by hand.
 That is the whole method, and it is why the course opens by having you write C. A
 destructor is not interesting until you have watched an early `return` skip your `free`.
 A copy constructor is not interesting until passing a struct to a function has freed the
-same pointer twice. A template is not interesting until you have four functions that
-differ only by a type.
+same pointer twice. A template is not interesting until you have written the same
+byte-reading function twice, once per width, and know you would write it again.
 
 So each lesson starts from something wrong with the program you have, not from a feature
 that needs a home. You will be asked what you expect to happen before you run anything,
@@ -121,7 +121,7 @@ three rather than instead of them.
 | | |
 |---|---|
 | `07-bounds-you-cannot-skip` | The read that runs off the end of the file, and the view that outlives what it points into. |
-| `08-templates-eat-the-macros` | Delete the `read_u32` / `read_u16` / `read_u8` family. One definition replaces all of them. |
+| `08-templates-eat-the-macros` | Delete the `read_u32` / `read_u8` family. One definition replaces both of them, and every width after them. |
 | `09-errors-without-errno` | Stop returning `-1`. Meet exceptions, learn what RAII has to do with them, and decide against them on purpose. |
 
 ### Chapter 4 — Polymorphism and the finished tool
@@ -150,13 +150,13 @@ or decline it.
 
 ## Milestones
 
-| After | You have |
-|---|---|
-| lesson 00 | a C program that prints a real PNG's chunk list, and leaks |
-| lesson 04 | a project that builds as a library, a binary and a test suite |
-| lesson 06 | a buffer type that cannot leak, cannot double-free, and is cheap to return |
-| lesson 11 | the complete inspector: metadata, checksum validation, truncation handled |
-| lesson 12 | the same tool, on the standard library, with nothing hand-rolled |
+| Milestone | After | You have |
+|---|---|---|
+| M1 | lesson 00 | a C program that prints a real PNG's chunk list, and leaks |
+| M2 | lesson 04 | a project that builds as a library, a binary and a test suite |
+| M3 | lesson 06 | a buffer type that cannot leak, cannot double-free, and is cheap to return |
+| M4 | lesson 11 | the complete inspector: metadata, checksum validation, truncation handled |
+| M5 | lesson 12 | the same tool, on the standard library, with nothing hand-rolled |
 
 ## Topics this course must cover
 

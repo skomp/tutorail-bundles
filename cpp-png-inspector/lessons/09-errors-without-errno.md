@@ -2,7 +2,7 @@
 id: 09-errors-without-errno
 title: Errors without errno
 design_refs: [errors-are-values, owning-and-borrowing]
-validators: [build, tests, rejects-truncated, explains-the-repair]
+validators: [build, tests, rejects-truncated, no-leak-on-error-path, explains-the-repair]
 ---
 
 ## Purpose

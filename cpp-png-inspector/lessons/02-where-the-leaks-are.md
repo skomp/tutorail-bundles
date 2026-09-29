@@ -194,11 +194,15 @@ leaves the function while the buffer is live, and say how many bytes that run lo
 with the harder question — how many other places in this program could grow the same defect
 later, and what would have to be true for you to notice?
 
-If placing the report on every path turns out to be awkward, that awkwardness is worth a
-minute's thought before you engineer around it. C's `atexit` registers a function to run when
-the program exits normally, which is one answer; a single exit point that all the error paths
-funnel to is another; and the answer the course is heading towards is that scope exit should be
-doing this work for you, which is next lesson.
+Placing the report on every path is where this gets awkward, and that awkwardness is worth a
+minute's thought before you engineer around it. Two answers are available to you today: C's
+`atexit` registers a function to run when the program exits normally, and a single exit point
+that all the error paths funnel to. Decide between them deliberately, and write down the
+reason before you implement either — the answer the course is heading towards is that scope
+exit should be doing this work for you, and that one is not available until next lesson. Then
+run the tool on `assets/basic.png`, on `assets/truncated.png`, and on a file that does not
+exist, confirm the report line appears exactly once on each of the three runs, and re-run
+`leak-is-visible`.
 
 ## Completion conditions
 
