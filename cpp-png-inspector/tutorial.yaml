@@ -28,6 +28,7 @@ lessons:
   - lessons/09-errors-without-errno.md
   - lessons/10-chunks-without-switch.md
   - lessons/11-the-finished-tool/LESSON.md
+  - lessons/12-it-was-in-the-box.md
 
 workspace_kind: new-repository
 tutor_owned: [tutorial/STATE.md, tutorial/DESIGN.md]
