@@ -73,6 +73,32 @@ A ruling only the author can make — for example whether a project skeleton cou
 (`tutorail-authoring#11`) — stays pending in writing until the author makes it. Do not
 pre-empt it, and pass it to the session that owns the file it changes.
 
+## Three toolkit traps that cost this repository time
+
+Each was hit while building `pico-ps2-usb-adapter` on 2026-09-29, each is filed against the
+repository that must fix it, and each will keep happening until it is.
+
+**A lesson title containing `": "` produces frontmatter that is not valid YAML.**
+`scripts/lesson.py add` writes the title unquoted, so
+`title: Events to state: joining the two halves` breaks every standard parser. The runner's
+validator does **not** catch it and reports PASS; the authoring toolkit's own `yamlite`
+reader *does* reject it, so the toolkit writes a file it cannot read back. Two of this
+bundle's 26 titles were affected, and `rust-automaton-db` was bitten by the same thing in
+`skomp/tutorail-bundles#13`. **Quote any title containing a colon**, and after authoring a
+course, parse every lesson's frontmatter with a real YAML parser rather than trusting the
+validator. Filed as `tutorail-authoring#26` and `tutorAIl#53`.
+
+**A flow collection wrapped across two lines does not parse.** The restricted YAML reader
+takes `aliases: [a, b,` + newline + `c]` as a syntax error, so a long `aliases:` or
+`subjects:` list must sit on one physical line however wide that gets. The failure message
+names a line number and not the cause.
+
+**`supplies.py` refuses to run on an invalid bundle, even when the declaration is the
+repair.** A lesson-folder file that no `LESSON.md` names is a check 6 finding; declaring it
+as a lesson-scope supply clears that finding; but the tool checks validity *before* its own
+edit and refuses. The way out is the format's other remedy — have the `LESSON.md` name its
+material file — and then declare it. Filed as `tutorail-authoring#28`.
+
 ## A total is not a grade
 
 A course's score is comparable **against its own lessons only**. The figure tracks how
