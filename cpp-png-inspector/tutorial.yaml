@@ -159,3 +159,6 @@ supplies:
   - from: supplies/checks/
     to: checks
     describe: The scripts the course uses to read your program's behaviour back. You never edit these
+  - from: supplies/PNG-FORMAT.md
+    to: PNG-FORMAT.md
+    describe: One page holding everything about the PNG format this course needs, so you never have to open the specification
