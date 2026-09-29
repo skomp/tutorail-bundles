@@ -21,8 +21,8 @@ tells you what the parts are.
 ## Prerequisites
 
 This is an optional lesson, offered around `08-templates-eat-the-macros`. It needs a
-function template of your own — the `read<T>()` that replaced the `read_u32` / `read_u16` /
-`read_u8` family — a project that builds a library, a binary and a test executable from
+function template of your own — the `read<T>()` that replaced the `read_u32` and `read_u8`
+pair — a project that builds a library, a binary and a test executable from
 `04-a-target-of-its-own`, and the ability to run the build and read its output. It uses no
 C++ feature the main path has not reached, and nothing on the main path depends on it.
 
