@@ -152,3 +152,7 @@ failure_modes:
     signals:
       - validator:build
       - diagnosis
+supplies:
+  - from: supplies/assets/
+    to: assets
+    describe: "The four PNG files this course runs against: a small valid image, one carrying text metadata, one truncated part-way through a chunk, and one whose checksum is deliberately wrong"
