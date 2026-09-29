@@ -156,3 +156,6 @@ supplies:
   - from: supplies/assets/
     to: assets
     describe: "The four PNG files this course runs against: a small valid image, one carrying text metadata, one truncated part-way through a chunk, and one whose checksum is deliberately wrong"
+  - from: supplies/checks/
+    to: checks
+    describe: The scripts the course uses to read your program's behaviour back. You never edit these
