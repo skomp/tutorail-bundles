@@ -2,7 +2,7 @@
 id: 04-a-target-of-its-own
 title: A target of its own
 design_refs: [owning-and-borrowing]
-validators: [configure, build, tests]
+validators: [configure, build, tests, no-leak-on-error-path]
 ---
 
 ## Purpose

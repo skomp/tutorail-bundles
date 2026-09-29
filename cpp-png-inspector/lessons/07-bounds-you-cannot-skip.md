@@ -2,7 +2,7 @@
 id: 07-bounds-you-cannot-skip
 title: Bounds you cannot skip
 design_refs: [owning-and-borrowing]
-validators: [build, tests, dumps-basic-png, rejects-truncated]
+validators: [build, tests, dumps-basic-png, rejects-truncated, no-leak-on-error-path]
 ---
 
 ## Purpose

@@ -2,15 +2,15 @@
 id: 08-templates-eat-the-macros
 title: Templates eat the macros
 design_refs: [byte-order-in-one-place]
-validators: [build, tests, dumps-basic-png]
+validators: [build, tests, dumps-basic-png, no-leak-on-error-path]
 ---
 
 ## Purpose
 
-You have three or four byte-reading functions that differ only in a type and a count, and one
-definition should replace the lot of them.
+You have two byte-reading functions that differ only in a type and a count, one definition
+should replace both, and the same definition should serve every width you add after them.
 
-Look at `read_u32`, `read_u16` and `read_u8` — or the macros you wrote instead of them. Line
+Look at `read_u32` and `read_u8` — or the macros you wrote instead of them. Line
 them up and the bodies are the same shape: take a position, take that many bytes, put them
 together most significant first, hand back an integer. Only the type and the number of bytes
 change, and the number of bytes is a property of the type. In C the available answers were
@@ -45,9 +45,9 @@ the placement is the point.
 
 ### What is wrong with the family you have
 
-Three functions that differ by a type are three places to fix a bug, and the bug they attract
-is the byte-order one: it is entirely possible to get `read_u32` right and `read_u16` subtly
-wrong, and nothing points at the discrepancy. If you wrote macros instead, the defects are
+Two functions that differ by a type are two places to fix a bug, and the bug they attract is
+the byte-order one: it is entirely possible to get `read_u32` right and the next width you
+add subtly wrong, and nothing points at the discrepancy. If you wrote macros instead, the defects are
 the familiar ones — the arguments are evaluated wherever they appear in the expansion, so a
 macro called with `p[i++]` does something nobody intended; there is no type checking, because
 there is no type; the errors name the expansion, not your call; and a macro obeys no scope
@@ -204,7 +204,7 @@ lives in one function (`#byte-order-in-one-place`).
 
 ## Constraints
 
-- `read_u32`, `read_u16`, `read_u8` and any macro that did their job are deleted, not left
+- `read_u32`, `read_u8` and any macro that did their job are deleted, not left
   beside the template as wrappers.
 - There is exactly one definition of `read`, it is a template, and it lives in a header that
   both the library and the tests include.
@@ -257,7 +257,7 @@ source for the deleted names and for any shifting or reversing outside the templ
 ## Completion conditions
 
 - `build` and `tests` pass, and `dumps-basic-png` still passes.
-- No `read_u32`/`read_u16`/`read_u8` function or macro remains in the source, and no call site
+- No `read_u32`/`read_u8` function or macro remains in the source, and no call site
   adjusts byte order after calling `read<T>`.
 - `read<std::uint32_t>` reads a chunk length correctly, demonstrated by the listing for
   `assets/basic.png` being byte-for-byte what it was before.

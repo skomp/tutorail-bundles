@@ -87,9 +87,11 @@ The message is more informative than it looks. GCC and the GNU linker say
 `undefined reference to` followed by the mangled name; Clang on macOS says
 `Undefined symbols for architecture …`, then the symbol, then `referenced from:` and the
 object file. In both cases the symbol **contains the template arguments**, so it says exactly
-which instantiation was requested, and `c++filt` or `nm -C` over the object files will
-demangle it into something readable. Note the one thing it cannot tell you: there is no line
-number in the template, because no code was ever generated to have one.
+which instantiation was requested. Most current linkers print it already demangled, which is
+why it reads like a C++ signature rather than like `_ZN3png4readItEE…`; where you meet the
+raw form — `nm` over the object file shows it — `c++filt` or `nm -C` turns it back. Note
+the one thing it cannot tell you: there is no line number in the template, because no code
+was ever generated to have one.
 
 The deliberate version of the same mechanism is an **explicit instantiation definition**:
 telling the compiler in that `.cpp` to generate the specialisation for a named type whether
