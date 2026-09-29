@@ -200,3 +200,7 @@ optional_lessons:
     offer_at:
       - lessons/12-the-hid-report-descriptor.md
     offer_because: From the next lesson on, your firmware can type into whatever window has focus, and a bug that holds a key down is recoverable only by unplugging. If you would rather solve that in firmware than by choosing a machine you do not mind being typed into, this lesson adds a hardware enable gate that fails safe.
+  lessons/a-second-interface-for-debugging.md:
+    offer_at:
+      - lessons/13-your-first-keystroke.md
+    offer_because: Your device now talks USB, and it is tempting to send your own debug data down the same pipe. There is a right way and a wrong way, and the wrong way breaks boot protocol silently. This lesson adds a separate vendor interface and shows why the debug channel cannot live on the keyboard one.
