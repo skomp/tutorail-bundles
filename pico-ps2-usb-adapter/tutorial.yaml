@@ -223,3 +223,6 @@ supplies:
   - from: supplies/gitignore
     to: .gitignore
     describe: Keeps the build directory, editor droppings and your machine-specific device.env out of your git history
+  - from: supplies/pico_sdk_import.cmake
+    to: pico_sdk_import.cmake
+    describe: Boilerplate the Pico SDK requires verbatim; nothing in this course changes it
