@@ -204,3 +204,7 @@ optional_lessons:
     offer_at:
       - lessons/13-your-first-keystroke.md
     offer_because: Your device now talks USB, and it is tempting to send your own debug data down the same pipe. There is a right way and a wrong way, and the wrong way breaks boot protocol silently. This lesson adds a separate vendor interface and shows why the debug channel cannot live on the keyboard one.
+  lessons/measure-your-latency.md:
+    offer_at:
+      - lessons/14-events-to-state/LESSON.md
+    offer_because: Your adapter works, and it sits between a typist and their computer. This lesson measures what it costs them, end to end, and compares your two receive backends with numbers rather than with intuition.
