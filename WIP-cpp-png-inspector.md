@@ -1,11 +1,45 @@
 # WIP: cpp-png-inspector — where this stopped, and what comes next
 
-**Branch:** `add-cpp-png-inspector`. **Delete this file before merging.**
+**Branch: read section 0 first — this work is NOT on `add-cpp-png-inspector`.**
+**Delete this file before merging.**
 **Written:** 2026-09-29, at a pause for a machine reboot.
 
 The bundle is structurally complete and validated, and all fifteen lesson bodies are
 written. It is NOT finished: the corrections in section 2 are known and unapplied, and the
 course-quality audit has not been run.
+
+## 0. Branch collision — read this before anything else
+
+Two sessions shared this checkout. A peer session created and checked out
+`spec-pico-ps2-usb-adapter` from my HEAD at `64bfc72`, part-way through my work. Branches
+are per-checkout, so from that moment **my commits went onto their branch.** Nothing was
+lost and nobody staged anyone else's files, but the history is interleaved:
+
+```
+main
+ └─ d6ed53b .. 64bfc72   mine   skeleton, 15 lesson adds, failure mode
+     └─ d3074a0          PEER'S pico-ps2-usb-adapter/SPEC.md (458 lines, one file)
+         └─ 7a93281 .. cd8baa1   mine   supplies, all lesson bodies, this handover
+```
+
+- `add-cpp-png-inspector` is stranded at **`64bfc72`** and does NOT contain the lesson
+  bodies, the supplies declarations or this file.
+- `cpp-png-inspector-tip` -> **`cd8baa1`** is a ref I added purely so my later commits stay
+  reachable from something I own. It rewrites nothing.
+- `spec-pico-ps2-usb-adapter` -> `cd8baa1` is the peer's branch and currently HEAD.
+
+**The tip of my work is `cd8baa1`.** Untangling it means separating one peer commit from
+nine of mine, which is a history rewrite in a shared checkout — Robert's call, not a thing
+to do unattended. The peer said it intends to cherry-pick only `d3074a0` onto a fresh
+branch off `main` and leave my commits alone; cherry-picking does not move refs, so that
+plan is safe for me.
+
+**One hazard if anyone rebases instead.** `rebase.updateRefs` is `true` in the global git
+config, so a rebase over `d3074a0` force-moves every branch pointing into the rewritten
+range. `git for-each-ref --contains d3074a0` lists both `cpp-png-inspector-tip` and
+`spec-pico-ps2-usb-adapter` — which is to say the backup would be moved off the commits it
+exists to preserve. Pass `--no-update-refs`, or re-point the ref afterwards and verify it.
+Nothing here is pushed, so the safety ref is local only and is not yet a real backup.
 
 ## 1. State
 
