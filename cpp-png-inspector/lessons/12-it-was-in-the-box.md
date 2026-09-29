@@ -212,8 +212,8 @@ It is the right type for a `tEXt` chunk specifically because **the value is not
 NUL-terminated**: it runs to the end of the chunk, and its length is whatever the chunk
 length leaves over after the keyword and its NUL. A `std::string_view` carries that length
 with it, so the trap `11-the-finished-tool` is built around cannot be sprung — there is no
-terminator to look for, and nothing invites you to look for one. In exchange you get `find`, `substr`,
-comparison against string literals, and printing to a stream with the right length.
+terminator to look for, and nothing invites you to look for one. In exchange you get `find`,
+`substr`, comparison against string literals, and printing to a stream with the right length.
 
 Two details. Your bytes are `unsigned char` and `std::string_view` is over `char`, so the
 conversion at that boundary is a `reinterpret_cast` and belongs in one place. And
