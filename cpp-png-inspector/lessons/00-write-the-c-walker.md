@@ -20,7 +20,7 @@ until you are holding the thing that needs repairing.
 ## Prerequisites
 
 None — this is the first lesson. Your toolchain was confirmed before the course opened, so
-CMake 3.16 or newer and a working compiler are on your `PATH`.
+CMake 3.20 or newer and a working compiler are on your `PATH`.
 
 Your workspace already contains four things the course supplies and you never edit:
 

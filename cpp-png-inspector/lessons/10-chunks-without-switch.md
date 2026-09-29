@@ -253,10 +253,13 @@ given, owned through your buffer type, so it can report the count and total payl
 at the end of the run. Then build a table mapping a type to a handler, have the walker
 look up and call, and delete the handlers when the table goes away.
 
-Now run `build` and `no-leak-on-error-path`, and read what the counter says. If the number
-is not zero, do not reach for the answer: find out which allocation is outstanding, which
-destructor was supposed to release it, and why that destructor did not run when the
-handler was deleted through a base pointer.
+Now run `build` and `no-leak-on-error-path`, then run the tool yourself over
+`assets/basic.png` and read what the counter says there. The second run is the one that
+shows this: `assets/truncated.png` ends 54 bytes into the first `IDAT`'s payload, so no
+complete chunk ever reaches that handler, it never allocated on that path, and its counts
+balance whether the destructor is virtual or not. If the number is not zero, do not reach for the answer: find out which
+allocation is outstanding, which destructor was supposed to release it, and why that
+destructor did not run when the handler was deleted through a base pointer.
 
 With that fixed, do the `override` experiment on purpose. Take one derived handler, change
 its parameter or its const-qualification so the signature no longer matches the base, and
@@ -269,9 +272,10 @@ handler for a type that does not appear in the test files at all — `gAMA` or `
 counting the existing functions you had to edit. The answer should be zero.
 
 Add tests: that a call through a base pointer reaches the derived handler; that
-constructing and deleting a handler through a base pointer leaves the counter balanced;
-that the table returns the fallback for an unregistered type. Finish with `build`,
-`tests`, `dumps-basic-png` and `no-leak-on-error-path`.
+constructing a handler, giving it a chunk to record, and deleting it through a base pointer
+leaves the counter balanced — give it the chunk, or the test passes with the destructor
+having had nothing to release; that the table returns the fallback for an unregistered
+type. Finish with `build`, `tests`, `dumps-basic-png` and `no-leak-on-error-path`.
 
 ## Completion conditions
 

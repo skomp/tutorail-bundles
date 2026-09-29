@@ -2,7 +2,7 @@
 id: 12-it-was-in-the-box
 title: It was in the box all along
 design_refs: [handwritten-then-replaced, errors-are-values]
-validators: [build, tests, dumps-basic-png, reads-text-metadata, detects-bad-crc, rejects-truncated, explains-the-repair]
+validators: [build, tests, dumps-basic-png, reads-text-metadata, detects-bad-crc, rejects-truncated, no-leak-on-error-path, explains-the-repair]
 ---
 
 ## Purpose
@@ -180,7 +180,13 @@ Say the next part out loud, because it is the most common wrong conclusion:
 `Base*`. If `Base`'s destructor is not virtual that is undefined behaviour and, in
 practice, the derived part is never destroyed — the same leak lesson 10 caught with the
 allocation counter, now hidden behind a type whose name suggests it was handled. Remove the
-`virtual` after the refactor, run the tool, and read the counter.
+`virtual` after the refactor, run the tool over `assets/basic.png`, and read the counter.
+The file matters, for the reason lesson 10 gave: the counts for the handler object itself
+balance either way, and what goes missing is the allocation a handler's own member was
+holding — so the run has to be one where that handler ran and actually allocated.
+`assets/truncated.png` ends 54 bytes into the first `IDAT`'s payload, so no complete chunk
+ever reaches a handler, and a `std::vector` nothing has been put into has allocated
+nothing — so on that file the counter reads zero with the destructor virtual or not.
 
 Keep the chunk *values* as values. `chunk-data-vs-chunk-handlers` puts polymorphism in the
 handlers and nowhere else, and one reason is visible only now: a chunk that is a plain value
@@ -244,6 +250,11 @@ unchanged test suite, with the three reasons a test might break.
   all still printed in the same shapes.
 - The allocation counter stays in the program and must still balance. It is the evidence,
   and this lesson is not an excuse to retire it.
+- At least one handler still owns heap state after the refactor, and the experiment above
+  reads it. Lesson 10 guaranteed this by making the record an owning buffer; replacing that
+  buffer with `std::vector` does not, because collapsing the record into two `std::size_t`
+  members is a reasonable tidy-up that allocates nothing — and then the missing virtual
+  destructor becomes invisible again.
 - The tests written in lessons 04 to 11 keep their assertions. If one will not compile,
   diagnose it and record why before changing a character of it.
 - No new features, and one replacement at a time with the full check set green in between.
@@ -270,7 +281,8 @@ allocation report against the baseline.
 
 Then the owning pointers: convert the handler list to `std::unique_ptr` and remove every
 `delete` it made unnecessary. Then run the experiment — make the base destructor
-non-virtual, run the tool, read the counter, restore it, and be able to say what you saw.
+non-virtual, run the tool over `assets/basic.png`, read the counter, restore it, and be able
+to say what you saw.
 
 Then the result type. Work out first, on paper, which of your returns need to carry an
 offset and which only need to say "nothing here"; replace the second kind with
@@ -294,8 +306,9 @@ one of them, that is the reference page to go and read.
   had to be edited is accounted for by name, with which of the three reasons applied; an
   edit for reason 3 is recorded as a defect the refactor found.
 - No hand-written owning buffer and no owning raw pointer remains. The allocation report
-  still appears at exit and still shows `outstanding: 0` on every asset, including
-  `assets/truncated.png`.
+  still appears at exit and still shows `outstanding: 0` on every asset;
+  `no-leak-on-error-path` checks that for `assets/truncated.png`, and you read the other
+  three yourself.
 - `explains-the-repair`: the learner states, per replacement, what the standard type does
   that theirs did not — specifically that `std::vector` grows and separates size from
   capacity, that `std::unique_ptr` puts single ownership in the type while still requiring

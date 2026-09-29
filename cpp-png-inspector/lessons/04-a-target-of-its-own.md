@@ -18,7 +18,7 @@ harness is not housekeeping — it is the instrument for the next eight lessons.
 
 `03-a-class-that-cleans-up` is complete: an owning buffer type exists, its destructor
 releases the bytes, `no-leak-on-error-path` passes on `assets/truncated.png`, and
-`dumps-basic-png` still passes. You have `cmake` 3.16 or newer and a C++17 compiler, both
+`dumps-basic-png` still passes. You have `cmake` 3.20 or newer and a C++17 compiler, both
 confirmed before lesson 00.
 
 ## Learning objectives
