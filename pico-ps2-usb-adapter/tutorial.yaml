@@ -28,6 +28,7 @@ lessons:
   - lessons/08-ps2-receive-in-pio.md
   - lessons/09-talking-back-in-pio/LESSON.md
   - lessons/10-scan-codes-to-key-events.md
+  - lessons/11-descriptors-you-write-yourself.md
 
 workspace_kind: new-repository
 tutor_owned: [tutorial/STATE.md, tutorial/DESIGN.md]
