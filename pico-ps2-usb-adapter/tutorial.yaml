@@ -1,0 +1,255 @@
+bundle_format: 1
+id: pico-ps2-usb-adapter
+title: Build a PS/2 to USB HID Keyboard Adapter on the Raspberry Pi Pico
+description: >
+  Build an adapter that presents an IBM Model M over PS/2 to any modern computer
+  as an ordinary USB HID keyboard, and learn the embedded, electrical, timing and
+  protocol layers it stands on.
+teaching_method: >
+  Every stage ends in something you can observe on an instrument or on the host
+  before the next one starts. You see the PS/2 signal before you decode it, you
+  write the receiver with interrupts before you offload it to PIO, and you write
+  every USB descriptor by hand. The tutor reads evidence off your board's debug
+  console and never advances on an assertion.
+subjects: [embedded, microcontrollers, rp2040, usb, hid, ps2, electronics, firmware, c]
+aliases: [model m, keyboard adapter, ps2 to usb, raspberry pi pico, rp2040, pio, usb hid, tinyusb, mechanical keyboard, buckling spring, pico-sdk]
+level: intermediate
+style: [project-driven, interactive, long-form]
+
+lessons:
+  - lessons/00-first-code-and-a-window-in.md
+  - lessons/01-the-ps2-connector-and-what-is-safe.md
+  - lessons/02-open-drain-and-pull-ups.md
+  - lessons/03-see-the-protocol-before-you-decode-it/LESSON.md
+  - lessons/04-your-first-interrupt.md
+  - lessons/05-a-state-machine-in-an-isr.md
+  - lessons/06-handing-data-to-the-main-loop.md
+  - lessons/07-what-a-pio-state-machine-is.md
+  - lessons/08-ps2-receive-in-pio.md
+  - lessons/09-talking-back-in-pio/LESSON.md
+  - lessons/10-scan-codes-to-key-events.md
+  - lessons/11-descriptors-you-write-yourself.md
+  - lessons/12-the-hid-report-descriptor.md
+  - lessons/13-your-first-keystroke.md
+  - lessons/14-events-to-state/LESSON.md
+  - lessons/15-the-lock-leds.md
+  - lessons/16-when-it-goes-wrong.md
+  - lessons/17-robustness-and-the-real-world.md
+  - lessons/18-off-the-breadboard-and-done/LESSON.md
+
+workspace_kind: new-repository
+tutor_owned: [tutorial/STATE.md, tutorial/DESIGN.md]
+learner_owned:
+  - src/**
+  - include/**
+  - pio/**
+  - checks/**
+  - docs/**
+  - captures/**
+  - CMakeLists.txt
+  - pico_sdk_import.cmake
+  - README.md
+  - BOM.md
+  - device.env
+ownership_policy: tutor-must-not-edit-learner-owned
+
+validators:
+  toolchain-present:      { kind: command, command: [python3, checks/toolchain.py] }
+  build-ok:               { kind: command, command: [python3, checks/build.py] }
+  firmware-alive:         { kind: command, command: [python3, checks/console.py, alive] }
+  edges-counted:          { kind: command, command: [python3, checks/console.py, edges] }
+  frames-received:        { kind: command, command: [python3, checks/console.py, frames] }
+  queue-lossless:         { kind: command, command: [python3, checks/console.py, queue] }
+  pio-runs:               { kind: command, command: [python3, checks/console.py, pio] }
+  pio-frames-received:    { kind: command, command: [python3, checks/console.py, pio-frames] }
+  keyboard-acks-command:  { kind: command, command: [python3, checks/console.py, ack] }
+  key-events-decoded:     { kind: command, command: [python3, checks/console.py, events] }
+  no-stuck-keys:          { kind: command, command: [python3, checks/console.py, reports] }
+  survives-abuse:         { kind: command, command: [python3, checks/console.py, robustness] }
+  safety-catch-works:     { kind: command, command: [python3, checks/console.py, safety] }
+  enumerates-as-hid:      { kind: command, command: [python3, checks/usb.py, enumerate] }
+  report-descriptor-sane: { kind: command, command: [python3, checks/usb.py, descriptor] }
+  second-interface-live:  { kind: command, command: [python3, checks/usb.py, vendor] }
+  nkro-reports:           { kind: command, command: [python3, checks/usb.py, nkro] }
+  wiring-verified:        { kind: manual }
+  pullups-verified:       { kind: manual }
+  signal-captured:        { kind: manual }
+  keystroke-delivered:    { kind: manual }
+  leds-follow-host:       { kind: manual }
+  fault-diagnosed:        { kind: manual }
+  finished-adapter:       { kind: manual }
+  scope-trace-read:       { kind: manual }
+  enumeration-captured:   { kind: manual }
+  latency-measured:       { kind: manual }
+  keymap-applied:         { kind: manual }
+
+setup_validators:
+  - name: toolchain-present
+    describe: >
+      Checks that cmake, the ARM toolchain and the Pico SDK are where the build will
+      look for them, so a failure in lesson 00 is your code and not your environment.
+
+covers:
+  microcontroller-execution-model:
+    summary: >
+      A program that owns the whole chip: it starts from a boot ROM, runs from flash
+      with no operating system under it, and never returns.
+    aliases: [bare metal, firmware, boot rom, uf2, xip flash, memory map]
+  open-drain-signalling:
+    summary: >
+      A line no device drives high: every device may only pull it low, a pull-up
+      resistor supplies the high level, and that is what lets two devices share one wire.
+    aliases: [open collector, push-pull vs open-drain, pull-up sizing, wired-and]
+  logic-level-shifting:
+    summary: >
+      Joining a 5 V part to a 3.3 V part that is not 5 V tolerant, on a bidirectional
+      line where a resistor divider and a unidirectional buffer both fail.
+    aliases: [voltage domains, level shifter, 3.3v vs 5v, bss138, logic levels]
+  interrupt-driven-io:
+    summary: >
+      A hardware event vectors the CPU into a handler that runs to completion; latency,
+      what may not be done inside one, and how the handler reaches the main loop.
+    aliases: [interrupts, isr, nvic, isr latency, interrupt handler]
+  isr-main-loop-shared-state:
+    summary: >
+      Data crossing between an interrupt handler and the main loop needs `volatile`, a
+      critical section or a lock-free ring buffer, and the choice between them has costs.
+    aliases: [volatile, critical sections, lock-free ring buffer, single-producer single-consumer, shared state]
+  framing-state-machine:
+    summary: >
+      Assembling a serial bit stream into bytes: a shift register, a bit counter, a
+      parity check, and an idle timeout that resynchronises after a glitch.
+    aliases: [framing, resynchronisation, timeouts, parity, shift register]
+  rp2040-pio:
+    summary: >
+      Programmable I/O state machines that run a nine-instruction program beside the CPU,
+      with their own shift registers, autopush and clock divider.
+    aliases: [pio, pio instruction set, autopush, autopull, clock divider, state machine, protocol offload]
+  ps2-keyboard-protocol:
+    summary: >
+      The PS/2 electrical interface and its eleven-bit frame in both directions,
+      including the host-to-device sequence the device itself clocks.
+    aliases: [ps2, ps/2, wire format, bus arbitration, mini-din-6]
+  scan-code-set-2:
+    summary: >
+      What a PS/2 keyboard actually sends: make codes, the break prefix, the extended
+      prefix, the Pause and Print Screen sequences, and typematic repeat.
+    aliases: [scan codes, make and break, typematic repeat, extended prefix]
+  usb-enumeration:
+    summary: >
+      The conversation a host has with a device it has never seen — addresses, control
+      transfers, and the descriptors that decide which driver binds.
+    aliases: [usb, enumeration, usb descriptors, endpoints, transfer types, bus topology]
+  hid-report-descriptors:
+    summary: >
+      The stack language that tells a host the shape of a device's reports: usage pages,
+      logical minimum and maximum, report size and count, arrays versus bitmaps.
+    aliases: [hid, report descriptor, usages, arrays and bitmaps, usage page]
+  usb-hid-keyboard-reports:
+    summary: >
+      The eight-byte boot keyboard report — a modifier bitmap, a reserved byte and a
+      six-key array — with rollover, and the LED output report the host sends back.
+    aliases: [boot protocol, report protocol, modifiers, rollover, lock leds, hid output reports, 6kro]
+  events-versus-state:
+    summary: >
+      A source that emits events and a sink that reports state need a state model
+      between them, because a report per event gives stuck keys under load.
+    aliases: [key state, events vs state, snapshots, firmware architecture, swappable backends]
+  usb-power-management:
+    summary: >
+      Suspend, resume and remote wakeup, and what a device owes its host when the host
+      goes to sleep with the device plugged in.
+    aliases: [usb suspend, resume, remote wakeup, hot-plug, watchdog]
+  embedded-debugging:
+    summary: >
+      Finding a fault on a chip with no console: SWD and gdb, reading a hard fault, and
+      why adding a `printf` changes the timing you were trying to measure.
+    aliases: [swd, gdb, hard fault, debugprobe, observer effect, logic analyser, sample rate, triggering]
+
+assumes:
+  c-programming:
+    level: working
+    summary: >
+      Write and debug ordinary C: pointers, structs, arrays, bit manipulation with
+      shifts and masks, header and translation unit separation, and reading a compiler
+      error without help.
+  command-line-and-git:
+    level: working
+    summary: >
+      Work in a shell, run a build, read a build log, and use git for your own commits
+      and branches.
+  reading-reference-documentation:
+    level: working
+    summary: >
+      Read a datasheet, a reference manual or a protocol specification and find the
+      answer to a specific question in it, rather than following a tutorial.
+
+one_task_at_a_time: true
+solution_code: on-request-only
+advance_on: validated-evidence-only
+optional_lessons:
+  lessons/see-the-edges-on-a-scope.md:
+    offer_at:
+      - lessons/02-open-drain-and-pull-ups.md
+    offer_because: You have just calculated an RC rise time for your pull-up. If you have an oscilloscope, you can go and look at the edge it actually produces, at two different pull-up values, and see why this is a trade-off rather than a lookup. It needs a scope; a logic analyser cannot show you this.
+  lessons/watch-the-enumeration.md:
+    offer_at:
+      - lessons/11-descriptors-you-write-yourself.md
+    offer_because: "You have just inferred the enumeration conversation from its results. You can watch it happen instead, as packets on the wire, and walk the request sequence your own device answered. This needs a Linux or Windows host: USB packet capture does not work on macOS."
+  lessons/a-safety-catch.md:
+    offer_at:
+      - lessons/13-your-first-keystroke.md
+    offer_because: "This lesson is where your firmware starts typing into whatever window has focus, and a bug that holds a key down is recoverable only by unplugging. If you would rather solve that in firmware than by choosing a machine you do not mind being typed into, this lesson adds a hardware enable gate that fails safe."
+  lessons/a-second-interface-for-debugging.md:
+    offer_at:
+      - lessons/13-your-first-keystroke.md
+    offer_because: Your device now talks USB, and it is tempting to send your own debug data down the same pipe. There is a right way and a wrong way, and the wrong way breaks boot protocol silently. This lesson adds a separate vendor interface and shows why the debug channel cannot live on the keyboard one.
+  lessons/measure-your-latency.md:
+    offer_at:
+      - lessons/14-events-to-state/LESSON.md
+    offer_because: Your adapter works, and it sits between a typist and their computer. This lesson measures what it costs them, end to end, and compares your two receive backends with numbers rather than with intuition.
+  lessons/nkro-without-a-driver.md:
+    offer_at:
+      - lessons/14-events-to-state/LESSON.md
+    offer_because: Your report carries six keys, because that is what boot protocol gives you. You can report more, without a driver, and this lesson shows how — and what you give up if you do it by replacing the boot report instead of adding to it.
+  lessons/remap-and-macros.md:
+    offer_at:
+      - lessons/15-the-lock-leds.md
+    offer_because: The adapter is complete and the layout is whatever IBM shipped in 1986. This lesson adds a keymap layer so you can move a key or bind a macro, and shows which layer each kind of change belongs in.
+supplies:
+  - from: supplies/README.md
+    to: README.md
+    describe: "README for this firmware repository: what the project is, the hardware it needs, and how to configure, build and flash it"
+  - from: supplies/gitignore
+    to: .gitignore
+    describe: Keeps the build directory, editor droppings and your machine-specific device.env out of your git history
+  - from: supplies/pico_sdk_import.cmake
+    to: pico_sdk_import.cmake
+    describe: Boilerplate the Pico SDK requires verbatim; nothing in this course changes it
+  - from: supplies/device.env.template
+    to: device.env
+    describe: "device.env: which serial port your debug console is on and which VID/PID your device will use - you fill these in during lesson 00"
+  - from: supplies/BOM.md
+    to: BOM.md
+    describe: The shopping list, with the exact part types this course assumes and why each one. Lead time is the thing you cannot compress, so read it first
+  - from: supplies/PINOUT.md
+    to: docs/PINOUT.md
+    describe: The pin assignment this course uses, and the mini-DIN-6 pinout drawn from both the plug side and the socket side so you cannot read it mirrored
+  - from: supplies/checks-console.py
+    to: checks/_console.py
+    describe: Shared helper the checks use to open your debug console and read its log lines
+  - from: supplies/checks-usb.py
+    to: checks/_usb.py
+    describe: Shared helper the checks use to find your device on the host and read its descriptors, on Linux, macOS and Windows alike
+  - from: supplies/checks-toolchain.py
+    to: checks/toolchain.py
+    describe: The check that confirms cmake, the ARM toolchain and the Pico SDK are installed and findable
+  - from: supplies/checks-build.py
+    to: checks/build.py
+    describe: The check that configures and builds your firmware
+  - from: supplies/checks-console-cli.py
+    to: checks/console.py
+    describe: The checks that read evidence off your debug console
+  - from: supplies/checks-usb-cli.py
+    to: checks/usb.py
+    describe: The checks that read evidence off the host's view of your device

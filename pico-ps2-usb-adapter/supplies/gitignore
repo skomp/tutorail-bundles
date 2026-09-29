@@ -1,0 +1,58 @@
+# --- build output -----------------------------------------------------------
+# Everything CMake generates. Nothing in here is worth committing and some of it is
+# tens of megabytes.
+build/
+build-*/
+cmake-build-*/
+out/
+
+# Firmware images and link artefacts, in case one ends up outside the build tree.
+*.uf2
+*.elf
+*.bin
+*.hex
+*.dis
+*.map
+*.o
+*.a
+*.d
+
+# --- machine-specific configuration ------------------------------------------
+# device.env holds the serial port path of your debug console, which is different on
+# every machine and changes when you replug. It is yours, not the repository's.
+# device.env.template is committed; the filled-in copy is not.
+device.env
+device.env.local
+
+# --- editor and tooling droppings --------------------------------------------
+.vscode/
+.idea/
+*.code-workspace
+.cache/
+compile_commands.json
+.clangd/
+.ccls-cache/
+*.swp
+*.swo
+*~
+\#*\#
+.#*
+
+# --- operating system droppings ----------------------------------------------
+.DS_Store
+._*
+Thumbs.db
+desktop.ini
+
+# --- python, for anything you script around the checks ------------------------
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Note what is deliberately NOT ignored:
+#   pico_sdk_import.cmake   boilerplate the build needs; it must be committed
+#   CMakeLists.txt          you write it, and it changes in nearly every lesson
+#   captures/               your logic analyser captures are evidence; keep them
+#   docs/                   your notes and the supplied references
+#   tutorial/               where the tutor keeps your progress and design notes
