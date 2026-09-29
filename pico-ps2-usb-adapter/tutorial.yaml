@@ -23,6 +23,7 @@ lessons:
   - lessons/03-see-the-protocol-before-you-decode-it/LESSON.md
   - lessons/04-your-first-interrupt.md
   - lessons/05-a-state-machine-in-an-isr.md
+  - lessons/06-handing-data-to-the-main-loop.md
 
 workspace_kind: new-repository
 tutor_owned: [tutorial/STATE.md, tutorial/DESIGN.md]
