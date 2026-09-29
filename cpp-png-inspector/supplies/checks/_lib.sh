@@ -20,7 +20,18 @@ find_pngdump() {
       and you must have built it: cmake -S . -B build && cmake --build build"
 }
 
-# The three line shapes the course fixes. Everything else your tool prints is yours.
+# The three line shapes the course fixes. Everything else your tool prints is yours,
+# but these three are matched literally, so the spacing is part of the contract:
+#
+#   chunk   <offset> <type> <length> — decimal, a four-letter type, exactly one
+#           space between fields, no leading space, nothing after the length.
+#           Aligned columns, space-padded numbers and a trailing space all fail
+#           to match. Leading zeroes match the shape but not the expected output.
+#   error   begins with "error:" in column one.
+#   report  allocations: <n> frees: <m> outstanding: <k> — single spaces, nothing
+#           trailing, and printed exactly once. <k> may be negative, which is how a
+#           double free shows up.
 chunk_lines() { grep -E '^[0-9]+ [A-Za-z]{4} [0-9]+$' || true; }
 error_lines() { grep -E '^error:' || true; }
-outstanding() { sed -n 's/^allocations: [0-9]* frees: [0-9]* outstanding: \([0-9][0-9]*\)$/\1/p'; }
+# Emits one <k> per report line found, so a caller can tell none from one from many.
+outstanding() { sed -n 's/^allocations: [0-9]* frees: [0-9]* outstanding: \(-\{0,1\}[0-9][0-9]*\)$/\1/p'; }

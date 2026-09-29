@@ -4,14 +4,16 @@
 . "$(dirname "$0")/_lib.sh"
 
 command -v cmake >/dev/null 2>&1 \
-  || die "cmake is not on your PATH. This course needs CMake 3.16 or newer.
+  || die "cmake is not on your PATH. This course needs CMake 3.20 or newer.
       macOS: brew install cmake   Debian/Ubuntu: apt install cmake
       Windows: winget install Kitware.CMake"
 
 v="$(cmake --version | head -1 | awk '{print $3}')"
 major="${v%%.*}"; rest="${v#*.}"; minor="${rest%%.*}"
-if [ "$major" -lt 3 ] || { [ "$major" -eq 3 ] && [ "$minor" -lt 16 ]; }; then
-  die "cmake $v is older than the 3.16 this course needs."
+if [ "$major" -lt 3 ] || { [ "$major" -eq 3 ] && [ "$minor" -lt 20 ]; }; then
+  die "cmake $v is older than the 3.20 this course needs.
+      The course's test check runs 'ctest --test-dir build', and --test-dir
+      was added in CMake 3.20."
 fi
 
 cxx=""

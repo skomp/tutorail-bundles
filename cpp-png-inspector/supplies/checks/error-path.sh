@@ -21,11 +21,13 @@ out="$("$bin" "$asset" 2>&1)"; status=$?
 
 [ "$status" -lt 128 ] || die "pngdump died on a signal (exit $status) instead of reporting the truncation."
 
-k="$(printf '%s\n' "$out" | outstanding)"
-[ -n "$k" ] || die "no allocation report in the output.
+reports="$(printf '%s\n' "$out" | outstanding)"
+[ -n "$reports" ] || die "no allocation report in the output.
 
-      This check reads one line, printed when your program exits:
+      This check reads one line, printed exactly once when your program exits:
           allocations: <n> frees: <m> outstanding: <k>
+
+      Single spaces, nothing before it on the line and nothing after it.
 
       If you have written the counter but print it only on the success path,
       that is the defect this lesson is about: the run that leaks is exactly
@@ -33,6 +35,27 @@ k="$(printf '%s\n' "$out" | outstanding)"
 
       Its output was:
 $out"
+
+count="$(printf '%s\n' "$reports" | grep -c '.')"
+[ "$count" -eq 1 ] || die "the allocation report was printed $count times. This check needs
+      exactly one, because it cannot tell which of $count counts is the final one.
+
+      Print the line once, at exit, after the last free — not once per chunk and
+      not once per object destroyed.
+
+      The counts it found, in order: $(printf '%s\n' "$reports" | paste -sd ' ' -)"
+
+k="$(printf '%s\n' "$reports" | tail -n 1)"
+
+if [ "$k" -lt 0 ]; then
+  die "the counter says outstanding: $k. A negative count means your program
+      freed more times than it allocated, which almost always means one block was
+      freed twice — a double free. The likely cause is a copy: two objects holding
+      the same pointer, each releasing it in its destructor.
+
+      A double free is undefined behaviour, so a run that survives it proves
+      nothing. Fix the ownership, then run this check again."
+fi
 
 case "$mode" in
   expect-leak)
