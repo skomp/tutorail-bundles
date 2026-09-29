@@ -193,25 +193,27 @@ your backstop either way.
 9. Debounce or settle the reading. A mechanical jumper bounces, and a gate that flutters on
    contact emits half a transition's worth of reports.
 10. Handle armed → blocked: send an all-keys-released report as the last thing before the gate
-    closes. Handle blocked → armed: send a snapshot of the current bitmap as the first thing
-    after it opens. Confirm `safety:` prints on change and not repeatedly.
-11. Confirm the device still enumerates and stays configured while blocked, and that `key:` lines
+    closes.
+11. Handle blocked → armed: send a snapshot of the current bitmap as the first thing after it
+    opens.
+12. Confirm `safety:` prints on change and not repeatedly.
+13. Confirm the device still enumerates and stays configured while blocked, and that `key:` lines
     still appear as you type. If the console goes quiet while blocked, you have gated the wrong
     end.
-12. Build the adversary: a runaway that sends a key-down and never releases it, or emits a
+14. Build the adversary: a runaway that sends a key-down and never releases it, or emits a
     character in a loop. Keep it in a separate configuration or behind a flag you can remove
     cleanly.
-13. Before running it: focus a plain text editor, and take the jumper in your hand rather than
+15. Before running it: focus a plain text editor, and take the jumper in your hand rather than
     fitting it.
-14. Run the runaway with GP4 open. The console shows `safety: blocked`, the `key:` lines prove
+16. Run the runaway with GP4 open. The console shows `safety: blocked`, the `key:` lines prove
     the firmware is alive, and the editor stays empty. Leave it long enough to be convinced — a
     gate that leaks one report every few seconds is a gate that fails.
-15. Ground GP4. The console flips to `safety: armed` and the runaway does what it was written to
+17. Ground GP4. The console flips to `safety: armed` and the runaway does what it was written to
     do. Let it, briefly.
-16. Lift the jumper. Typing stops, and — check this carefully — the host does **not** keep
+18. Lift the jumper. Typing stops, and — check this carefully — the host does **not** keep
     repeating the last character. If it does, your all-released report is missing, or is being
     sent after the gate rather than before it.
-17. Remove the runaway build, return to your real firmware, keep the gate. Then say in one
+19. Remove the runaway build, return to your real firmware, keep the gate. Then say in one
     sentence each what would have happened with an active-high enable, and with the gate placed
     after the stack call.
 

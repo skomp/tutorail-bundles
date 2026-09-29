@@ -110,8 +110,10 @@ cycle some handler noticed.
 
 Every instruction also carries a **delay** of up to 31 cycles, written in brackets:
 `set pins, 1 [7]` executes and then idles 7 more cycles, occupying 8 in total. That is how
-you build precise timing without a loop. The delay field is shared with side-set, so using
-side-set costs delay range.
+you build precise timing without a loop. There is also **side-set**, a way to drive a pin
+group on the same cycle as any instruction — a clock line for free — which this course never
+uses; the optional deeper path at the end of this lesson says what it costs and where to read
+about it.
 
 ### The clock divider, and the thing it cannot do
 
@@ -162,8 +164,9 @@ consequences to carry into lesson 08:
   does not drop the word and it does not carry on. A state machine nobody drains is a state
   machine that has stopped, and from outside that looks exactly like a bug in the program.
 - With a threshold below 32 the word in the FIFO is still 32 bits wide, and your bits are not
-  where you want them. Shifting right with threshold N leaves them in the **top** N bits, so
-  the CPU must shift down by `32 - N`. Nothing warns you; the value looks entirely reasonable.
+  where you want them. Shifting right leaves them in the **top** bits, occupying as many of
+  them as the threshold, so the CPU must shift down by 32 minus the threshold. Nothing warns
+  you; the value looks entirely reasonable.
 
 **Autopull** is the same idea in reverse for the OSR and TX FIFO, drained by `out`. You will
 use it in lesson 09 and not before. An explicit `push` also has a `noblock` form that
@@ -215,8 +218,7 @@ machine is something you do on purpose.
 - A PIO block: two blocks, four state machines each, 32 shared instruction words; and the
   per-state-machine state — PC, X, Y, ISR, OSR, two four-word FIFOs, divider, pin maps.
 - The nine instructions, and that each takes one cycle unless it stalls.
-- The delay field, and that `[d]` means `d` *extra* cycles; side-set, at least as "it exists,
-  it steals bits from the delay field, and it drives a clock line for free".
+- The delay field, and that `[d]` means `d` *extra* cycles.
 - The divider as 16.8 fixed point, and the ~1.9 kHz floor it implies.
 - Predicting a frequency from instruction count, delay and divider — arithmetic before
   measurement, not after.
@@ -320,7 +322,11 @@ machine is something you do on purpose.
 
 ## Optional deeper paths
 
-- Rewrite the square wave with side-set instead of `set pins`, watch the instruction count
+- **Side-set**, which the lesson body only names. It drives a pin group on the same cycle as
+  any instruction, which is how a PIO program gets a clock line for free, and it pays for that
+  by taking bits out of the delay field — a wider side-set group leaves a narrower delay range.
+  The datasheet's PIO chapter and `pioasm`'s `.side_set` directive are where to read it up.
+  Then rewrite the square wave with side-set instead of `set pins`, watch the instruction count
   fall, and work out what you gave up in delay range.
 - Run the *same* loaded program on two state machines at different dividers, and watch two pins
   toggle at two rates from one copy of the instructions — the clearest demonstration of what is

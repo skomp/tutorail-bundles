@@ -108,10 +108,10 @@ not match the log format are ignored by every check.
 modes, and changing your layout means editing a file and reflashing. A table in RAM can be
 changed while the adapter runs — from the debug console, from a key combination, from a vendor
 report if you took the offered `a-second-interface-for-debugging` lesson — and costs RAM, a
-persistence story and a recovery story. Persistence is the sharp edge on an RP2040: writing
-the keymap to flash from running firmware means the code doing the writing cannot itself be
-executing from flash while XIP is disabled, and the second core and the interrupts must be
-kept out of flash for the duration. Recovery is quieter and bites harder: a runtime map that
+persistence story and a recovery story. Persistence is possible on this chip and is fiddly,
+because your code executes in place out of the same flash you would be writing to; the
+optional deeper path at the end of this lesson is where that is covered. Recovery is quieter
+and bites harder: a runtime map that
 remaps the key you need in order to fix the map leaves you reflashing anyway. Compile-time is
 the right default here. Whichever you pick, be able to say why.
 
@@ -151,8 +151,7 @@ stream until it finishes and real events queue behind it.
   usage and up as another.
 - `#events-vs-state`: the bitmap is still the single source of truth and reports are still
   snapshots of it, after remapping and after macros alike.
-- Compile-time versus runtime configuration: RAM, reflash cost, flash persistence on RP2040
-  with XIP disabled, and recovery from a bad map.
+- Compile-time versus runtime configuration: RAM, reflash cost, and recovery from a bad map.
 - The polling interval as the rate limit on host-visible state changes, and why a repeated
   character needs an intervening empty report.
 - Macros as a scheduled queue advanced one step per report opportunity, never a busy-wait;

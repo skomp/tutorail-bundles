@@ -312,6 +312,14 @@ entirely, so if you find it in a blog post, the blog post is old.
   string.
 - The learner can state why a made-up VID is unacceptable for anything distributed, and what
   `1209:0001` is for.
+- The learner can say what an endpoint is — a numbered, directional buffer in the device — what
+  makes endpoint 0 different from the ones they declared, and what a device's address is,
+  including what it is before the host assigns one.
+- The learner can say why a keyboard uses control plus interrupt transfers and neither of the
+  other two: bulk carries no latency bound, so a keystroke arrives behind whatever else is on
+  the bus; isochronous does not retry a failed transfer, and a dropped keystroke is a bug rather
+  than a late video frame; interrupt is the only type that offers a latency bound and delivery
+  together.
 - The `key:` and `alive:` lines are still arriving on the UART console with USB attached.
 - The `build-ok` check passes.
 - The `enumerates-as-hid` check passes: it finds the device on the host by the VID/PID in
