@@ -2,11 +2,10 @@
 
 **Branch: read section 0 first — this work is NOT on `add-cpp-png-inspector`.**
 **Delete this file before merging.**
-**Written:** 2026-09-29, at a pause for a machine reboot.
+**Written:** 2026-09-29. Updated 2026-09-29 after the corrections were applied.
 
-The bundle is structurally complete and validated, and all fifteen lesson bodies are
-written. It is NOT finished: the corrections in section 2 are known and unapplied, and the
-course-quality audit has not been run.
+The bundle is structurally complete, validating, catalogued, and all ten known
+corrections are applied. What remains is the course-quality audit and the merge.
 
 ## 0. Where this work lives now
 
@@ -15,7 +14,7 @@ course-quality audit has not been run.
 ```
 worktree : .claude/worktrees/cpp-png-inspector
 branch   : worktree-cpp-png-inspector
-tip      : 28 commits ahead of main, all mine, nothing of anyone else's
+tip      : 34 commits ahead of main, all mine, nothing of anyone else's
 ```
 
 That branch is authoritative. Work on the bundle there, not in the main checkout.
@@ -56,136 +55,45 @@ at a time does not.
 
 Done, committed, validating:
 
-- `cpp-png-inspector/SPEC.md` — the approved course spec. Read this first; it is the design.
+- `cpp-png-inspector/SPEC.md` — the approved course spec, now matching the built course.
 - Skeleton: `tutorial.yaml`, `COURSE.md`, `DESIGN.md` (ten anchored decisions),
   `STATE.template.md`.
 - 13 main-path lessons, 2 optional lessons, all added with `lesson.py` so no `id` drifted.
 - 5 declared supplies. `crc32.hpp` is lesson-scoped to `11-the-finished-tool`.
-- All 15 lesson bodies, 216 to 332 lines each, written by five agents, one per chapter.
+- All 15 lesson bodies, 216 to 332 lines each.
 - The repository `README.md` table lists the bundle.
+- **All ten corrections from the previous section 2 are applied.** Commits `f2f9c8f`
+  (check scripts), `73c4e91` (SPEC.md's eight stale cells), `ae06b0b` (lessons),
+  `c58becd` (COURSE.md and DESIGN.md).
+- **`catalog.yaml` is rebuilt** — commit `ee88ec5`. The bundle is discoverable now; it
+  was not before, which is the one thing that had made it invisible to a runner.
+- `validate_bundle.py` returns `PASS - every applicable check ran and found nothing`,
+  exit 0, at `ee88ec5`. Confirmed by running it.
 
-Not done:
+### One defect found while applying the corrections, and fixed
 
-- The corrections in section 2.
-- `python3 scripts/catalog.py <repo>` to rebuild `catalog.yaml`. The bundle is invisible to
-  a runner until this is done.
-- The `course-quality` audit. Its report belongs in `skomp/tutorail-authoring` under
-  `docs/audits/`, and its findings belong in an issue here, per this repository's CLAUDE.md.
-- A final `validate_bundle.py` run after the corrections.
+Worth recording because the handover's own section 2.5 got it half right. Lessons 10 and
+12 both ran the missing-virtual-destructor experiment over `assets/truncated.png`, which
+is the one file where it cannot fire: that file ends 54 bytes into the first `IDAT`'s
+payload (header at offset 33, length 108, file 95 bytes — measured), so no complete chunk
+ever reaches a handler and the handler's owned allocation never happens. The learner
+removed `virtual`, saw `outstanding: 0`, and would have concluded the keyword does not
+matter. Lesson 10's test for it was vacuous for the same reason.
 
-All five agents reported. `validate_bundle.py` returns PASS, exit 0, at the last commit —
-confirmed by running it, not assumed.
+In lesson 12 it was guaranteed rather than learner-dependent: after the refactor the
+record is a `std::vector`, which allocates nothing until something is put in it.
 
-## 2. Corrections to apply, all verified
+Both now run it over `assets/basic.png`. Lesson 12 gained a constraint that at least one
+handler must still own heap state afterwards, because lesson 10 guaranteed that through
+the owning buffer type and `std::vector` silently does not.
 
-Each was confirmed directly, not taken on an agent's report.
+## 2. What remains
 
-### 2.1 The `tests` validator cannot run on the CMake version the course demands
-
-`ctest --test-dir` is `.. versionadded:: 3.20`, read from cmake-3.31's own
-`Help/manual/ctest.1.rst`, at the `--test-dir` option block. `supplies/checks/toolchain.sh`
-and `COURSE.md` require only 3.16. A learner on 3.16 to 3.19 passes the setup check and then
-cannot pass `tests` at `04-a-target-of-its-own`, whatever they write.
-
-Raise the floor to 3.20 in `toolchain.sh` and in `COURSE.md`. Then read
-`00-write-the-c-walker.md` and `01-not-a-superset.md`: if they teach
-`cmake_minimum_required(VERSION 3.16)`, move that too.
-
-### 2.2 A double free is invisible to `error-path.sh`
-
-`outstanding()` in `supplies/checks/_lib.sh` matches digits only, so a report line reading
-`outstanding: -1` produces no output at all. The check then says "no allocation report in
-the output" and sends the learner to the wrong place, at exactly the moment
-`05-the-rule-of-three` makes them double-free. Reproduced.
-
-Match an optional minus sign, and give a negative count its own message that names a double
-free.
-
-### 2.3 Two report lines crash the check
-
-With two matching lines the shell variable becomes `0\n1`, and the comparison fails with
-`[: 0\n1: integer expected`. Reproduced verbatim.
-
-Take the last match. Fail with a real message when more than one line matches. Also state
-"printed exactly once" in the output contract.
-
-### 2.4 The output contract says spacing is free. It is not.
-
-`_lib.sh` matches `^[0-9]+ [A-Za-z]{4} [0-9]+$`: single spaces, no alignment, no leading
-space, nothing trailing. `COURSE.md` and `DESIGN.md#the-output-contract` both say spacing is
-the learner's. A learner who aligns the columns gets a red check with no defect behind it.
-
-Say exactly what is fixed and what is free, in both places.
-
-### 2.5 `DESIGN.md#the-allocation-counter` overstates what the counter catches
-
-It says the counter is what catches a missing virtual destructor. On its own it is not:
-`delete` through a non-virtual base destructor still makes exactly one deallocation call, so
-the counts balance. It is observable only when a derived object owns a heap allocation whose
-destructor never runs.
-
-`10-chunks-without-switch.md` arranges that deliberately, with a handler that owns a heap
-allocation for a real reason. Correct the anchor to state the precondition, and confirm that
-`12-it-was-in-the-box.md`, which runs the same experiment, gets what it assumes.
-
-### 2.6 Five `SPEC.md` rows are wrong and the lessons already diverge from them
-
-The bundle is right and the spec is stale in each case. Update the spec, do not change the
-lessons.
-
-- **Lesson 05** — completion says "a test copies a buffer and passes", but the same row
-  offers `= delete` as a legitimate answer, under which nothing can copy it. The lesson
-  writes it as a fork: a copy-and-count test, or an `is_copy_constructible_v` test plus a
-  borrowed-use test.
-- **Lesson 06** — "a test proves a returned buffer allocated once" passes vacuously. C++17
-  guaranteed copy elision satisfies it on a prvalue return even with no move constructor at
-  all. The lesson adds a second test on a case elision cannot cover.
-- **Lesson 07** — the instructive failure says returning a non-`const` reference from a
-  `const` method "compiles nowhere useful". With a raw pointer member it compiles everywhere
-  and works, because `const` is shallow. That is the sharper failure and is what got taught.
-- **Lesson 10** — "adding a chunk type touches one new class and no existing function"
-  cannot include registering the handler. The lesson names the registration entry as the
-  honest exception: it is data, not a branch.
-- **Lesson 00** — "never terminating because `IEND` was not special-cased" does not
-  reproduce on `basic.png`; a bounds-checked loop terminates anyway. It bites only on
-  `truncated.png`. The lesson poses termination as a real choice between two stopping rules.
-
-### 2.7 `SPEC.md` lesson 12 asks for something C++17 cannot give
-
-"No hand-written result type remains" cannot hold alongside `#errors-are-values` and the
-`error: <message> at offset <n>` contract. `std::optional` carries no error payload and
-`std::expected` is C++23. The lesson turns this into its designed decision point:
-`std::optional` where absence needs no explanation, and for failures that must carry an
-offset, a choice the learner argues — a diagnostics container the caller owns, which the
-tool already wants because `rejects-truncated` requires chunks read before the truncation to
-still be listed, or a justified two-field result. The non-negotiables stay: no global, no
-`-1`, offsets survive. Soften the spec cell to match.
-
-### 2.8 Lesson 12's validator list cannot check its own closing claim
-
-Its completion says the allocation counter still balances, but `dump.sh` ignores the
-allocation report and `error-path.sh` is the only script that reads `outstanding:` — and
-`no-leak-on-error-path` is not in lesson 12's validator list. The condition is currently
-tutor-verified. Adding `no-leak-on-error-path` to that lesson makes the course's closing
-claim machine-checked, for one word of change. Worth doing.
-
-### 2.9 The optional lesson's type-trait mechanism is subtly wrong
-
-`SPEC.md` suggests `static_assert` on type traits for
-`what-the-compiler-writes-for-you`. `std::is_move_constructible_v<T>` is `true` for a
-copy-only type, because the copy constructor's `const T&` binds to an rvalue — so a naive
-assertion would *confirm* a wrong prediction about the learner's own buffer. The lesson
-makes that trap its sharpest point and uses a behavioural probe (construct from an rvalue
-with the counter watching) for the move questions, keeping traits where they genuinely
-answer. The spec's suggested mechanism should say so.
-
-### 2.10 `reading-a-template-error`'s compile-time case is implementation-dependent
-
-`read<double>` fails only if the template body shifts and ORs; a memcpy-and-reverse body
-compiles for `double` and silently returns nonsense. The lesson makes choosing the type part
-of the exercise and gives a fallback (a small class type with no default constructor) that
-no plausible body accepts. It also surfaces a secondary point worth keeping: an
-unconstrained `read<T>` accepts types it should not.
+- **The `course-quality` audit.** In flight at the time of writing. Its report belongs in
+  `skomp/tutorail-authoring` under `docs/audits/`, and its findings belong in an issue
+  here, per this repository's `CLAUDE.md`.
+- **The merge.** Nothing is pushed. See section 0.
+- **Delete this file** before merging.
 
 ## 3. Checked and deliberately not acted on
 
