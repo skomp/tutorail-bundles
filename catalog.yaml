@@ -16,6 +16,22 @@
 
 catalog_version: 1
 tutorials:
+  - id: cpp-png-inspector
+    title: "C++ for C Programmers: Build a PNG Inspector"
+    description: >
+      Learn C++ classes and templates by writing a PNG structure inspector in C first
+      and then repairing it, one C++ feature at a time, until nothing hand-rolled is
+      left. For a programmer who knows C and has written no C++.
+    subjects: [cpp, c, systems-programming, binary-formats, cmake]
+    aliases: [c++, cpp17, modern c++, classes, templates, raii, move semantics, png, c to c++]
+    level: beginner-to-intermediate
+    style: [project-driven, interactive, long-form]
+    scope: "13 lessons; a few weeks"
+    optional_lesson_count: 2
+    workspace_kind: new-repository
+    source:
+      type: local
+      path: cpp-png-inspector
   - id: durable-event-broker
     title: Build a Durable Event Broker in Go
     description: >

@@ -35,6 +35,36 @@ The findings go in an issue here, one issue per bundle. **The full report goes i
 Audits propose and never change a bundle. Applying a proposal is the `tutorail-authoring`
 skill's job, after the author agrees.
 
+## Build a tutorial in a worktree, not in this checkout
+
+**When you are building or changing a bundle here, work in a git worktree.** Use the
+`superpowers:using-git-worktrees` skill, and prefer the harness's native worktree tool
+(`EnterWorktree`, a `/worktree` command, a `--worktree` flag) over a hand-rolled
+`git worktree add` — a manual worktree creates state the harness cannot see or clean up.
+
+**This section is the declared preference the skill looks for, so do not ask for consent.**
+The skill asks only when the user's instructions are silent. They are not.
+
+A branch in this checkout is not isolation. A worktree is. Learned here on 2026-09-29,
+building `cpp-png-inspector`: a second session created a branch from this session's HEAD
+part-way through the work, and because branches are per-checkout, every commit made
+afterwards landed on *that* branch. The result was one peer commit sandwiched between
+fifteen of this session's, a feature branch stranded nine commits behind its own work, and
+an untangling that needs a history rewrite in a shared checkout — which is nobody's call to
+make unattended. Nothing was lost and nobody staged anyone else's files. It still cost an
+afternoon's clarity, and a worktree would have cost one command.
+
+Two consequences worth knowing before you start:
+
+- **A worktree branches from `origin/<default-branch>` by default, so commits you have not
+  pushed are invisible inside it.** This repository's sessions do not push unless asked, so
+  say plainly which commits are local-only and give their absolute path in this checkout,
+  or push first. An agent told to read an approved `SPEC.md` that is not there will
+  improvise one.
+- **The authoring toolkit refuses a dirty working tree**, by design, so that `git diff` is
+  an honest record of what a script did. That is comfortable in a worktree and miserable in
+  a checkout somebody else is editing.
+
 ## This session owns this repository, and hands the rest over
 
 A session here handles **`skomp/tutorail-bundles`** — the bundles and their teaching
