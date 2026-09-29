@@ -35,6 +35,7 @@ lessons:
   - lessons/15-the-lock-leds.md
   - lessons/16-when-it-goes-wrong.md
   - lessons/17-robustness-and-the-real-world.md
+  - lessons/18-off-the-breadboard-and-done/LESSON.md
 
 workspace_kind: new-repository
 tutor_owned: [tutorial/STATE.md, tutorial/DESIGN.md]
