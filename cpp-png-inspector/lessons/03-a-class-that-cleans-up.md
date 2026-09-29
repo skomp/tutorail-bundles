@@ -201,7 +201,8 @@ constructor. The destructor of an object whose acquisition did not happen. The
 ## Constraints
 
 - Exactly one type owns the file bytes. Every function that reads them takes a reference to
-  that object (or, from `07-bounds-you-cannot-skip`, a view) and frees nothing.
+  that object (or, from `07-bounds-you-cannot-skip`, a view — a pointer and a length that
+  borrow the bytes and own nothing) and frees nothing.
 - No `free` or `delete` of the file bytes may appear anywhere except in that type's
   destructor. That includes the success path.
 - Cleanup must not depend on a member function you call by hand. If the object can be

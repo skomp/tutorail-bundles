@@ -2,7 +2,7 @@
 id: 11-the-finished-tool
 title: The finished tool
 design_refs: [idat-is-out-of-scope, errors-are-values, the-output-contract]
-validators: [build, tests, dumps-basic-png, reads-text-metadata, detects-bad-crc, rejects-truncated]
+validators: [build, tests, dumps-basic-png, reads-text-metadata, detects-bad-crc, rejects-truncated, no-leak-on-error-path]
 supplies:
   - from: lessons/11-the-finished-tool/crc32.hpp
     to: src/crc32.hpp
@@ -240,12 +240,13 @@ still listed, an `error:` line is reported, the exit status is non-zero — and 
 tried to hash the bytes the truncated chunk claims but does not have.
 
 Finish with the full sweep: `build`, `tests`, `dumps-basic-png`, `reads-text-metadata`,
-`detects-bad-crc` and `rejects-truncated`.
+`detects-bad-crc`, `rejects-truncated` and `no-leak-on-error-path` — the new handler and
+the new error path are why the last of those is run again here.
 
 ## Completion conditions
 
-- `build`, `tests`, `dumps-basic-png`, `reads-text-metadata`, `detects-bad-crc` and
-  `rejects-truncated` all pass.
+- `build`, `tests`, `dumps-basic-png`, `reads-text-metadata`, `detects-bad-crc`,
+  `rejects-truncated` and `no-leak-on-error-path` all pass.
 - `assets/text.png` lists its four chunks exactly, exits 0, reports no error, and prints
   both the keyword and the value of its `tEXt` chunk in full.
 - `assets/badcrc.png` produces an `error:` line naming the CRC and the offset of the chunk
@@ -262,6 +263,8 @@ Finish with the full sweep: `build`, `tests`, `dumps-basic-png`, `reads-text-met
   distinction reaches the exit status.
 - The learner can say what `src/crc32.hpp` solved for them and which part of the problem it
   did not.
+- The learner can say where the tool's scope ends, and why `IDAT` is listed and walked past
+  rather than decoded.
 - A malformed `tEXt` payload is handled as a reported error rather than undefined
   behaviour, demonstrated by a test.
 
@@ -275,9 +278,10 @@ future session is most likely to get wrong again.
 
 Record in `STATE.md` that milestone M4 is reached: the inspector is complete — it lists
 chunks, reads text metadata, validates checksums and reports truncation without crashing or
-leaking. Note that `src/crc32.hpp` is supplied and not learner-owned, so nothing later in
-the course should propose changing it. Note also anything the learner decided about output
-layout, since `12-it-was-in-the-box` must not disturb it.
+leaking. Note that `src/crc32.hpp` is supplied by the course and that neither the learner
+nor the tutor may modify it, so nothing later in the course should propose changing it.
+Note also anything the learner decided about output layout, since `12-it-was-in-the-box`
+must not disturb it.
 
 ## Optional deeper paths
 
