@@ -216,3 +216,7 @@ optional_lessons:
     offer_at:
       - lessons/15-the-lock-leds.md
     offer_because: The adapter is complete and the layout is whatever IBM shipped in 1986. This lesson adds a keymap layer so you can move a key or bind a macro, and shows which layer each kind of change belongs in.
+supplies:
+  - from: supplies/README.md
+    to: README.md
+    describe: "README for this firmware repository: what the project is, the hardware it needs, and how to configure, build and flash it"
