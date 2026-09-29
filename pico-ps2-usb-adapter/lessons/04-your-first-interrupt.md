@@ -267,8 +267,12 @@ compiler's model of the program, and `volatile` as a statement about the compile
 3. Add GP2 as a plain input with internal pulls disabled and — before any interrupt exists —
    read its level in the main loop, printing it once a second alongside `alive`. Hold a key and
    confirm the level changes. Debug wiring with a polling loop, which has only one failure mode.
-4. Write the handler: a bank callback taking `(uint gpio, uint32_t events)` that checks it was
-   called for GP2 with a falling-edge event and increments a `uint32_t` counter. Nothing else.
+4. Before you write a line of the handler, say out loud what the core will do when that edge
+   arrives: what the hardware stacks and why those particular registers, where the address it
+   jumps to comes from, and what "runs to completion" means for the main loop it interrupted.
+   Then write the handler: a bank callback taking `(uint gpio, uint32_t events)` that checks it
+   was called for GP2 with a falling-edge event and increments a `uint32_t` counter. Nothing
+   else.
 5. Arm it with `gpio_set_irq_enabled_with_callback` for `GPIO_IRQ_EDGE_FALL` on GP2 only, with
    the counter and the pin both settled before the arming call.
 6. In the main loop, print `edges: <n>` whenever the count differs from the value last printed,
@@ -315,6 +319,12 @@ compiler's model of the program, and `volatile` as a statement about the compile
   at least five presses.
 - The learner can derive 11, 22, 33 and 55 from the frame format without being told, and can say
   which of those an extended key produces and why.
+- The learner can say what the hardware stacks on exception entry — `R0`–`R3`, `R12`, `LR`, the
+  return address and `xPSR`, the caller-saved registers whose saving is what lets a handler be an
+  ordinary C function — where the core gets the handler's address from, namely the vector table
+  entry for the exception, with `IO_IRQ_BANK0` as the line every bank 0 GPIO raises; and why a
+  handler is not a thread: it borrows the stack already in use, it runs to completion, and
+  nothing else on that core runs until it returns.
 - The learner can name at least three things that must not happen inside a handler, and can
   justify the `printf` prohibition with the 86.8 µs-per-character figure set against their own
   measured bit time.

@@ -25,9 +25,13 @@ to it from first principles.
 ## How this course teaches
 
 **You build it. Every line of firmware is yours.** The course supplies fixtures, reference
-tables, a stripboard layout and the check scripts. It supplies no firmware and no
-`CMakeLists.txt`, because the build file is edited in nearly every lesson and is therefore
-a thing you must be able to change rather than a thing handed over.
+tables, a stripboard layout and the check scripts. It supplies no firmware at all.
+
+It does hand you a `CMakeLists.txt`, once, and it is deliberately incomplete: it finds the
+SDK and builds one executable, and it routes `printf` nowhere. Retyping that boilerplate
+would teach you nothing. Deciding where your console lives *is* lesson 00's teaching, so
+those two lines are yours to work out and add — and from that moment the file is yours,
+which matters, because you edit it in nearly every lesson afterwards.
 
 **Every lesson ends in something you can observe or measure.** Not "you have written the
 receiver" — a count rising on a console, a byte you recognise, a trace on an analyser, a
@@ -80,7 +84,7 @@ Neither is required.
 
 ## The route
 
-Eight milestones, nineteen lessons. Each milestone is a thing that works.
+Eight milestones, twenty lessons. Each milestone is a thing that works.
 
 ### M1 — I can run my own code, and see inside it
 
@@ -132,7 +136,10 @@ Eight milestones, nineteen lessons. Each milestone is a thing that works.
 
 - **16 `when-it-goes-wrong`** — the tools to diagnose the next bug yourself.
 - **17 `robustness-and-the-real-world`** — behave when things are not ideal.
-- **18 `off-the-breadboard-and-done`** — a working circuit becomes an object you trust.
+- **18 `off-the-breadboard-and-done`** — the circuit comes off the breadboard and into a
+  case: cuts, solder, strain relief, continuity before first power.
+- **19 `does-it-pass`** — turn the brief back into tests, and prove the object is a
+  keyboard on a machine that has never seen it.
 
 ## Lessons the tutor may offer you
 

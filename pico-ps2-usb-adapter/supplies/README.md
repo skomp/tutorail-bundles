@@ -146,7 +146,9 @@ machine you are sitting at.
 
 ## Build
 
-Once you have a `CMakeLists.txt` — writing it is part of lesson 00 — the cycle is:
+`CMakeLists.txt` is already in this directory. It is minimal on purpose and routes
+`printf` nowhere at all, so a build from it is silent until lesson 00 has you decide
+where the console lives and add the two lines that say so. The cycle is:
 
 ```
 cmake -S . -B build

@@ -2,7 +2,8 @@
 
 **Bundle id:** `pico-ps2-usb-adapter`
 **Scale:** long
-**Status:** draft, pending author approval
+**Status:** approved by the author 2026-09-29, and built. Revised the same day to carry
+the course-quality audit's findings; see the revision note at the foot of this file.
 **Date:** 2026-09-29
 
 ## The learner
@@ -27,7 +28,7 @@ and you can say exactly why, at every layer.
 
 ## The arc
 
-Nineteen main-path lessons in eight milestones, plus seven offered lessons. Each lesson
+Twenty main-path lessons in eight milestones, plus seven offered lessons. Each lesson
 ends in something the learner can observe or measure before the next one starts.
 
 The course is deliberately shaped so that the **CPU-interrupt receiver comes before the
@@ -60,7 +61,8 @@ against. PIO then becomes the real implementation for the rest of the course.
 | 15 | `the-lock-leds` | close the loop: the host tells the keyboard something, and the keyboard obeys | HID output reports and `SET_REPORT`; translating a host LED bitmap into a PS/2 `0xED` command; doing slow work outside a USB callback | handling the OUT report in the wrong callback or on the wrong interface; assuming the HID LED bit order matches PS/2's, which it does not; performing the multi-millisecond PS/2 write inside the USB callback and stalling the endpoint | pressing Caps Lock on the host lights the Caps Lock LED on the Model M, and the state survives a host-side toggle from another keyboard | `#hid-contract`, `#wire-format` | `build-ok`, `leds-follow-host` |
 | 16 | `when-it-goes-wrong` | acquire the tools to diagnose the next bug yourself | SWD and gdb through the second Pico; reading a hard fault and finding the faulting instruction; `panic` and the pico-sdk's fault handlers; correlating a logic analyser capture with firmware state by toggling a spare GPIO | debugging by `printf` alone and perturbing the very timing being measured — the Heisenbug this subject is full of; reading a stack trace without knowing which core faulted; assuming a hang is a hang rather than a fault loop | the learner deliberately introduces a fault, catches it in gdb, names the faulting line, and separately correlates a captured edge with a GPIO marker their firmware set | `#debug-channel`, `#pin-assignment` | `build-ok`, `fault-diagnosed` |
 | 17 | `robustness-and-the-real-world` | make it behave when things are not ideal | hot-plug and absent-device handling; resynchronisation after a framing or parity error; releasing held keys on error; USB suspend, resume and remote wakeup; the watchdog | assuming the keyboard is present at boot, so the firmware wedges when it is not; latching after one parity error instead of resyncing; leaving a key held when the keyboard is unplugged mid-press; omitting remote wakeup, so the adapter cannot wake the host it is plugged into | the adapter boots with no keyboard attached and picks it up when plugged in, recovers from an induced framing error, never leaves a key held, and wakes a suspended host | `#failure-posture`, `#rx-interface` | `build-ok`, `survives-abuse` |
-| 18 | `off-the-breadboard-and-done` | turn a working circuit into an object you trust, and prove it is a keyboard | transferring a breadboard circuit to perfboard; soldering a connector; strain relief; continuity testing before first power; final acceptance against the original requirements | applying power before continuity-testing, and finding the short with the magic smoke; no strain relief, so the first tug lifts a pad; cold joints that work on the bench and fail warm; declaring victory without testing in a BIOS, where boot protocol is the only thing that saves you | the finished adapter in its case works from cold boot on a machine that has never seen it, types correctly in the host's firmware setup screen, needs no driver, and survives suspend, resume and replug | `#voltage-domains`, `#pin-assignment`, `#hid-contract` | `finished-adapter` |
+| 18 | `off-the-breadboard-and-done` | take the circuit off the breadboard and put it in a case you trust | transferring a breadboard circuit to stripboard; track cuts; soldering a connector; strain relief; continuity and isolation testing before first power; staged bring-up | applying power before continuity-testing, and finding the short with the magic smoke; no strain relief, so the first tug lifts a pad; cold joints that work on the bench and fail warm; letting the tutor choose between the level-shifter module and discrete BSS138s, which is the learner's decision | the adapter is soldered, cased and strain-relieved, every cut was verified on the bare board, the bring-up stopped at no surprise, and the console still reports `alive` with the lid on | `#voltage-domains`, `#pin-assignment`, `#deliberately-unresolved` | `build-ok`, `firmware-alive` |
+| 19 | `does-it-pass` | turn the brief back into tests, and prove the object is a keyboard | converting a requirement into an acceptance test; boot protocol where it actually matters; re-verifying `#failure-posture` through solder rather than on a breadboard; what a fresh host and a warm hour each catch | declaring victory without testing in a BIOS, where boot protocol is the only thing that saves you; re-running the tests on the machine that has seen every build; trusting a board that was only ever tested cold; reopening the vendor-interface decision instead of confirming it | the finished adapter works from cold boot on a machine that has never seen it, types correctly in the host's firmware setup screen, needs no driver, recovers from a deliberate wedge with the case shut, and survives suspend, resume and replug | `#hid-contract`, `#failure-posture`, `#deliberately-unresolved` | `enumerates-as-hid`, `no-stuck-keys`, `survives-abuse`, `finished-adapter` |
 
 ### Offered track
 
@@ -86,7 +88,7 @@ None is a prerequisite for any main-path lesson.
 - **M5 — I have key events for every key on the board** (10)
 - **M6 — the host says "a keyboard is plugged in", and it types** (11–13)
 - **M7 — it is actually a Model M adapter, lock LEDs and all** (14–15)
-- **M8 — a finished object I trust** (16–18)
+- **M8 — a finished object I trust** (16–19)
 
 ## Teaching stance
 
@@ -178,6 +180,7 @@ answer for this subject, not a gap. Every validator that *can* be a command is o
 
 | from | to | describe | scope |
 |---|---|---|---|
+| `supplies/CMakeLists.txt` | `CMakeLists.txt` | A minimal CMake file that finds the SDK and builds one executable. Everything this course teaches about the build - the stdio route, the PIO header, TinyUSB, the backend switch - you add to it yourself | `tutorial.yaml` |
 | `supplies/README.md` | `README.md` | README for this firmware repository and how to build and flash it | `tutorial.yaml` |
 | `supplies/gitignore` | `.gitignore` | Keeps the build directory and editor droppings out of your history | `tutorial.yaml` |
 | `supplies/pico_sdk_import.cmake` | `pico_sdk_import.cmake` | Boilerplate the Pico SDK requires verbatim; nothing in this course changes it | `tutorial.yaml` |
@@ -204,11 +207,23 @@ The check scripts are supplied rather than assigned for the same reason. Writing
 port reader is not what this course teaches, and a validator the learner wrote is a
 validator the learner can satisfy by weakening.
 
-**Not supplied, and deliberately so:** `CMakeLists.txt` and every line of firmware. The
-CMake file is edited in nearly every lesson — adding the PIO program, adding TinyUSB,
-switching backends — so it is a thing the learner must be able to change, not a thing
-handed over. The Pico SDK itself and the ARM toolchain need the network, so installing them
-is the learner's work and lesson 00 asks for it.
+**Not supplied, and deliberately so:** every line of firmware. The Pico SDK itself and the
+ARM toolchain need the network, so installing them is the learner's work and lesson 00 asks
+for it.
+
+**`CMakeLists.txt` was in that list and is not any more.** The original reasoning was that
+the CMake file is edited in nearly every lesson — the PIO header, TinyUSB, the backend
+switch — so the learner must be able to change it rather than receive it. The
+course-quality audit of 2026-09-29 scored the from-scratch write as the course's only toil
+site: this is a single-platform course, so the bundle can ship exactly one file, and under
+the rubric's shippability test a skeleton the bundle could have shipped is toil.
+
+Both positions are right about different things, and the resolution keeps both. The bundle
+now supplies a **minimal** file — SDK import, `project()`, `pico_sdk_init()`, one
+executable, `pico_add_extra_outputs` — and carries **no stdio routing at all**. Deciding
+where the console lives is lesson 00's actual teaching, and it stays two lines the learner
+adds themselves to a file they own from that moment on. The boilerplate is handed over; the
+decision is not.
 
 ## Durable decisions
 
@@ -424,7 +439,7 @@ assumed: any electronics, any firmware experience, any USB knowledge below the c
 
 ## Depth decision
 
-**Every lesson is authored now**, main path and offered track alike. Nineteen main-path
+**Every lesson is authored now**, main path and offered track alike. Twenty main-path
 lessons plus seven offered ones. No chapter is left as a map.
 
 The cost of the alternative was the deciding factor: an unwritten chapter is drafted fresh
@@ -469,3 +484,43 @@ learners who would rather solve it that way. Neither is required.
 
 None outstanding for the author. The three items under *Deliberately unresolved* are
 choices the learner makes during the course, not gaps in the design.
+
+## Revision note — 2026-09-29, after the course-quality audit
+
+The bundle was built from this spec, audited the same day, and then both were revised
+together. The audit report is in `skomp/tutorail-authoring` at
+`docs/audits/2026-09-29-pico-ps2-usb-adapter.md`; its findings are
+`skomp/tutorail-bundles#28`. The author ruled on the three that were genuinely open.
+
+**What changed in this spec, and why.**
+
+1. **`CMakeLists.txt` is now supplied.** It was in *Not supplied, and deliberately so*, on
+   the argument that a file edited in nearly every lesson must be the learner's. The audit
+   scored the from-scratch write as the course's only toil site, because a single-platform
+   course can ship exactly one such file. Both arguments survive: the bundle ships a minimal
+   file with **no stdio routing at all**, and deciding where the console lives stays lesson
+   00's teaching. See *Supplied files*.
+
+2. **Lesson 18 became lessons 18 and 19.** At 473 lines it was the longest in the course and
+   its own Purpose named the seam — construction, then acceptance. 18 now ends with the
+   enclosure fitted and closes on `firmware-alive`; 19 is the acceptance suite and closes on
+   `finished-adapter`. The main path is twenty lessons. No content was dropped.
+
+3. **Three objectives were stated and never exercised**, at −3 each under the rubric: lesson
+   00's XIP and memory-map objective, lesson 04's interrupt-entry objective, and lesson 11's
+   transfer-types objective. Lesson 00's exercise was promoted from an optional deeper path
+   to the main path; 04 and 11 gained completion conditions.
+
+4. **The watchdog is now verified on the finished object.** Lesson 17 built it and nothing
+   tested it again; lesson 19's acceptance list now wedges the soldered adapter and requires
+   it to recover with the case shut.
+
+5. **Two concepts were taught and never used** — `side-set` in lesson 07 and flash
+   persistence in `remap-and-macros`. Both are trimmed to a pointer plus an optional deeper
+   path, rather than left as attention the course never cashes in.
+
+**What did not change.** The interrupt-receiver-before-PIO ordering, the debug-UART
+validation channel, and `watch-the-enumeration` staying off the main path are the three
+decisions this spec called load-bearing, and the audit found nothing against any of them.
+No `required_for` gate exists, no `DESIGN.md` anchor goes unserved, and a learner who
+declines every offer can still finish the course.

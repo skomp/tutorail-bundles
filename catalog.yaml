@@ -73,7 +73,7 @@ tutorials:
     aliases: [model m, keyboard adapter, ps2 to usb, raspberry pi pico, rp2040, pio, usb hid, tinyusb, mechanical keyboard, buckling spring, pico-sdk]
     level: intermediate
     style: [project-driven, interactive, long-form]
-    scope: "19 lessons; months of work"
+    scope: "20 lessons; months of work"
     optional_lesson_count: 7
     workspace_kind: new-repository
     source:

@@ -188,16 +188,18 @@ mostly a thing you do because you want to know how.
    from events.
 9. Type one letter. If it appears twice, the one-reporter rule is not in place yet — this is
    the moment to discover the bug rather than be warned about it.
-10. Decide and implement the gate, using the boot interface's protocol state. State the rule
-    in one sentence.
-11. Find a combination the Model M will actually deliver: hold candidate sets and watch the
+10. Decide the gate before writing it: which interface reports a keypress at a given moment,
+    keyed on the boot interface's protocol state. Have the learner state the rule in one
+    sentence, and say what a host that reads neither interface would then receive.
+11. Implement the decided rule, and type the same letter again. It appears once.
+12. Find a combination the Model M will actually deliver: hold candidate sets and watch the
     `key:` and `held:` lines to see whether seven or more downs reach the firmware at all.
-12. With a combination that works, press more than six keys at once into a text editor on the
+13. With a combination that works, press more than six keys at once into a text editor on the
     host and check every one appears while `held:` shows the same count. Release everything
     and confirm `held: 0` and no stuck key.
-13. Reboot into firmware setup and type. The boot interface must still work there, with the
+14. Reboot into firmware setup and type. The boot interface must still work there, with the
     NKRO interface idle.
-14. Have the learner write down what NKRO cost them — endpoints, bytes, the second device
+15. Have the learner write down what NKRO cost them — endpoints, bytes, the second device
     entry, the gate — and whether they would keep it in the finished adapter.
 
 ## Completion conditions

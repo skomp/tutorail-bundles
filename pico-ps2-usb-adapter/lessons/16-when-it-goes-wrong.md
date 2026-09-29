@@ -321,8 +321,12 @@ now part of what you are measuring.
 16. Have the learner say which instrument they would reach for given four symptoms.
     If the answer to the timing question is still "add a print", the lesson is not
     finished.
-17. Guard or remove the injected fault and the wedge, confirm the adapter works
-    normally, and keep the marker — lessons 17 and 18 both want it.
+17. Guard or remove the injected fault and the deliberate wedge, so neither can be
+    left enabled by accident.
+18. Confirm the adapter works normally again: it receives, decodes and types as it
+    did before this lesson, and `alive` is still rising.
+19. Keep the marker in the firmware. Lessons 17 and 18 both want it, so it is not
+    scaffolding to be taken out with the fault.
 
 ## Completion conditions
 

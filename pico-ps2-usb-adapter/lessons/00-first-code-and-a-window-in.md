@@ -197,8 +197,10 @@ only lesson that discusses the choice; after this the course assumes it.
   unused. If you find yourself reading the console over the Pico's own USB cable, stop.
 - UART0 on **GP0 and GP1**, 115200 8N1, as `#pin-assignment` fixes. Do not relocate it.
 - Nothing may touch GP2 or GP3 in this lesson. They are spoken for.
-- `CMakeLists.txt` is yours to write. The course does not supply one, here or ever, because
-  you will edit it in nearly every lesson.
+- `CMakeLists.txt` is supplied once, in your workspace root, and it is minimal on purpose: it
+  builds one executable and routes `printf` nowhere at all. From here on the file is yours —
+  the course hands you no other, and you edit this one in nearly every lesson. The two lines
+  that give `printf` a destination are yours to work out and add in this lesson.
 - The firmware must print `alive` with a strictly increasing value, spelled exactly
   `alive`, roughly once per second, and must keep doing so indefinitely.
 - The LED must be driven by your code, not by anything the bootloader does.
@@ -215,8 +217,12 @@ only lesson that discusses the choice; after this the course assumes it.
 3. Read the supplied `README.md` in your workspace for how this repository is meant to be
    built, and glance at the supplied `pico_sdk_import.cmake`, which is SDK boilerplate you
    will never modify.
-4. Write a minimal `CMakeLists.txt`: project, SDK initialisation, one executable, link the
-   core SDK library, and produce the extra outputs including the `.uf2`.
+4. Read the supplied `CMakeLists.txt` in your workspace root, and account for every line of
+   it: why the SDK import must come before `project()`, what `pico_sdk_init()` sets up, what
+   `pico_stdlib` brings with it, and which call produces the `.uf2` you are about to drag onto
+   a drive. Then name what is deliberately missing from it — nothing in that file routes
+   `printf` anywhere, which is why a build made from it right now would be silent. You add
+   that, in this lesson, at the bottom of the file.
 5. Write a `main` that does nothing but toggle the on-board LED in a loop. Build it.
 6. Flash it: hold BOOTSEL while plugging the Pico in, confirm `RPI-RP2` appears, copy the
    `.uf2`, and watch the drive dismount as the chip reboots into your code.
@@ -225,8 +231,12 @@ only lesson that discusses the choice; after this the course assumes it.
 8. Now add a `printf` to the loop and rebuild **without** enabling any stdio route. Flash
    it. Observe that absolutely nothing happens and nothing complains. Meet this failure
    deliberately now, because the next time you meet it you will not lose an hour to it.
-9. Enable the UART stdio route in your CMake target, explicitly disable the USB one, and
-   call the SDK's stdio initialisation at the top of `main`.
+9. Now make the decision the supplied build file left open, and write it down in two lines of
+   your own: enable the UART stdio route on your target, explicitly disable the USB one, and
+   call the SDK's stdio initialisation at the top of `main`. Before you build, say in your own
+   words why this course puts the console on UART rather than USB, and what specifically stops
+   working in lesson 11 if it goes on USB instead. The two lines are small; the decision behind
+   them is the reason this lesson comes first.
 10. Flash the second Pico with the `debugprobe` firmware. It is a separate device with a
     separate job and never runs your code.
 11. Wire the console: your Pico's GP0 (UART0 TX) to the probe's UART RX pin, your GP1
@@ -241,19 +251,29 @@ only lesson that discusses the choice; after this the course assumes it.
 14. Replace the scratch `printf` with the structured record: a counter that increments and
     is printed as `alive: <n>` about once a second. Keep the LED blinking, so that a dead
     console and a dead chip look different from across the room.
-15. Have the `build-ok` and `firmware-alive` checks run against it.
-16. Before you finish, unplug the debug probe's USB cable and watch the console go silent
+15. Measure the XIP cache effect, now that you have somewhere to print to. Write a small
+    function, call it twice in a row with nothing in between, time each call with the SDK's
+    microsecond timer, and print both numbers. The first call fetches its instructions from the
+    external QSPI flash chip; the second finds them in the XIP cache. Keep both numbers — you
+    meet this effect again in lesson 04, as a term in interrupt latency.
+16. Have the `build-ok` and `firmware-alive` checks run against it.
+17. Before you finish, unplug the debug probe's USB cable and watch the console go silent
     while the LED keeps blinking. That is the difference between your firmware and your view
     of it, and it is worth having seen once.
 
 ## Completion conditions
 
-- The `build-ok` check passes against a `CMakeLists.txt` you wrote.
+- The `build-ok` check passes, and the two lines that route stdio in `CMakeLists.txt` — the
+  UART one enabled, the USB one disabled — are lines you added to the supplied file yourself.
 - The `firmware-alive` check reads `alive` from the debug console with a value that is
   strictly increasing across successive readings, sustained over several seconds.
 - The on-board LED is blinking under your code's control while that console output is
   flowing, so the two are visibly independent.
 - `device.env` names a serial port that the checks actually opened.
+- The learner reports both timings from the cold and the warm call of the same function, and
+  can say why the first was slower: the code lives in external QSPI flash and is executed in
+  place, so a call whose instructions are not yet in the XIP cache pays a flash access that
+  the second call does not.
 - The build configuration enables the UART stdio route and disables the USB one, and the
   learner can point at both lines.
 - The learner can answer, unprompted: what is running when `RPI-RP2` is mounted; what a UF2
@@ -277,8 +297,6 @@ only lesson that discusses the choice; after this the course assumes it.
   payload length, block number and total.
 - Look at the linker script the SDK uses and find where the XIP region, SRAM and the stack
   are placed, and what building for RAM instead of flash would change.
-- Measure the XIP cache effect: time a call into a function cold and warm, and see what the
-  cache is worth.
 - Find out what `picotool` can do that dragging a file cannot — reboot a running board into
   BOOTSEL over USB, read flash back, and inspect the binary information the SDK embeds in
   your own firmware.
