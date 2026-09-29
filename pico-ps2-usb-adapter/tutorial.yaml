@@ -34,6 +34,7 @@ lessons:
   - lessons/14-events-to-state/LESSON.md
   - lessons/15-the-lock-leds.md
   - lessons/16-when-it-goes-wrong.md
+  - lessons/17-robustness-and-the-real-world.md
 
 workspace_kind: new-repository
 tutor_owned: [tutorial/STATE.md, tutorial/DESIGN.md]
