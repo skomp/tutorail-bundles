@@ -20,6 +20,7 @@ lessons:
   - lessons/00-first-code-and-a-window-in.md
   - lessons/01-the-ps2-connector-and-what-is-safe.md
   - lessons/02-open-drain-and-pull-ups.md
+  - lessons/03-see-the-protocol-before-you-decode-it/LESSON.md
 
 workspace_kind: new-repository
 tutor_owned: [tutorial/STATE.md, tutorial/DESIGN.md]
