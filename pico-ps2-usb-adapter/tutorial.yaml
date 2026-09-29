@@ -12,8 +12,7 @@ teaching_method: >
   every USB descriptor by hand. The tutor reads evidence off your board's debug
   console and never advances on an assertion.
 subjects: [embedded, microcontrollers, rp2040, usb, hid, ps2, electronics, firmware, c]
-aliases: [model m, keyboard adapter, ps2 to usb, raspberry pi pico, rp2040, pio,
-          usb hid, tinyusb, mechanical keyboard, buckling spring, pico-sdk]
+aliases: [model m, keyboard adapter, ps2 to usb, raspberry pi pico, rp2040, pio, usb hid, tinyusb, mechanical keyboard, buckling spring, pico-sdk]
 level: intermediate
 style: [project-driven, interactive, long-form]
 
@@ -96,8 +95,7 @@ covers:
     summary: >
       Data crossing between an interrupt handler and the main loop needs `volatile`, a
       critical section or a lock-free ring buffer, and the choice between them has costs.
-    aliases: [volatile, critical sections, lock-free ring buffer,
-              single-producer single-consumer, shared state]
+    aliases: [volatile, critical sections, lock-free ring buffer, single-producer single-consumer, shared state]
   framing-state-machine:
     summary: >
       Assembling a serial bit stream into bytes: a shift register, a bit counter, a
@@ -107,8 +105,7 @@ covers:
     summary: >
       Programmable I/O state machines that run a nine-instruction program beside the CPU,
       with their own shift registers, autopush and clock divider.
-    aliases: [pio, pio instruction set, autopush, autopull, clock divider,
-              state machine, protocol offload]
+    aliases: [pio, pio instruction set, autopush, autopull, clock divider, state machine, protocol offload]
   ps2-keyboard-protocol:
     summary: >
       The PS/2 electrical interface and its eleven-bit frame in both directions,
@@ -123,8 +120,7 @@ covers:
     summary: >
       The conversation a host has with a device it has never seen — addresses, control
       transfers, and the descriptors that decide which driver binds.
-    aliases: [usb, enumeration, usb descriptors, endpoints, transfer types,
-              bus topology]
+    aliases: [usb, enumeration, usb descriptors, endpoints, transfer types, bus topology]
   hid-report-descriptors:
     summary: >
       The stack language that tells a host the shape of a device's reports: usage pages,
@@ -134,14 +130,12 @@ covers:
     summary: >
       The eight-byte boot keyboard report — a modifier bitmap, a reserved byte and a
       six-key array — with rollover, and the LED output report the host sends back.
-    aliases: [boot protocol, report protocol, modifiers, rollover, lock leds,
-              hid output reports, 6kro]
+    aliases: [boot protocol, report protocol, modifiers, rollover, lock leds, hid output reports, 6kro]
   events-versus-state:
     summary: >
       A source that emits events and a sink that reports state need a state model
       between them, because a report per event gives stuck keys under load.
-    aliases: [key state, events vs state, snapshots, firmware architecture,
-              swappable backends]
+    aliases: [key state, events vs state, snapshots, firmware architecture, swappable backends]
   usb-power-management:
     summary: >
       Suspend, resume and remote wakeup, and what a device owes its host when the host
@@ -151,8 +145,7 @@ covers:
     summary: >
       Finding a fault on a chip with no console: SWD and gdb, reading a hard fault, and
       why adding a `printf` changes the timing you were trying to measure.
-    aliases: [swd, gdb, hard fault, debugprobe, observer effect, logic analyser,
-              sample rate, triggering]
+    aliases: [swd, gdb, hard fault, debugprobe, observer effect, logic analyser, sample rate, triggering]
 
 assumes:
   c-programming:
