@@ -16,7 +16,8 @@ aliases: [model m, keyboard adapter, ps2 to usb, raspberry pi pico, rp2040, pio,
 level: intermediate
 style: [project-driven, interactive, long-form]
 
-lessons: []
+lessons:
+  - lessons/00-first-code-and-a-window-in.md
 
 workspace_kind: new-repository
 tutor_owned: [tutorial/STATE.md, tutorial/DESIGN.md]
