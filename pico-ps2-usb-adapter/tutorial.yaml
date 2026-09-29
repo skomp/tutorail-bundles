@@ -25,6 +25,7 @@ lessons:
   - lessons/05-a-state-machine-in-an-isr.md
   - lessons/06-handing-data-to-the-main-loop.md
   - lessons/07-what-a-pio-state-machine-is.md
+  - lessons/08-ps2-receive-in-pio.md
 
 workspace_kind: new-repository
 tutor_owned: [tutorial/STATE.md, tutorial/DESIGN.md]
