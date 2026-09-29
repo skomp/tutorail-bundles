@@ -3,6 +3,10 @@ id: 14-events-to-state
 title: "Events to state: joining the two halves"
 design_refs: [events-vs-state, hid-contract]
 validators: [build-ok, no-stuck-keys]
+supplies:
+  - from: lessons/14-events-to-state/ps2_set2_to_hid.h
+    to: include/ps2_set2_to_hid.h
+    describe: The complete scan code set 2 to HID usage translation table; lesson 10 had you derive a handful yourself, and this is the rest
 ---
 
 ## Purpose
